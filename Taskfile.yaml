@@ -1,0 +1,67 @@
+---
+version: 3
+
+env:
+  limit: '{{ .limit | default "all" }}'
+
+tasks:
+  pre-checks:
+    desc: Check the environment before running
+    internal: true
+    silent: true
+    run: once
+    cmds:
+      - cmd: |-
+          test -x "$(which python 2>/dev/null)" \
+            || (echo "Cannot find 'python'. Please install before trying again."; exit 1)
+      - cmd: |-
+          test -x "$(which pip 2>/dev/null)" \
+            || (echo "Cannot find 'pip'. Please install before trying again."; exit 1)
+      - cmd: |-
+          test -x "$(which pre-commit 2>/dev/null)" \
+            || (echo "Cannot find 'pre-commit'. Please install before trying again."; exit 1)
+      - cmd: |-
+          test -x "$(which ansible 2>/dev/null)" \
+            || (echo "Cannot find 'ansible'. Please install before trying again."; exit 1)
+      - cmd: |-
+          test -x "$(which ansible-playbook 2>/dev/null)" \
+            || (echo "Cannot find 'ansible-playbook'. Please install before trying again."; exit 1)
+      - cmd: |-
+          test -x "$(which sshpass 2>/dev/null)" \
+            || (echo "Cannot find 'sshpass'. Please install before trying again."; exit 1)
+    status:
+      # Setting this file will bypass pre-checks (only use if you are sure)
+      - test -f .skip-pre-checks
+
+  deps:
+    desc: Install the required dependencies for the repository
+    cmds:
+      - task: pre-commit
+
+  pre-commit:
+    desc: Add the `pre-commit` hook to this repository
+    deps:
+      - task: pre-checks
+    cmds:
+      - pre-commit install
+    generates:
+      - .git/hooks/pre-commit
+
+  bootstrap:
+    desc: Bootstrap new servers using the bootstrap Ansible Play
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --user root \
+            --ask-pass plays/bootstrap.yaml \
+            --limit {{ .limit }}
+
+  baseline:
+    desc: Baseline servers using the baseline Ansible Play
+    cmds:
+      - cmd: |-
+          ansible-playbook --verbose \
+            --user root \
+            --ask-pass plays/baseline.yaml \
+            --limit {{ .limit }} \
+            --tags wipe
