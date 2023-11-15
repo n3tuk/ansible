@@ -43,25 +43,98 @@ tasks:
     deps:
       - task: pre-checks
     cmds:
-      - pre-commit install
+      - cmd: pre-commit install
     generates:
       - .git/hooks/pre-commit
+
+  rename:
+    desc: Find and rename all .yml files to .yaml
+    sources:
+      - "plays/*.yml"
+      - "plays/host_vars/*.yml"
+      - "plays/group_vars/*.yml"
+      - "roles/*/*/*.yml"
+    silent: true
+    cmds:
+      - cmd: |-
+          find -type f -iname '*.yml' | while read file
+          do
+            echo "${file#\./} -> $(basename $file .yml).yaml"
+            git mv -f $file ${file%.yml}.yaml 2>/dev/null \
+             || mv -f $file ${file%.yml}.yaml
+          done
+
+  lint:
+    desc: Run linting tools against the Ansible files
+    summary: |
+      Run linting tools against the Ansible files inside this repository for
+      validity and correctness.
+    run: once
+    deps:
+      - task: pre-checks
+      - task: rename
+    sources:
+      - ".yamllint.yaml"
+      - "plays/*.yaml"
+      - "plays/host_vars/*.yaml"
+      - "plays/group_vars/*.yaml"
+      - "roles/*/*/*.yaml"
+    cmds:
+      - cmd: |-
+          yamllint \
+            --config-file .yamllint.yaml \
+            --format colored \
+            plays/ roles/
+      - cmd: |-
+          ansible-lint \
+            --profile production \
+            --format brief \
+            --show-relpath
+
+  ping:
+    desc: Attempt to ping all nodes through Ansible
+    cmds:
+      - cmd: |-
+          ansible \
+            --inventory inventory.yaml \
+            --ask-become-pass \
+            --module-name ping \
+            --one-line all
 
   bootstrap:
     desc: Bootstrap new servers using the bootstrap Ansible Play
     cmds:
       - cmd: |-
           ansible-playbook \
+            --syntax-check plays/bootstrap.yaml
+      - cmd: |-
+          ansible-playbook \
             --user root \
             --ask-pass plays/bootstrap.yaml \
-            --limit {{ .limit }}
+            --extra-vars bootstrap_chroot_dir=/mnt \
+            --force-handlers \
+            --limit {{ .limit }} \
+            --forks 10 --diff
 
   baseline:
     desc: Baseline servers using the baseline Ansible Play
     cmds:
       - cmd: |-
-          ansible-playbook --verbose \
-            --user root \
-            --ask-pass plays/baseline.yaml \
+          ansible-playbook \
+            --syntax-check plays/baseline.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/baseline.yaml \
+            --force-handlers \
             --limit {{ .limit }} \
-            --tags wipe
+            --forks 10
+
+  clean:
+    desc: Clean up the temporary files from the repository
+    summary: |
+      Remove any generated configuration files and temporary files from the repository.
+    run: once
+    silent: true
+    cmds:
+      - cmd: rm -rf .cache
+      - cmd: rm -rf .task
