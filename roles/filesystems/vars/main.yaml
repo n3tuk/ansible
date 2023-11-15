@@ -1,0 +1,4 @@
+---
+# vars file for filesystems
+
+filesystems_mount_base: "{{ bootstrap_mount_base | default('/mnt') }}"

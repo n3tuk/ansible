@@ -1,0 +1,71 @@
+---
+# create physical tasks file for filesystems
+
+- name: Create the physical partitions
+  community.general.parted:
+    device: "/dev/{{ item.device }}"
+    label: gpt
+    number: "{{ item.number }}"
+    name: "{{ item.name }}"
+    part_start: "{{ item.start }}"
+    part_end: "{{ item.end }}"
+    fs_type: "{{ item.pv_type | default(omit) }}"
+    state: present
+    flags: "{{ item.flags | default(omit) }}"
+  loop: "{{ filesystems_physical_partitions | default([]) }}"
+  loop_control:
+    label: "/dev/{{ item.device }}p{{ item.number }}"
+  tags:
+    - filesystems
+    - setup
+    - physical
+
+- name: Create LUKS container on physical partitions
+  community.crypto.luks_device:
+    device: "/dev/{{ item.device }}p{{ item.number }}"
+    type: luks2
+    cipher: aes-xts-plain64
+    keysize: 512
+    hash: sha256
+    passphrase: "{{ filesystems_crypt_passphrase }}"
+    state: present
+  loop: "{{ filesystems_physical_partitions | default([]) }}"
+  loop_control:
+    label: "/dev/{{ item.device }}p{{ item.number }}"
+  when: item.luks|default(false)
+  tags:
+    - filesystems
+    - setup
+    - physical
+    - cryptsetup
+
+- name: Open LUKS containers on physical partitions
+  community.crypto.luks_device:
+    device: "/dev/{{ item.device }}p{{ item.number }}"
+    name: crypt-{{ item.device }}p{{ item.number }}
+    state: opened
+    passphrase: "{{ filesystems_crypt_passphrase }}"
+  loop: "{{ filesystems_physical_partitions | default([]) }}"
+  loop_control:
+    label: "/dev/{{ item.device }}p{{ item.number }}"
+  when: item.luks|default(false)
+  tags:
+    - filesystems
+    - setup
+    - physical
+
+- name: Create the physical volume filesystems
+  community.general.filesystem:
+    device: "/dev/{{ item.device }}p{{ ansible_loop.index }}"
+    fstype: "{{ item.fs_type }}"
+    opts: "{{ item.fs_opts | default(omit) }}"
+    state: present
+  when: item.fs_type is defined
+  loop: "{{ filesystems_physical_partitions | default([]) }}"
+  loop_control:
+    label: "/dev/{{ item.device }}p{{ item.number }}"
+    extended: true
+  tags:
+    - filesystems
+    - setup
+    - physical

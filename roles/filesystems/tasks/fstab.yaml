@@ -1,0 +1,95 @@
+---
+# fstab tasks file for filesystems
+
+- name: Prepare the configuration directory
+  ansible.builtin.file:
+    dest: "{{ filesystems_mount_base }}/etc"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+    state: directory
+  tags:
+    - filesystems
+    - configuraton
+
+- name: Register the encrypted volumes in crypttab
+  ansible.builtin.template:
+    src: crypttab.jinja
+    dest: "{{ filesystems_mount_base }}/etc/{{ file }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - crypttab
+    - crypttab.initramfs
+  loop_control:
+    loop_var: file
+    label: "/etc/{{ file }}"
+  tags:
+    - filesystems
+    - cryptsetup
+    - configuraton
+
+- name: Register the logical volumes in fstab
+  ansible.posix.mount:
+    fstab: "{{ filesystems_mount_base }}/etc/fstab"
+    src: "/dev/{{ item.group }}/{{ item.name }}"
+    path: "{{ item.path }}"
+    fstype: "{{ item.fs_type }}"
+    opts: "defaults,rw,noatime{% if item.mount_opts is defined and item.mount_opts | length > 0 %},{% endif %}{{ item.mount_opts | default([]) | join(',') }}"
+    state: present
+  when: item.path is defined
+  loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
+  loop_control:
+    label: "{{ item.group }}/{{ item.name }}"
+  tags:
+    - filesystems
+    - configuration
+    - logical
+
+- name: Register the swap volumes in fstab
+  ansible.posix.mount:
+    fstab: "{{ filesystems_mount_base }}/etc/fstab"
+    src: "/dev/{{ item.group }}/{{ item.name }}"
+    path: none
+    fstype: "{{ item.fs_type }}"
+    opts: "defaults{% if item.mount_opts is defined and item.mount_opts | length > 0 %},{% endif %}{{ item.mount_opts | default([]) | join(',') }}"
+    state: present
+  when: item.fs_type is defined and item.fs_type == "swap"
+  loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
+  loop_control:
+    label: "{{ item.group }}/{{ item.name }}"
+  tags:
+    - filesystems
+    - configuration
+    - logical
+
+- name: Register the physical volumes in fstab
+  ansible.posix.mount:
+    fstab: "{{ filesystems_mount_base }}/etc/fstab"
+    src: "/dev/{{ item.device }}p{{ item.number }}"
+    path: "{{ item.path }}"
+    fstype: "{{ item.fs_type }}"
+    opts: "defaults,rw,noatime{% if item.mount_opts is defined and item.mount_opts | length > 0 %},{% endif %}{{ item.mount_opts | default([]) | join(',') }}"
+    state: present
+  when: item.path is defined
+  loop: "{{ filesystems_physical_partitions | default([]) }}"
+  loop_control:
+    label: "/dev/{{ item.device }}p{{ item.number }}"
+  tags:
+    - filesystems
+    - configuration
+    - physical
+
+- name: Register the tmpfs volume in fstab
+  ansible.posix.mount:
+    fstab: "{{ filesystems_mount_base }}/etc/fstab"
+    src: tmpfs
+    path: /tmp
+    fstype: tmpfs
+    opts: "defaults,rw,noatime,nosuid,size={{ filesystems_tmpfs_size | default('256M') }},mode=1777"
+    state: present
+  tags:
+    - filesystems
+    - configuration
+    - logical

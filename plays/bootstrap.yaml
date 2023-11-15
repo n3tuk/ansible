@@ -1,0 +1,6 @@
+---
+- name: Bootstrap new physical and virtual machines with Arch Linux
+  hosts: bootstrap
+  remote_user: root
+  roles:
+    - filesystems
