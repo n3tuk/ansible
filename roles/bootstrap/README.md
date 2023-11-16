@@ -14,7 +14,7 @@ installation.
 
 | Variable                    | Default                                                                            | Description                                                                                                                            |
 | :-------------------------- | :--------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
-| `bootstrap_mount_dir`       | `""`                                                                               | (**optional**) The root location of the system to install the configuration and packages into, and from which to build the UEFI stubs. |
+| `bootstrap_mount_base`      | `""`                                                                               | (**optional**) The root location of the system to install the configuration and packages into, and from which to build the UEFI stubs. |
 | `bootstrap_pacstrap_extras` | `[]`                                                                               | Any additional packages to be installed as part of `pacstrap`.                                                                         |
 | `bootstrap_vconsole_keymap` | `uk`                                                                               | The keymap to provide to the virtual console.                                                                                          |
 | `bootstrap_locale_lang`     | `en_GB.UTF-8`                                                                      | The default locale used on the system.                                                                                                 |
@@ -32,7 +32,7 @@ None.
   hosts: all
   remote_user: root
   vars:
-    bootstrap_mount_dir: /mnt
+    bootstrap_mount_base: /mnt
   roles:
     - role: bootstrap
 ```

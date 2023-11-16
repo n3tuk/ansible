@@ -1,0 +1,8 @@
+---
+# tasks file for bootstrap
+
+- name: Install the base system for Anch Linux
+  ansible.builtin.include_tasks: pacstrap.yaml
+
+- name: Install the basic configuration files
+  ansible.builtin.include_tasks: configuration.yaml

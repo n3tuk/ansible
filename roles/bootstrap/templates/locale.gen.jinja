@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+
+# Configuration file for locale-gen
+{% for locale in bootstrap_locale_gen|default([]) %}
+{{ locale }}
+{% endfor %}

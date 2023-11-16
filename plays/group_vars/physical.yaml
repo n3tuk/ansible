@@ -92,6 +92,10 @@ bootstrap_pacstrap_extras:
   - sbctl
   - sbsigntools
   - i7z
+  - libvirt
+  - dmidecode
+  - qemu-desktop
+  - jack2
 
 kernels_microcode: true
 kernels_secure_boot_sign: true

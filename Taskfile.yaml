@@ -103,6 +103,7 @@ tasks:
 
   bootstrap:
     desc: Bootstrap new servers using the bootstrap Ansible Play
+    silent: true
     cmds:
       - cmd: |-
           ansible-playbook \
@@ -114,7 +115,7 @@ tasks:
             --extra-vars bootstrap_chroot_dir=/mnt \
             --force-handlers \
             --limit {{ .limit }} \
-            --forks 10 --diff
+            --forks 10
 
   baseline:
     desc: Baseline servers using the baseline Ansible Play

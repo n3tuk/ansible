@@ -3,4 +3,18 @@
   hosts: bootstrap
   remote_user: root
   roles:
-    - filesystems
+    - role: filesystems
+    - role: bootstrap
+    - role: issue
+    - role: secure_boot
+    - role: kernels
+    - role: systemd
+    - role: systemd_networkd
+    - role: systemd_resolved
+    - role: ca
+    - role: ssh
+    - role: starship
+    - role: fish
+    - role: bash
+    - role: sudo
+    - role: users
