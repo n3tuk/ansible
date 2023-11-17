@@ -8,6 +8,7 @@
       lvdisplay --colon 2>/dev/null | cut -d : -f 1
     executable: /usr/bin/bash
   register: lvol_info
+  # This can be safely run in --check mode
   check_mode: true
   tags:
     - filesystems
@@ -36,6 +37,7 @@
       set -o pipefail
       vgdisplay --colon 2>/dev/null | cut -d : -f 1
     executable: /usr/bin/bash
+  # This can be safely run in --check mode
   check_mode: false
   register: lvg_info
   tags:

@@ -35,6 +35,7 @@
     opts: "defaults,noatime{% if item.mount_opts is defined and item.mount_opts | length > 0 %},{% endif %}{{ item.mount_opts | default([]) | join(',') }},x-mount.mkdir"
     state: ephemeral
   when: item.path is defined
+  ignore_errors: "{{ ansible_check_mode }}"
   loop: "{{ filesystems_physical_partitions | default([]) }}"
   loop_control:
     label: "/dev/{{ item.device }}p{{ item.number }}"
@@ -53,6 +54,7 @@
     # These should only be temporary mounts, so don't add to /etc/fstab
     state: ephemeral
   when: item.path is defined
+  ignore_errors: "{{ ansible_check_mode }}"
   loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
   loop_control:
     label: "{{ item.group }}/{{ item.name }}"
@@ -68,6 +70,7 @@
     fstype: tmpfs
     opts: "defaults,rw,noatime,nosuid,size={{ filesystems_tmpfs_size }},mode=1777"
     state: ephemeral
+  ignore_errors: "{{ ansible_check_mode }}"
   tags:
     - filesystems
     - mount
