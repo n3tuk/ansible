@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+
+MODULES=({{ kernels_mkinitcpio_modules | join(' ') }})
+BINARIES=({{ kernels_mkinitcpio_binaries | join(' ') }})
+FILES=({{ kernels_mkinitcpio_files | join(' ') }})
+
+HOOKS=({{ kernels_mkinitcpio_hooks | join(' ') }})
+
+# COMPRESSION
+COMPRESSION="{{ kernels_mkinitcpio_compression }}"
+COMPRESSION_OPTIONS=()
+MODULES_DECOMPRESS="yes"

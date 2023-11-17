@@ -1,0 +1,25 @@
+---
+# defaults file for kernels
+
+kernels_install:
+  - linux-lts
+
+kernels_cmdline_extras: []
+
+kernels_mkinitcpio_microcode: false
+kernels_mkinitcpio_compression: zstd
+kernels_mkinitcpio_modules: []
+kernels_mkinitcpio_binaries: []
+kernels_mkinitcpio_files: []
+kernels_mkinitcpio_hooks:
+  - base
+  - systemd
+  - keyboard
+  - autodetect
+  - modconf
+  - kms
+  - block
+  - sd-vconsole
+  - lvm2
+  - filesystems
+  - fsck

@@ -6,3 +6,4 @@
     - role: filesystems
     - role: bootstrap
     - role: secure_boot
+    - role: kernels

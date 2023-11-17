@@ -1,0 +1,68 @@
+---
+# tasks file for kernels
+
+- name: Configure mkinitcpio.conf
+  ansible.builtin.template:
+    src: mkinitcpio.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/mkinitcpio.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  # Although mkinitcpio.conf and cmdline (below) can be installed into the
+  # chroot'd environment by these tasks, the installation of the individual
+  # kernels will manually run mkinitcpio inside the chroot when required, so
+  # will read these files then, and therefore do not need to be handled here
+  notify:
+    - Run mkinitcpio locally
+    - Run sbctl sign-all locally
+
+# This assumes that the directory will have been created, which should have been
+# completed via the pacstrap step on bootstrapping, so should always be present
+- name: Configure the kernel cmdline
+  ansible.builtin.template:
+    src: cmdline.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/kernel/cmdline"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Run mkinitcpio locally
+    - Run sbctl sign-all locally
+
+- name: Create the EFI directories
+  ansible.builtin.file:
+    path: "{{ bootstrap_mount_base | default('') }}/efi/{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  loop:
+    - EFI
+    - EFI/Linux
+  loop_control:
+    label: "/efi/{{ directory }}"
+    loop_var: directory
+
+- name: Install common kernel packages locally
+  community.general.pacman:
+    name: "{{ kernels_packages }}"
+    state: latest
+  # Work on the assumption that the utility will have been pre-installed as part
+  # of the bootstrap role when initialising the initial system, so only attempt
+  # installation or update when bootstrap_mount_base is not set.
+  when: not bootstrap_mount_base | default('') | length
+
+- name: Install the Intel Microcode package locally
+  community.general.pacman:
+    name: "{{ kernels_ucode }}"
+    state: latest
+  when: kernels_mkinitcpio_microcode | default(false) and not bootstrap_mount_base | default('') | length
+
+- name: Install and configure Linux kernels
+  ansible.builtin.include_tasks: kernel.yaml
+  # Run these in reverse so that the kernel at the top of the list if the
+  # default kernel (i.e. the last configured is the first to be booted)
+  loop: "{{ kernels_install | reverse }}"
+  loop_control:
+    extended: true
+    loop_var: kernel
