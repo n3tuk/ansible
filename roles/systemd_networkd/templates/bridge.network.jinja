@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+[Match]
+Name=bri{{ '%02d' | format(item.0) }}
+
+[Network]
+DHCP=no
+IPForward=yes
+{% if systemd_networkd_access_vlan == item.0 %}
+
+# IP Address for IPv4
+Address={{ systemd_networkd_ipv4_address }}
+Gateway={{ systemd_networkd_ipv4_gateway }}
+
+# IP Address for IPv6
+Address={{ systemd_networkd_ipv6_address }}
+
+IPv6AcceptRA=yes
+{% else %}
+IPv6AcceptRA=no
+{% endif %}
+IPv6PrivacyExtensions=no
+MulticastDNS=no
+LLMNR=no

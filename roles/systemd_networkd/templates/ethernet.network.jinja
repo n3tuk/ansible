@@ -1,0 +1,36 @@
+# {{ ansible_managed }}
+
+[Match]
+Name={{ systemd_networkd_ethernet_name }}
+
+[Link]
+MTUBytes={{ systemd_networkd_ethernet_mtu }}
+
+[Network]
+DHCP=no
+{% if systemd_networkd_vlans|length %}
+IPForward=yes
+{% else %}
+IPForward=no
+{% endif %}
+
+{% if systemd_networkd_access_vlan == 0 %}
+# IP Address for IPv4
+Address={{ systemd_networkd_ipv4_address }}
+Gateway={{ systemd_networkd_ipv4_gateway }}
+
+# IP Address for IPv6
+Address={{ systemd_networkd_ipv6_address }}
+
+{% else %}
+IPv6AcceptRA=no
+{% endif %}
+IPv6PrivacyExtensions=no
+MulticastDNS=no
+LLMNR=no
+{% if systemd_networkd_vlans|length %}
+
+{%   for vlan in systemd_networkd_vlans %}
+VLAN={{ systemd_networkd_ethernet_name }}.{{ '%02d' | format(vlan) }}
+{%   endfor %}
+{% endif %}

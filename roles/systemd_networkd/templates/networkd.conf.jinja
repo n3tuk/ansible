@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+#
+# See networkd.conf(5) for details.
+
+[Network]
+SpeedMeter=yes
+SpeedMeterIntervalSec=10sec
+IPv6PrivacyExtensions=no
+
+[DHCPv4]
+DUIDType=vendor
+
+[DHCPv6]
+DUIDType=vendor

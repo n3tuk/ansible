@@ -8,3 +8,4 @@
     - role: secure_boot
     - role: kernels
     - role: systemd
+    - role: systemd_networkd
