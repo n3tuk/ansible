@@ -7,3 +7,4 @@
     - role: bootstrap
     - role: secure_boot
     - role: kernels
+    - role: systemd

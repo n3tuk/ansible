@@ -1,0 +1,112 @@
+---
+# tasks file for systemd
+
+- name: Configure systemd
+  ansible.builtin.template:
+    src: system.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/system.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Run systemd daemon-reload locally
+  tags:
+    - systemd
+    - configuraton
+
+- name: Configure systemd-journald
+  ansible.builtin.template:
+    src: journald.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/journald.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Run systemd daemon-reload locally
+    - Restart systemd-journald locally
+  tags:
+    - systemd
+    - systemd-journald
+    - configuraton
+
+- name: Configure systemd-user
+  ansible.builtin.template:
+    src: user.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/user.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Run systemd daemon-reload locally
+  tags:
+    - systemd
+    - systemd-user
+    - configuraton
+
+- name: Configure systemd-sleep
+  ansible.builtin.template:
+    src: sleep.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/sleep.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Run systemd daemon-reload locally
+  tags:
+    - systemd
+    - systemd-sleep
+    - configuraton
+
+- name: Configure systemd-oomd
+  ansible.builtin.template:
+    src: oomd.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/oomd.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Run systemd daemon-reload locally
+  tags:
+    - systemd
+    - systemd-oomd
+    - configuraton
+
+- name: Configure systemd-timesyncd
+  ansible.builtin.template:
+    src: timesyncd.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/timesyncd.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Run systemd daemon-reload locally
+    - Restart systemd-timesyncd locally
+  tags:
+    - systemd
+    - systemd-timesyncd
+    - configuraton
+
+- name: Enable systemd-timesyncd in the chroot
+  # If installing into the chroot'd environment, call systemd directly via
+  # arch-chroot instead of using the systemd module
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c 'systemctl enable systemd-timesyncd.service'
+  when: not ansible_check_mode and bootstrap_mount_base | default('') | length
+  tags:
+    - systemd
+    - systemd-timesyncd
+    - service
+
+- name: Ensure systemd-timesyncd is running locally
+  ansible.builtin.systemd_service:
+    name: systemd-timesyncd.service
+    daemon_reload: false
+    enabled: true
+    state: started
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - systemd
+    - systemd-timesyncd
+    - service

@@ -119,3 +119,9 @@ kernels_mkinitcpio_hooks:
   - lvm2
   - filesystems
   - fsck
+
+systemd_system_watchdog_enabled: true
+systemd_journald_max_size: 200M
+systemd_timesyncd_fallback_ntp:
+  - ntp0.zen.co.uk
+  - ntp1.zen.co.uk
