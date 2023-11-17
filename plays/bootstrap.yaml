@@ -9,3 +9,4 @@
     - role: kernels
     - role: systemd
     - role: systemd_networkd
+    - role: systemd_resolved

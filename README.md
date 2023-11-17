@@ -32,6 +32,7 @@ task: [bootstrap] ansible-playbook \
 | [`kernels`][role-kernels]                   | A role to install selected Linux kernels and configure them for booting on this system.                                                                                                                    |
 | [`systemd`][role-systemd]                   | A role to update the local configuration for `systemd` on this system, including `systemd` itself, `systemd-oomd`, and `systemd-timesyncd` for NTP support.                                                |
 | [`systemd_networkd`][role-systemd-networkd] | A role to enable `systemd-networkd` and install the required configuration for the local ethernet port, as well as any VLANs and Bridges required for virtual machine access to the network.               |
+| [`systemd_resolved`][role-systemd-resolved] | A role to enable `systemd-resolved` for local DNS resolution, including setting up the stub resolver, and configuring the DNS settings for this system.                                                    |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -39,3 +40,4 @@ task: [bootstrap] ansible-playbook \
 [role-kernels]: https://github.com/n3tuk/ansible/tree/main/roles/kernels
 [role-systemd]: https://github.com/n3tuk/ansible/tree/main/roles/systemd
 [role-systemd-networkd]: https://github.com/n3tuk/ansible/tree/main/roles/systemd_networkd
+[role-systemd-resolved]: https://github.com/n3tuk/ansible/tree/main/roles/systemd_resolved
