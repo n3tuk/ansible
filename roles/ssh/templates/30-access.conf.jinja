@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+
+UsePAM yes
+LoginGraceTime 15s
+PermitRootLogin no
+StrictModes yes
+MaxAuthTries 6
+MaxSessions 10
+
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+IgnoreRhosts yes

@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+
+KexAlgorithms {{ ssh_server_kex_algorithms | join (',') }}
+Ciphers {{ ssh_server_ciphers | join (',') }}
+MACs {{ ssh_server_macs | join (',') }}
+HostKeyAlgorithms {{ ssh_server_host_key_algorithms | join (',') }}
