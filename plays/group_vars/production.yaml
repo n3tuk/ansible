@@ -1,2 +1,6 @@
 ---
 env_name: production
+
+starship_location: cym-south-1
+starship_environment: production
+starship_colour: bf616a

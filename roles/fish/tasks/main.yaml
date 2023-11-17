@@ -1,0 +1,44 @@
+---
+# tasks file for fish
+
+- name: Install Fish
+  community.general.pacman:
+    name: "{{ fish_packages }}"
+    state: latest
+  # Work on the assumption that the service will have been pre-installed as part
+  # of the bootstrap role when initialising the initial system, so only attempt
+  # installation or update when bootstrap_mount_base is not set.
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - fish
+    - packages
+
+- name: Prepare the local directories
+  ansible.builtin.file:
+    path: "{{ bootstrap_mount_base | default('') }}/{{ directory.0 }}/{{ directory.1 }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  loop: "{{ fish_config_dirs | product(['.config', '.config/fish']) }}"
+  loop_control:
+    loop_var: directory
+    label: "/{{ directory.0 }}/{{ directory.1 }}"
+  tags:
+    - fish
+    - configuration
+
+- name: Configure Fish
+  ansible.builtin.template:
+    src: config.fish.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/{{ directory }}/.config/fish/config.fish"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  loop: "{{ fish_config_dirs }}"
+  loop_control:
+    loop_var: directory
+    label: "/{{ directory }}/.config/config.fish"
+  tags:
+    - fish
+    - configuration

@@ -10,3 +10,5 @@
     - role: systemd
     - role: systemd_networkd
     - role: systemd_resolved
+    - role: starship
+    - role: fish

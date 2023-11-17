@@ -1,0 +1,5 @@
+---
+# vars file for starship
+
+starship_packages:
+  - starship
