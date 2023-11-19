@@ -37,6 +37,7 @@ task: [bootstrap] ansible-playbook \
 | [`starship`][role-starship]                 | A role to install and configure `starship` as a command-line prompt management utility, and allow it to clearly define the use and purpose of the system in both [`file`][role-fish] and [`bash`][role-bash]. |
 | [`fish`][role-fish]                         | A role to install and configure `fish` with some basic settings and to run `starship` for users.                                                                                                              |
 | [`bash`][role-bash]                         | A role to install and configure `bash` with some basic settings and to run `starship` for users.                                                                                                              |
+| [`sudo`][role-sudo]                         | A role to install and configure `sudo` on this system with standadised defaults and limited access based on groups.                                                                                           |
 | [`ssh`][role-ssh]                           | A role to install and configure the `ssh` service on this system to enable secure defaults and remote access for configured and supported users.                                                              |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
@@ -50,4 +51,5 @@ task: [bootstrap] ansible-playbook \
 [role-starship]: https://github.com/n3tuk/ansible/tree/main/roles/starship
 [role-fish]: https://github.com/n3tuk/ansible/tree/main/roles/fish
 [role-bash]: https://github.com/n3tuk/ansible/tree/main/roles/bash
+[role-sudo]: https://github.com/n3tuk/ansible/tree/main/roles/sudo
 [role-ssh]: https://github.com/n3tuk/ansible/tree/main/roles/ssh

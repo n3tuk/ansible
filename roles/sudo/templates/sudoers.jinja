@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+Defaults env_keep += "LANG LANGUAGE LINGUAS LC_* _XKB_CHARSET"
+Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+
+root ALL=(ALL:ALL) ALL
+%wheel ALL=(ALL:ALL) ALL
+%sudo ALL=(ALL:ALL) ALL
+
+@includedir /etc/sudoers.d

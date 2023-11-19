@@ -1,0 +1,53 @@
+---
+# tasks file for sudo
+
+- name: Install sudo packages
+  community.general.pacman:
+    name: "{{ sudo_packages }}"
+    state: latest
+  # Work on the assumption that the service will have been pre-installed as part
+  # of the bootstrap role when initialising the initial system, so only attempt
+  # installation or update when bootstrap_mount_base is not set.
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - sudo
+    - packages
+
+- name: Create the sudo drop-in directory
+  ansible.builtin.file:
+    path: "{{ bootstrap_mount_base | default('') }}/etc/sudoers.d"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=
+  tags:
+    - sudo
+    - configuration
+
+- name: Configure the sudo service
+  ansible.builtin.template:
+    src: "{{ file }}.jinja"
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/{{ file }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - sudo.conf
+    - sudo_logsrvd.conf
+  loop_control:
+    label: "/etc/{{ file }}"
+    loop_var: file
+  tags:
+    - sudo
+    - configuration
+
+- name: Configure the sudoers file
+  ansible.builtin.template:
+    src: "sudoers.jinja"
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/sudoers"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - sudo
+    - configuration
