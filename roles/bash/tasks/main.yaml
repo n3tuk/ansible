@@ -1,0 +1,29 @@
+---
+# tasks file for bash
+
+- name: Install Bash
+  community.general.pacman:
+    name: "{{ bash_packages }}"
+    state: latest
+  # Work on the assumption that the service will have been pre-installed as part
+  # of the bootstrap role when initialising the initial system, so only attempt
+  # installation or update when bootstrap_mount_base is not set.
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - bash
+    - packages
+
+- name: Configure Bash
+  ansible.builtin.template:
+    src: "{{ path.1 }}.jinja"
+    dest: "{{ bootstrap_mount_base | default('') }}/{{ path.0 }}/.{{ path.1 }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  loop: "{{ bash_config_dirs | product(bash_config_files) }}"
+  loop_control:
+    loop_var: path
+    label: "/{{ path.0 }}/.{{ path.1 }}"
+  tags:
+    - bash
+    - configuration
