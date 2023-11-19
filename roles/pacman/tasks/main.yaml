@@ -1,0 +1,33 @@
+---
+# tasks file for pacman
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: This role does not support being run when bootstrapping hosts. Failing.
+  when: bootstrap_mount_base | default('') | length
+
+- name: Configure the mirrorlist
+  ansible.builtin.copy:
+    src: mirrorlist
+    dest: /etc/pacman.d/mirrorlist
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Refresh the pacman databases locally
+  tags:
+    - pacman
+    - configuraton
+
+- name: Configure pacman.conf
+  ansible.builtin.template:
+    src: pacman.conf.jinja
+    dest: /etc/pacman.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Refresh the pacman database locally
+  tags:
+    - pacman
+    - configuraton

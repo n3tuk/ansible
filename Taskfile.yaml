@@ -117,8 +117,23 @@ tasks:
             --limit {{ .limit }} \
             --forks 10
 
+  upgrade:
+    desc: Update and upgrade the packages on systems
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/upgrade.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/upgrade.yaml \
+            --force-handlers \
+            --limit {{ .limit }} \
+            --forks 10
+
   baseline:
     desc: Baseline servers using the baseline Ansible Play
+    silent: true
     cmds:
       - cmd: |-
           ansible-playbook \

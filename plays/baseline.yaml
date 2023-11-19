@@ -1,0 +1,38 @@
+---
+- name: Baseline all physical machines
+  hosts: physical
+  remote_user: root
+  roles:
+    - role: ca
+    - role: pacman
+    - role: kernels
+    - role: systemd
+    - role: systemd_networkd
+    - role: systemd_resolved
+    - role: ca
+    - role: ssh
+    - role: starship
+    - role: fish
+    - role: bash
+    - role: sudo
+  tags:
+    - update
+
+- name: Baseline all virtual machines
+  hosts: virtual
+  remote_user: root
+  roles:
+    - role: ca
+    - role: pacman
+    - role: kernels
+    - role: systemd
+    - role: systemd_networkd
+    - role: systemd_resolved
+    - role: ca
+    - role: ssh
+    - role: starship
+    - role: fish
+    - role: bash
+    - role: sudo
+  tags:
+    - update

@@ -5,22 +5,28 @@ n3tuk.
 
 ## Playbooks
 
-| Playbook                           | `task`&nbsp;Command          | Description                                                                                                                                      |
-| :--------------------------------- | :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`bootstrap.yaml`][play-bootstrap] | [`task bootstrap`][taskfile] | A play which will bootstrap any host listed under the bootstrap group, and is normally used for both physical nodes as well as virtual machines. |
+| Playbook                           | `task`&nbsp;Command     | Description                                                                                                                                      |
+| :--------------------------------- | :---------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `n/a`                              | [`ping`][taskfile]      | A task-specific command which will attempt to `ping` all hosts configured in the [`inventory`][inventory] using the standard `become` process.   |
+| [`bootstrap.yaml`][play-bootstrap] | [`bootstrap`][taskfile] | A play which will bootstrap any host listed under the bootstrap group, and is normally used for both physical nodes as well as virtual machines. |
+| [`baseline.yaml`][play-baseline]   | [`baseline`][taskfile]  | A play which will configure physical and virtual machines to baselined settings.                                                                 |
+| [`upgrade.yaml`][play-upgrade]     | [`upgrade`][taskfile]   | A play which will run an update and upgrade of all Arch Linux packages of using `pacman`.                                                        |
 
 All Ansible plays run via `task` can be configured with limit overrides using
-`limit=` appended after `--`:
+`limit=` appended after the task:
 
 ```console
-$ task bootstrap -- limit=node-01.s.cym-south-1.kub3.uk
+$ task bootstrap limit=node-01.s.cym-south-1.kub3.uk
 task: [bootstrap] ansible-playbook \
   --syntax-check plays/bootstrap.yaml
 ...
 ```
 
 [play-bootstrap]: https://github.com/n3tuk/ansible/blob/main/plays/bootstrap.yaml
+[play-baseline]: https://github.com/n3tuk/ansible/blob/main/plays/baseline.yaml
+[play-upgrade]: https://github.com/n3tuk/ansible/blob/main/plays/upgrade.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
+[inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
 ## Roles
 
@@ -39,6 +45,7 @@ task: [bootstrap] ansible-playbook \
 | [`bash`][role-bash]                         | A role to install and configure `bash` with some basic settings and to run `starship` for users.                                                                                                              |
 | [`sudo`][role-sudo]                         | A role to install and configure `sudo` on this system with standadised defaults and limited access based on groups.                                                                                           |
 | [`ssh`][role-ssh]                           | A role to install and configure the `ssh` service on this system to enable secure defaults and remote access for configured and supported users.                                                              |
+| [`pacman`][role-pacman]                     | A role to install and configure the `pacman` utility on this system to additional Arch Linux repositories and custom settings.                                                                                |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -53,3 +60,4 @@ task: [bootstrap] ansible-playbook \
 [role-bash]: https://github.com/n3tuk/ansible/tree/main/roles/bash
 [role-sudo]: https://github.com/n3tuk/ansible/tree/main/roles/sudo
 [role-ssh]: https://github.com/n3tuk/ansible/tree/main/roles/ssh
+[role-pacman]: https://github.com/n3tuk/ansible/tree/main/roles/pacman

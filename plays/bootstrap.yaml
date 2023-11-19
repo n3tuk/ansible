@@ -1,4 +1,9 @@
 ---
+# Perform the bootstrap steps for all supported nodes, installing and
+# configuring Arch Linux on the hosts and rebooting to a minimum installed
+# standard, which can then be fully configured with other Ansible plays, as
+# required and supported.
+
 - name: Bootstrap new physical and virtual machines with Arch Linux
   hosts: bootstrap
   remote_user: root

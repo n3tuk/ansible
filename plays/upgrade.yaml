@@ -1,0 +1,37 @@
+---
+# Upgrade all virtual, and the physical hosts, updating the virtual hosts first
+# and completely before updating the physical hosts.
+
+- name: Upgrade all virtual machines
+  hosts: virtual
+  become: true
+  become_user: root
+  roles:
+    - role: ca
+    - role: pacman
+  tasks:
+    - name: Refresh the pacman databases
+      community.general.pacman:
+        update_cache: true
+    - name: Upgrade all avilable packages
+      community.general.pacman:
+        upgrade: true
+  tags:
+    - virtual-machines
+
+- name: Upgrade all physical machines
+  hosts: physical
+  become: true
+  become_user: root
+  roles:
+    - role: ca
+    - role: pacman
+  tasks:
+    - name: Refresh the pacman databases
+      community.general.pacman:
+        update_cache: true
+    - name: Upgrade all avilable packages
+      community.general.pacman:
+        upgrade: true
+  tags:
+    - virtual-machines
