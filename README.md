@@ -5,7 +5,7 @@ n3tuk.
 
 ## Playbooks
 
-| Playbook                           | `task` Command               | Description                                                                                                                                      |
+| Playbook                           | `task`&nbsp;Command          | Description                                                                                                                                      |
 | :--------------------------------- | :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`bootstrap.yaml`][play-bootstrap] | [`task bootstrap`][taskfile] | A play which will bootstrap any host listed under the bootstrap group, and is normally used for both physical nodes as well as virtual machines. |
 
@@ -28,6 +28,7 @@ task: [bootstrap] ansible-playbook \
 | :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [`filesystems`][role-filesystems]           | A role to configure physical partitions and filesystems, as well as physical volumes, volume groups, and logical volumes under LVM too, with support for encrypted physical filesystems with `cryptsetup`.    |
 | [`bootstrap`][role-bootstrap]               | A role to bootstrap an Arch Linux installation under a configured mount point, usually set up with [`filesystems`][role-filesystems] above.                                                                   |
+| [`ca`][role-ca]                             | A role to install the n3t.uk Root Certificate Authoritiy certificate into the the trusted store on each system, allowing tools and utilities to trust certificates issued under it.                           |
 | [`secure_boot`][role-secure-boot]           | A role to set up the keys and UEFI firmware to support Secure Boot on physical hosts, allowing locally-built kernels to be signed for booting.                                                                |
 | [`kernels`][role-kernels]                   | A role to install selected Linux kernels and configure them for booting on this system.                                                                                                                       |
 | [`systemd`][role-systemd]                   | A role to update the local configuration for `systemd` on this system, including `systemd` itself, `systemd-oomd`, and `systemd-timesyncd` for NTP support.                                                   |
@@ -39,6 +40,7 @@ task: [bootstrap] ansible-playbook \
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
+[role-ca]: https://github.com/n3tuk/ansible/tree/main/roles/ca
 [role-secure-boot]: https://github.com/n3tuk/ansible/tree/main/roles/secure_boot
 [role-kernels]: https://github.com/n3tuk/ansible/tree/main/roles/kernels
 [role-systemd]: https://github.com/n3tuk/ansible/tree/main/roles/systemd
