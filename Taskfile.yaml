@@ -93,13 +93,31 @@ tasks:
 
   ping:
     desc: Attempt to ping all nodes through Ansible
+    silent: true
     cmds:
+      - cmd: |-
+          echo -e "Keys:" \
+            "\033[32m  (OK)" \
+            "\033[34m   (DNS)" \
+            "\033[33m   (No Route)" \
+            "\033[31m   (Permission Denied)" \
+            "\033[0m"
+          echo
+          echo "Pinging all known hosts in the inventory to test for access..."
       - cmd: |-
           ansible \
             --inventory inventory.yaml \
+            --forks 75 \
             --ask-become-pass \
-            --module-name ping \
-            --one-line all
+            --module-name ansible.builtin.ping \
+            --one-line {{ .limit }} \
+          | awk '
+              /SUCCESS/                    { printf "\033[32m   %s\033[0m\n", $1 }
+              /Could not resolve hostname/ { printf "\033[34m   %s\033[0m\n", $1 }
+              /No route to host/           { printf "\033[33m   %s\033[0m\n", $1 }
+              /Permanently added/          { node=$1 }
+              /Permission denied/          { printf "\033[31m   %s\033[0m\n", node }
+          '
 
   bootstrap:
     desc: Bootstrap new servers using the bootstrap Ansible Play
