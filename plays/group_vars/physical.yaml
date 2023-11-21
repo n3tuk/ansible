@@ -125,3 +125,13 @@ systemd_journald_max_size: 200M
 systemd_timesyncd_fallback_ntp:
   - ntp0.zen.co.uk
   - ntp1.zen.co.uk
+
+# Add the libvirt group to the following users to allow access to the libvirt
+# daemon on the physical hosts, allowing these users to manage virtual machines
+users_users:
+  jonathan:
+    groups:
+      - power
+      - wheel
+      - users
+      - libvirt

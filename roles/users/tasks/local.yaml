@@ -1,0 +1,28 @@
+---
+# local tasks for users
+
+- name: Create and configure the root user locally
+  ansible.builtin.include_tasks: local-root.yaml
+  tags:
+    - root
+    - configuration
+
+- name: Create and configure groups locally
+  ansible.builtin.include_tasks: local-group.yaml
+  loop: "{{ users_groups | dict2items(key_name='name', value_name='settings') }}"
+  loop_control:
+    label: "{{ group.name }}"
+    loop_var: group
+  tags:
+    - groups
+    - configuration
+
+- name: Create and configure users locally
+  ansible.builtin.include_tasks: local-user.yaml
+  loop: "{{ users_users | dict2items(key_name='name', value_name='settings') }}"
+  loop_control:
+    label: "{{ user.name }}"
+    loop_var: user
+  tags:
+    - users
+    - configuration

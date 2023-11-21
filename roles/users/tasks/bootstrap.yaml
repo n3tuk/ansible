@@ -1,0 +1,30 @@
+---
+# bootstrap tasks for users
+
+- name: Create and configure the root user in the chroot
+  ansible.builtin.include_tasks: bootstrap-root.yaml
+  tags:
+    - root
+    - configuration
+
+- name: Create and configure groups in the chroot
+  ansible.builtin.include_tasks: bootstrap-group.yaml
+  when: group.settings.bootstrap is defined and group.settings.bootstrap
+  loop: "{{ users_groups | dict2items(key_name='name', value_name='settings') }}"
+  loop_control:
+    label: "{{ group.name }}"
+    loop_var: group
+  tags:
+    - groups
+    - configuration
+
+- name: Create and configure users in the chroot
+  ansible.builtin.include_tasks: bootstrap-user.yaml
+  when: user.settings.bootstrap is defined and user.settings.bootstrap
+  loop: "{{ users_users | dict2items(key_name='name', value_name='settings') }}"
+  loop_control:
+    label: "{{ user.name }}"
+    loop_var: user
+  tags:
+    - users
+    - configuration

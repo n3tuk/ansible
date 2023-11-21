@@ -1,0 +1,10 @@
+---
+# tasks file for users
+
+- name: Bootstrap selected users and groups in the chroot
+  ansible.builtin.include_tasks: bootstrap.yaml
+  when: bootstrap_mount_base | default('') | length
+
+- name: Config users and groups locally
+  ansible.builtin.include_tasks: local.yaml
+  when: not bootstrap_mount_base | default('') | length

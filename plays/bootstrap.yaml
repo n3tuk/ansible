@@ -21,3 +21,4 @@
     - role: fish
     - role: bash
     - role: sudo
+    - role: users

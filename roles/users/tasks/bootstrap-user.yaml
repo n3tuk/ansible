@@ -1,0 +1,108 @@
+---
+# bootstrap user tasks for users
+
+- name: Check the chroot database for the user {{ user.name }}
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c 'userdbctl user {{ user.name }}'
+  register: userdbctl
+  failed_when: userdbctl.rc >= 2
+  # Allow this to be run during --check as this is a read-only command
+  check_mode: false
+  tags:
+    - users
+    - configuration
+
+- name: Create the chroot group {{ user.name }}
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c 'groupadd{% if user.system is defined and user.system %} -r{% endif %} {{ user.name }}'
+  # Only create the user when the user was found not to exist based on above
+  when: not ansible_check_mode and userdbctl.rc == 1
+  tags:
+    - users
+    - configuation
+
+- name: Create the chroot user {{ user.name }}
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c '
+          useradd \
+            {% if user.system is defined and user.system %} -r {% endif %} \
+            -m -d /home/{{ user.name }} -g {{ user.name }} {{ user.name }}
+          '
+  # Only create the user when the user was found not to exist based on above
+  when: not ansible_check_mode and userdbctl.rc == 1
+  tags:
+    - users
+    - configuation
+
+- name: Configure the chroot user {{ user.name }}
+  # Split out setting configuration options which are not required on adding the
+  # user to a separate command so it will be possible to change some attributes,
+  # when required, during bootstrapping
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c '
+          usermod \
+            {% if user.settings.groups is defined %} -G {{ user.settings.groups | join(',') }}{% endif %} \
+            -s {{ user.settings.shell | default(users_default_shell) }} {{ user.name }}
+          '
+  when: not ansible_check_mode
+  tags:
+    - users
+    - configuation
+
+- name: Set the password for the chroot user {{ user.name }}
+  # Use command rather than shell here as the hashing controls in an encrypted
+  # password string use dollar symbols to control algorithms and salts, which,
+  # under shell attempt to be interpreted in the string, whereas command does
+  # not, so is safer for managing this task
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: |-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/fish -c "usermod -p '{{ user.settings.password }}' {{ user.name }}"
+  when: not ansible_check_mode
+  tags:
+    - users
+    - password
+
+- name: Prepare the .ssh directory for the chroot user {{ user.name }}
+  # The authorized_keys module can create and manage the file with manage_dir,
+  # but as we cannot use it (see below for reasons), we must ensure it's created
+  # manually inside the chroot environment, where we will have access to the
+  # user and group databases, so run everything under arch-chroot
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+      /usr/bin/fish -c "
+        umask 0077; and \
+        mkdir -p /home/{{ user.name }}/.ssh; and \
+        touch /home/{{ user.name }}/.ssh/authorized_keys; and \
+        chown -R {{ user.name }}:{{ user.name }} /home/{{ user.name }}/.ssh"
+  when: not ansible_check_mode
+  tags:
+    - users
+    - password
+
+- name: Set the authorized_keys for the chroot user {{ user.name }}
+  # Use lineinfile here rather than authorized_keys, as authorized_keys uses the
+  # user attribute to manage the file, and as that user exists only inside the
+  # chroot environment, it will always fail trying to add the key to the file
+  ansible.builtin.lineinfile:
+    path: "{{ bootstrap_mount_base | default('') }}/home/{{ user.name }}/.ssh/authorized_keys"
+    create: false
+    line: "{{ key.type | default(users_default_key_type) }} {{ key.key | replace('\n', '') }} {{ key.comment | default(user.name)}}"
+    insertafter: EOF
+    state: present
+  when: user.settings.ssh_keys is defined
+  loop: "{{ user.settings.ssh_keys }}"
+  loop_control:
+    label: "{{ key.comment | default(user.name) }}"
+    loop_var: key
+  tags:
+    - users
+    - authorized_keys

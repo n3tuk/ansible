@@ -1,0 +1,6 @@
+---
+# defaults file for users
+
+users_root: {}
+users_users: {}
+users_groups: {}

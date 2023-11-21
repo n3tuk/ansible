@@ -1,0 +1,13 @@
+---
+# Deploy updated user and sudo configurations for all hosts
+
+- name: Deploy user and sudo configurations
+  hosts: all
+  become: true
+  become_user: root
+  roles:
+    - role: sudo
+    - role: users
+  tags:
+    - users
+    - sudo

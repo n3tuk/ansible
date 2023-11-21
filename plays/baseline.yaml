@@ -15,6 +15,7 @@
     - role: fish
     - role: bash
     - role: sudo
+    - role: users
   tags:
     - update
 
@@ -34,5 +35,6 @@
     - role: fish
     - role: bash
     - role: sudo
+    - role: users
   tags:
     - update

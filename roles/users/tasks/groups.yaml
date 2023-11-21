@@ -1,0 +1,14 @@
+---
+# group tasks for users
+
+- name: Configure the groups
+  ansible.builtin.group:
+    name: "{{ group.name }}"
+    system: "{{ group.system | default(false) }}"
+  loop: "{{ users_groups }}"
+  loop_control:
+    label: "{{ group }}"
+    loop_var: group
+  tags:
+    - groups
+    - configuration

@@ -1,0 +1,50 @@
+---
+# local user tasks for users
+
+- name: Configure the local group {{ user.name }}
+  ansible.builtin.group:
+    name: "{{ user.name }}"
+    system: false
+  tags:
+    - groups
+    - configuration
+
+- name: Create and configure the local user {{ user.name }}
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    shell: "{{ user.settings.shell | default(users_default_shell) }}"
+    groups: "{{ [user.name] + (user.settings.groups | default(users_default_groups)) }}"
+    append: false
+  tags:
+    - users
+    - configuration
+
+# The root user is always configured on bootstrapping, so just ensure the
+# credentials (i.e. password and SSH public keys) are up-to-date
+
+- name: Set the password for the local user {{ user.name }}
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    password: "{{ user.settings.password }}"
+    update_password: always
+  when: user.settings.password is defined
+  tags:
+    - users
+    - password
+
+- name: Set the authorized_keys for the local user {{ user.name }}
+  # The root user is disabled in SSH, so it cannot be accessed remotely and as
+  # such all SSH keys should be deleted to act as a further backup
+  ansible.posix.authorized_key:
+    user: "{{ user.name }}"
+    key: "{{ key.type | default(users_default_key_type) }} {{ key.key | replace('\n', '') }} {{ key.comment | default(user.name)}}"
+    state: present
+    manage_dir: true
+  when: user.settings.ssh_keys is defined
+  loop: "{{ user.settings.ssh_keys }}"
+  loop_control:
+    label: "{{ key.comment | default(user.name) }}"
+    loop_var: key
+  tags:
+    - users
+    - authorized_keys

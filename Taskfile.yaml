@@ -163,6 +163,19 @@ tasks:
             --limit {{ .limit }} \
             --forks 10
 
+  users:
+    desc: Update the users and sudo configuration on servers using the users Ansible Play
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/users.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/users.yaml \
+            --limit {{ .limit }} \
+            --forks 10
+
   clean:
     desc: Clean up the temporary files from the repository
     summary: |

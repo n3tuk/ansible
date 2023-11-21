@@ -11,6 +11,7 @@ n3tuk.
 | [`bootstrap.yaml`][play-bootstrap] | [`bootstrap`][taskfile] | A play which will bootstrap any host listed under the bootstrap group, and is normally used for both physical nodes as well as virtual machines. |
 | [`baseline.yaml`][play-baseline]   | [`baseline`][taskfile]  | A play which will configure physical and virtual machines to baselined settings.                                                                 |
 | [`upgrade.yaml`][play-upgrade]     | [`upgrade`][taskfile]   | A play which will run an update and upgrade of all Arch Linux packages of using `pacman`.                                                        |
+| [`users.yaml`][play-users]         | [`users`][taskfile]     | A play which will run an create or update of all the users and groups on a system.                                                               |
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -25,6 +26,7 @@ task: [bootstrap] ansible-playbook \
 [play-bootstrap]: https://github.com/n3tuk/ansible/blob/main/plays/bootstrap.yaml
 [play-baseline]: https://github.com/n3tuk/ansible/blob/main/plays/baseline.yaml
 [play-upgrade]: https://github.com/n3tuk/ansible/blob/main/plays/upgrade.yaml
+[play-users]: https://github.com/n3tuk/ansible/blob/main/plays/upgrade.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
@@ -46,6 +48,7 @@ task: [bootstrap] ansible-playbook \
 | [`sudo`][role-sudo]                         | A role to install and configure `sudo` on this system with standadised defaults and limited access based on groups.                                                                                           |
 | [`ssh`][role-ssh]                           | A role to install and configure the `ssh` service on this system to enable secure defaults and remote access for configured and supported users.                                                              |
 | [`pacman`][role-pacman]                     | A role to install and configure the `pacman` utility on this system to additional Arch Linux repositories and custom settings.                                                                                |
+| [`users`][role-users]                       | A role to install and configure the users and groups on the system, including the `root` user.                                                                                                                |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -61,3 +64,4 @@ task: [bootstrap] ansible-playbook \
 [role-sudo]: https://github.com/n3tuk/ansible/tree/main/roles/sudo
 [role-ssh]: https://github.com/n3tuk/ansible/tree/main/roles/ssh
 [role-pacman]: https://github.com/n3tuk/ansible/tree/main/roles/pacman
+[role-users]: https://github.com/n3tuk/ansible/tree/main/roles/users
