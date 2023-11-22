@@ -1,0 +1,9 @@
+---
+# defaults file for firewalld
+
+firewalld_public_interface: "{{ systemd_networkd_ethernet_name }}"
+
+firewalld_internal_addresses:
+  - 172.27.0.0/16
+  - 172.23.0.0/16
+  - 2a02:8010:8006::/48

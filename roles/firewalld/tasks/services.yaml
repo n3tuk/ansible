@@ -1,0 +1,136 @@
+---
+# service tasks for firewalld
+
+- name: Remove selected default services from the public zone
+  ansible.posix.firewalld:
+    zone: public
+    service: "{{ service }}"
+    permanent: false
+    immediate: true
+    state: disabled
+  loop:
+    - ssh
+    - dhcpv6-client
+  loop_control:
+    label: "{{ service }}"
+    loop_var: service
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - firewalld
+    - services
+
+- name: Remove selected default services from the home zone
+  ansible.posix.firewalld:
+    zone: home
+    service: "{{ service }}"
+    permanent: false
+    immediate: true
+    state: disabled
+  loop:
+    - ssh
+    - mdns
+    - sambda-client
+    - dhcpv6-client
+  loop_control:
+    label: "{{ service }}"
+    loop_var: service
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - firewalld
+    - services
+
+- name: Remove selected default services from the work zone
+  ansible.posix.firewalld:
+    zone: work
+    service: "{{ service }}"
+    permanent: false
+    immediate: true
+    state: disabled
+  loop:
+    - ssh
+    - dhcpv6-client
+  loop_control:
+    label: "{{ service }}"
+    loop_var: service
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - firewalld
+    - services
+
+- name: Remove selected default services from the internal zone
+  ansible.posix.firewalld:
+    zone: internal
+    service: "{{ service }}"
+    permanent: false
+    immediate: true
+    state: disabled
+  loop:
+    # ssh is left enabled
+    - mdns
+    - samba-client
+    - dhcpv6-client
+  loop_control:
+    label: "{{ service }}"
+    loop_var: service
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - firewalld
+    - services
+
+- name: Remove selected default services from the external zone
+  ansible.posix.firewalld:
+    zone: internal
+    service: "{{ service }}"
+    permanent: false
+    immediate: true
+    state: disabled
+  loop:
+    - ssh
+  loop_control:
+    label: "{{ service }}"
+    loop_var: service
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - firewalld
+    - services
+
+- name: Remove selected default services from the dmz zone
+  ansible.posix.firewalld:
+    zone: dmz
+    service: "{{ service }}"
+    permanent: false
+    immediate: true
+    state: disabled
+  loop:
+    - ssh
+  loop_control:
+    label: "{{ service }}"
+    loop_var: service
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - firewalld
+    - services
+
+- name: Add selected services to the internal zone
+  ansible.posix.firewalld:
+    zone: internal
+    service: "{{ service }}"
+    permanent: false
+    immediate: true
+    state: enabled
+  loop:
+    - ssh
+  loop_control:
+    label: "{{ service }}"
+    loop_var: service
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - firewalld
+    - services

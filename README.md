@@ -12,6 +12,7 @@ n3tuk.
 | [`baseline.yaml`][play-baseline]   | [`baseline`][taskfile]  | A play which will configure physical and virtual machines to baselined settings.                                                                 |
 | [`upgrade.yaml`][play-upgrade]     | [`upgrade`][taskfile]   | A play which will run an update and upgrade of all Arch Linux packages of using `pacman`.                                                        |
 | [`users.yaml`][play-users]         | [`users`][taskfile]     | A play which will run an create or update of all the users and groups on a system.                                                               |
+| [`firewalld.yaml`][play-firewalld] | [`firewalld`][taskfile] | A play which will update the firewall configuration through `firewalld` on a system.                                                             |
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -27,6 +28,7 @@ task: [bootstrap] ansible-playbook \
 [play-baseline]: https://github.com/n3tuk/ansible/blob/main/plays/baseline.yaml
 [play-upgrade]: https://github.com/n3tuk/ansible/blob/main/plays/upgrade.yaml
 [play-users]: https://github.com/n3tuk/ansible/blob/main/plays/upgrade.yaml
+[play-firewalld]: https://github.com/n3tuk/ansible/blob/main/plays/firewalld.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
@@ -50,6 +52,7 @@ task: [bootstrap] ansible-playbook \
 | [`ssh`][role-ssh]                           | A role to install and configure the `ssh` service on this system to enable secure defaults and remote access for configured and supported users.                                                              |
 | [`pacman`][role-pacman]                     | A role to install and configure the `pacman` utility on this system to additional Arch Linux repositories and custom settings.                                                                                |
 | [`users`][role-users]                       | A role to install and configure the users and groups on the system, including the `root` user.                                                                                                                |
+| [`firewalld`][role-firewalld]               | A role to install and configure a firewall for the system using `firewalld`.                                                                                                                                  |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -67,3 +70,4 @@ task: [bootstrap] ansible-playbook \
 [role-ssh]: https://github.com/n3tuk/ansible/tree/main/roles/ssh
 [role-pacman]: https://github.com/n3tuk/ansible/tree/main/roles/pacman
 [role-users]: https://github.com/n3tuk/ansible/tree/main/roles/users
+[role-firewalld]: https://github.com/n3tuk/ansible/tree/main/roles/firewalld

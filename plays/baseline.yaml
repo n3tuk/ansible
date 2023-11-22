@@ -33,6 +33,7 @@
     - role: systemd_networkd
     - role: systemd_resolved
     - role: ca
+    - role: firewalld
     - role: ssh
     - role: starship
     - role: fish
