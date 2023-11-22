@@ -1,10 +1,12 @@
 ---
 - name: Baseline all physical machines
   hosts: physical
-  remote_user: root
+  become: true
+  become_user: root
   roles:
     - role: ca
     - role: pacman
+    - role: issue
     - role: kernels
     - role: systemd
     - role: systemd_networkd
@@ -21,7 +23,8 @@
 
 - name: Baseline all virtual machines
   hosts: virtual
-  remote_user: root
+  become: true
+  become_user: root
   roles:
     - role: ca
     - role: pacman

@@ -1,6 +1,4 @@
 ---
 env_name: development
-
-starship_location: cym-south-1
-starship_environment: development
-starship_colour: d08770
+env_location: cym-south-1
+env_colour: d08770

@@ -26,10 +26,11 @@ the command via `arch-chroot` into the new installation.
 | :--------------------- | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
 | `bootstrap_mount_base` | `""`                  | (**optional**) The root location of the system to install the configuration and packages into, and from which to build the UEFI stubs. |
 | `starship_config_dirs` | `["root","etc/skel"]` | The list of directories where `.config/starship.toml` is to be installed.                                                              |
-| `starship_purpose`     | `unknown`             | The purpose of the configured server or system, to be displayed on the terminal prompt.                                                |
-| `starship_environment` | `production`          | The name of the environment this sytem or server belongs, to be displayed on the terminal prompt.                                      |
-| `starship_location`    | `unknown`             | The location of the configured server or system, to be displayed on the terminal prompt.                                               |
-| `starship_colour`      | `d8dee9`              | The colour to be given to the `starship_environment` output on the terminal prompt.                                                    |
+| `env_purpose`          | `unknown`             | The purpose of the configured server or system, to be displayed on the terminal prompt.                                                |
+| `env_name`             | `unknown`             | The name of the environment this sytem or server belongs, to be displayed on the terminal prompt.                                      |
+| `env_location`         | `unknown`             | The location of the configured server or system, to be displayed on the terminal prompt.                                               |
+| `env_colour`           | `d8dee9`              | The colour to be given to the `env_name` output on the terminal prompt.                                                                |
+>>>>>>> 97d8928 (Add a role to manage the issue file for console access)
 
 ## Dependencies
 

@@ -1,11 +1,6 @@
 ---
 # defaults file for starship
 
-starship_location: unknown
-starship_environment: production
-starship_colour: d8dee9
-starship_purpose: unknown
-
 starship_config_dirs:
   - root
   - etc/skel

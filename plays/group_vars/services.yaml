@@ -1,6 +1,4 @@
 ---
 env_name: services
-
-starship_location: cym-south-1
-starship_environment: services
-starship_colour: ebcb8b
+env_location: cym-south-1
+env_colour: ebcb8b
