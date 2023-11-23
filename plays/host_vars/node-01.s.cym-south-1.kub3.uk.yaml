@@ -13,9 +13,60 @@ systemd_networkd_vlans:
   - 31
   - 32
 
-virtual_machines_domains:
-  vault-01: {}
-  cache-01: {}
-  netdata-s: {}
-  netdata-p: {}
-  netdata-d: {}
+machines_list:
+  - name: vault-01
+    environment: services
+    location: cym-south-1
+    purpose: vault-node
+    vcpu: 2
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 31
+  - name: cache-01
+    environment: services
+    location: cym-south-1
+    purpose: repo-cache-node
+    vcpu: 2
+    memory:
+      current: 2
+    volumes:
+      - dev: vda
+        size: 512G
+    vlan: 31
+  - name: netdata-01
+    environment: services
+    location: cym-south-1
+    purpose: netdata-node
+    vcpu: 2
+    memory:
+      current: 4
+    volumes:
+      - dev: vda
+        size: 256G
+    vlan: 31
+  - name: netdata-01
+    environment: development
+    location: cym-south-1
+    purpose: netdata-node
+    vcpu: 4
+    memory:
+      current: 16
+    volumes:
+      - dev: vda
+        size: 512G
+    vlan: 31
+  - name: netdata-01
+    environment: production
+    location: cym-south-1
+    purpose: netdata-node
+    vcpu: 4
+    memory:
+      current: 16
+    volumes:
+      - dev: vda
+        size: 1T
+    vlan: 31

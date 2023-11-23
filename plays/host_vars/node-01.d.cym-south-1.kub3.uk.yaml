@@ -16,3 +16,299 @@ systemd_networkd_vlans:
   - 53
   - 54
   - 55
+
+machines_list:
+  - name: boundary-01
+    environment: development
+    location: cym-south-1
+    purpose: boundary-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 50
+  - name: boundary-02
+    environment: development
+    location: cym-south-1
+    purpose: boundary-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 52
+  - name: boundary-03
+    environment: development
+    location: cym-south-1
+    purpose: boundary-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 54
+
+  - name: vault-01
+    environment: development
+    location: cym-south-1
+    purpose: vault-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 50
+  - name: vault-02
+    environment: development
+    location: cym-south-1
+    purpose: vault-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 52
+  - name: vault-03
+    environment: development
+    location: cym-south-1
+    purpose: vault-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 54
+
+  - name: consul-01
+    environment: development
+    location: cym-south-1
+    purpose: consul-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 50
+  - name: consul-02
+    environment: development
+    location: cym-south-1
+    purpose: consul-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 52
+  - name: consul-03
+    environment: development
+    location: cym-south-1
+    purpose: consul-node
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 54
+
+  - name: etcd-01
+    environment: development
+    location: cym-south-1
+    purpose: etcd-node
+    vcpu: 1
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 50
+  - name: etcd-02
+    environment: development
+    location: cym-south-1
+    purpose: etcd-node
+    vcpu: 1
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 52
+  - name: etcd-03
+    environment: development
+    location: cym-south-1
+    purpose: etcd-node
+    vcpu: 1
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 54
+
+  - name: controller-01
+    environment: development
+    location: cym-south-1
+    purpose: k8s-controller
+    vcpu: 2
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 64G
+    vlan: 50
+  - name: controller-02
+    environment: development
+    location: cym-south-1
+    purpose: k8s-controller
+    vcpu: 2
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 64G
+    vlan: 52
+  - name: controller-03
+    environment: development
+    location: cym-south-1
+    purpose: k8s-controller
+    vcpu: 2
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 64G
+    vlan: 54
+
+  - name: storage-01
+    environment: development
+    location: cym-south-1
+    purpose: k8s-storage-node
+    vcpu: 2
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 64G
+      - dev: vdb
+        size: 512G
+    vlan: 51
+  - name: storage-02
+    environment: development
+    location: cym-south-1
+    purpose: k8s-storage-node
+    vcpu: 2
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 64G
+      - dev: vdb
+        size: 512G
+    vlan: 53
+  - name: storage-03
+    environment: development
+    location: cym-south-1
+    purpose: k8s-storage-node
+    vcpu: 2
+    memory:
+      current: 2
+      shared: true
+    volumes:
+      - dev: vda
+        size: 64G
+      - dev: vdb
+        size: 512G
+    vlan: 55
+
+  - name: worker-01
+    environment: development
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 6
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 51
+  - name: worker-02
+    environment: development
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 6
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 53
+  - name: worker-03
+    environment: development
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 6
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 55
+  - name: worker-04
+    environment: development
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 6
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 51
+  - name: worker-05
+    environment: development
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 6
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 53
+  - name: worker-06
+    environment: development
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 6
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 55

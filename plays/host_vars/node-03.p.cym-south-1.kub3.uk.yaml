@@ -12,3 +12,88 @@ systemd_networkd_vlans:
   - 32
   - 44
   - 45
+
+machines_list:
+  - name: vault-03
+    environment: production
+    location: cym-south-1
+    purpose: vault-node
+    vcpu: 2
+    memory:
+      current: 4
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 44
+
+  - name: etcd-03
+    environment: production
+    location: cym-south-1
+    purpose: etcd-node
+    vcpu: 2
+    memory:
+      current: 4
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 44
+
+  - name: controller-03
+    environment: production
+    location: cym-south-1
+    purpose: k8s-controller
+    vcpu: 2
+    memory:
+      current: 4
+    volumes:
+      - dev: vda
+        size: 64G
+    vlan: 44
+
+  - name: storage-03
+    environment: production
+    location: cym-south-1
+    purpose: k8s-storage-node
+    vcpu: 2
+    memory:
+      current: 8
+    volumes:
+      - dev: vda
+        size: 64G
+      - dev: vda
+        size: 1T
+    vlan: 45
+
+  - name: worker-03
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 45
+  - name: worker-09
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 45
+  - name: worker-09
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 45

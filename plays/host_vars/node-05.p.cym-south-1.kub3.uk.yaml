@@ -12,3 +12,77 @@ systemd_networkd_vlans:
   - 32
   - 42
   - 43
+
+machines_list:
+  - name: boundary-02
+    environment: production
+    location: cym-south-1
+    purpose: boundary-node
+    vcpu: 2
+    memory:
+      current: 4
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 42
+
+  - name: consul-02
+    environment: production
+    location: cym-south-1
+    purpose: consul-node
+    vcpu: 2
+    memory:
+      current: 2
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 42
+
+  - name: storage-02
+    environment: development
+    location: cym-south-1
+    purpose: k8s-storage-node
+    vcpu: 2
+    memory:
+      current: 8
+    volumes:
+      - dev: vda
+        size: 64G
+      - dev: vdb
+        vg: persistant
+        size: 1T
+    vlan: 43
+
+  - name: worker-05
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 43
+  - name: worker-11
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 43
+  - name: worker-17
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 43
