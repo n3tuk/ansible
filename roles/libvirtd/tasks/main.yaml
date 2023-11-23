@@ -27,6 +27,22 @@
     - libvirt
     - configuration
 
+- name: Update autostart directorys for group permissions
+  ansible.builtin.file:
+    path: "/etc/libvirt/{{ directory }}"
+    owner: root
+    group: libvirt
+    mode: u=rwx,g=rwx,o=rx
+  loop:
+    - qemu/autostart
+    - storage/autostart
+  loop_control:
+    label: "/etc/libvirt/{{ directory }}"
+    loop_var: directory
+  tags:
+    - libvirt
+    - configuration
+
 - name: Ensure libvirtd is running
   ansible.builtin.systemd:
     name: libvirtd.service
@@ -59,8 +75,8 @@
     - libvirtd
     - service
 
-- name: Download installation images for libvirtd Storage Pool
+- name: Download installation images for libvirtd storage pool
   ansible.builtin.include_tasks: images.yaml
 
-- name: Configure Storage Pools for libvirtd
+- name: Configure storage pools for libvirtd
   ansible.builtin.include_tasks: storage.yaml
