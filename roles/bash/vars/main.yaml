@@ -1,0 +1,14 @@
+---
+# vars file for bash
+
+bash_packages:
+  - bash
+  - bash-completion
+
+bash_config_dirs:
+  - root
+  - etc/skel
+bash_config_files:
+  - bashrc
+  - bash_profile
+  - bash_logout

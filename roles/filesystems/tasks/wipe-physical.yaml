@@ -1,0 +1,27 @@
+---
+# wipe physical tasks file for filesystems
+
+- name: "Read the partitions on {{ drive }}"
+  community.general.parted:
+    device: "{{ drive }}"
+  register: gpt
+  tags:
+    - filesystems
+    - wipe
+    - physical
+
+- name: "Remove existing partitions for {{ drive }}"
+  community.general.parted:
+    device: "{{ gpt.disk.dev }}"
+    number: "{{ partition.num }}"
+    state: absent
+  loop: "{{ gpt.partitions }}"
+  loop_control:
+    label: "{{ gpt.disk.dev }}{{ partition.num }}"
+    loop_var: partition
+  when:
+    - gpt.partitions|length > 0
+  tags:
+    - filesystems
+    - wipe
+    - physical

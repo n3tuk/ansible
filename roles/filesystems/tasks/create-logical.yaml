@@ -1,0 +1,44 @@
+---
+# create logical tasks file for filesystems
+
+- name: Create the volume groups
+  community.general.lvg:
+    pvs: "{{ item.partitions | join(',') }}"
+    vg: "{{ item.name }}"
+    pvresize: true
+    state: present
+  loop: "{{ filesystems_volume_groups | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - filesystems
+    - setup
+    - logical
+
+- name: Create the logical volumes
+  community.general.lvol:
+    vg: "{{ item.group }}"
+    lv: "{{ item.name }}"
+    size: "{{ item.size }}"
+  loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
+  loop_control:
+    label: "{{ item.group }}/{{ item.name }}"
+  tags:
+    - filesystems
+    - setup
+    - logical
+
+- name: Create the logical volume filesystems
+  community.general.filesystem:
+    device: "/dev/{{ item.group }}/{{ item.name }}"
+    fstype: "{{ item.fs_type }}"
+    opts: "{{ item.fs_opts | default(omit) }}"
+    state: present
+  when: item.fs_type is defined
+  loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
+  loop_control:
+    label: "{{ item.group }}/{{ item.name }}"
+  tags:
+    - filesystems
+    - setup
+    - logical

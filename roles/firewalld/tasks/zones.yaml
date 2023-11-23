@@ -1,0 +1,41 @@
+---
+# zone tasks for firewalld
+
+- name: Set the selected zones to DROP by default
+  ansible.posix.firewalld:
+    zone: "{{ zone }}"
+    target: DROP
+    permanent: true
+    # This is a zone operation and must be permanent only
+    immediate: false
+    state: enabled
+  loop:
+    - public
+    - internal
+    - external
+    - home
+    - work
+    - dmz
+  loop_control:
+    label: "{{ zone }}"
+    loop_var: zone
+  tags:
+    - firewalld
+    - zones
+
+- name: Attach source ranges to internal zone
+  ansible.posix.firewalld:
+    zone: internal
+    source: "{{ range }}"
+    permanent: false
+    immediate: true
+    state: enabled
+  loop: "{{ firewalld_internal_addresses }}"
+  loop_control:
+    label: "{{ range }}"
+    loop_var: range
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - firewalld
+    - zones

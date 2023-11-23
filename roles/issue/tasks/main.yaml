@@ -1,0 +1,13 @@
+---
+# tasks file for issue
+
+- name: Configure the issue file
+  ansible.builtin.template:
+    src: issue.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/issue"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - issue
+    - configuraton

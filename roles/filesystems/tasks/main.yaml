@@ -1,0 +1,12 @@
+---
+# tasks file for filesystems
+
+- name: Unmount and wipe all filesystems, volumes, and partitions
+  ansible.builtin.include_tasks: wipe.yaml
+  when: filesystems_wipe_enable|default(false)
+
+- name: Create and mount all partitions, filesystems, and volumes
+  ansible.builtin.include_tasks: create.yaml
+
+- name: Prepare the fstab file
+  ansible.builtin.include_tasks: fstab.yaml

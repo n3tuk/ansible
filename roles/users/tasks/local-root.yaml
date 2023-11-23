@@ -1,0 +1,28 @@
+---
+# local root tasks for users
+
+- name: Set the password for root locally
+  ansible.builtin.user:
+    name: root
+    password: "{{ users_users.root.password }}"
+    shell: "{{ users_users.root.shell | default(users_default_shell) }}"
+    update_password: always
+  when: users_users.root.password is defined and users_users.root.password | length
+  tags:
+    - root
+    - password
+
+# The root user is always configured on bootstrapping, so just ensure the
+# credentials (i.e. password and SSH public keys) are up-to-date
+
+- name: Clear authorized_keys for root locally
+  # The root user is disabled in SSH, so it cannot be accessed remotely and as
+  # such all SSH keys should be deleted to act as a further backup
+  ansible.posix.authorized_key:
+    path: /root/.ssh/authorized_keys
+    user: root
+    key: ""
+    state: absent
+  tags:
+    - root
+    - authorized_keys

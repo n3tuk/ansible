@@ -1,0 +1,1 @@
+root=/dev/storage/system rw lsm=landlock,lockdown,yama,integrity,apparmor,bpf rd.udev.log_priority=3 vt.global_cursor_default=0 systemd.show_status=true{% for entry in kernels_cmdline_extras %} {{ entry }}{% endfor %}

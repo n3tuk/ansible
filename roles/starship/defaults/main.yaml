@@ -1,0 +1,6 @@
+---
+# defaults file for starship
+
+starship_config_dirs:
+  - root
+  - etc/skel

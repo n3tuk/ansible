@@ -1,0 +1,5 @@
+---
+# vars file for firewalld
+
+firewalld_packages:
+  - firewalld

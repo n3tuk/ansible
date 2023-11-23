@@ -1,0 +1,8 @@
+---
+# handlers file for libvirtd
+
+- name: Restart libvirtd
+  ansible.builtin.systemd:
+    name: libvirtd.service
+    daemon_reload: false
+    state: restarted

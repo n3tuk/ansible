@@ -43,25 +43,171 @@ tasks:
     deps:
       - task: pre-checks
     cmds:
-      - pre-commit install
+      - cmd: pre-commit install
     generates:
       - .git/hooks/pre-commit
 
+  rename:
+    desc: Find and rename all .yml files to .yaml
+    sources:
+      - "plays/*.yml"
+      - "plays/host_vars/*.yml"
+      - "plays/group_vars/*.yml"
+      - "roles/*/*/*.yml"
+    silent: true
+    cmds:
+      - cmd: |-
+          find -type f -iname '*.yml' | while read file
+          do
+            echo "${file#\./} -> $(basename $file .yml).yaml"
+            git mv -f $file ${file%.yml}.yaml 2>/dev/null \
+             || mv -f $file ${file%.yml}.yaml
+          done
+
+  lint:
+    desc: Run linting tools against the Ansible files
+    summary: |
+      Run linting tools against the Ansible files inside this repository for
+      validity and correctness.
+    run: once
+    deps:
+      - task: pre-checks
+      - task: rename
+    sources:
+      - ".yamllint.yaml"
+      - "plays/*.yaml"
+      - "plays/host_vars/*.yaml"
+      - "plays/group_vars/*.yaml"
+      - "roles/*/*/*.yaml"
+    cmds:
+      - cmd: |-
+          yamllint \
+            --config-file .yamllint.yaml \
+            --format colored \
+            plays/ roles/
+      - cmd: |-
+          ansible-lint \
+            --profile production \
+            --format brief \
+            --show-relpath
+
+  ping:
+    desc: Attempt to ping all nodes through Ansible
+    silent: true
+    cmds:
+      - cmd: |-
+          echo -e "Keys:" \
+            "\033[32m  (OK)" \
+            "\033[34m   (DNS)" \
+            "\033[33m   (No Route)" \
+            "\033[31m   (Permission Denied)" \
+            "\033[0m"
+          echo
+          echo "Pinging all known hosts in the inventory to test for access..."
+      - cmd: |-
+          ansible \
+            --inventory inventory.yaml \
+            --forks 75 \
+            --ask-become-pass \
+            --module-name ansible.builtin.ping \
+            --one-line {{ .limit }} \
+          | awk '
+              /SUCCESS/                    { printf "\033[32m   %s\033[0m\n", $1 }
+              /Could not resolve hostname/ { printf "\033[34m   %s\033[0m\n", $1 }
+              /No route to host/           { printf "\033[33m   %s\033[0m\n", $1 }
+              /Permanently added/          { node=$1 }
+              /Permission denied/          { printf "\033[31m   %s\033[0m\n", node }
+          '
+
   bootstrap:
     desc: Bootstrap new servers using the bootstrap Ansible Play
+    silent: true
     cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/bootstrap.yaml
       - cmd: |-
           ansible-playbook \
             --user root \
             --ask-pass plays/bootstrap.yaml \
-            --limit {{ .limit }}
+            --extra-vars bootstrap_chroot_dir=/mnt \
+            --force-handlers \
+            --limit {{ .limit }} \
+            --forks 10
+
+  upgrade:
+    desc: Update and upgrade the packages on systems
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/upgrade.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/upgrade.yaml \
+            --force-handlers \
+            --limit {{ .limit }} \
+            --forks 10
 
   baseline:
     desc: Baseline servers using the baseline Ansible Play
+    silent: true
     cmds:
       - cmd: |-
-          ansible-playbook --verbose \
-            --user root \
-            --ask-pass plays/baseline.yaml \
+          ansible-playbook \
+            --syntax-check plays/baseline.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/baseline.yaml \
+            --force-handlers \
             --limit {{ .limit }} \
-            --tags wipe
+            --forks 10
+
+  users:
+    desc: Update the users and sudo configuration on servers using the users Ansible Play
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/users.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/users.yaml \
+            --limit {{ .limit }} \
+            --forks 10
+
+  firewalld:
+    desc: Deploy updated firewall configuration through the firewalld Ansible Play
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/firewalld.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/firewalld.yaml \
+            --limit {{ .limit }} \
+            --forks 10
+
+  libvirtd:
+    desc: Configure libvirtd and deploy Virtual Machines
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/libvirtd.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/libvirtd.yaml \
+            --limit {{ .limit }} \
+            --forks 10
+
+  clean:
+    desc: Clean up the temporary files from the repository
+    summary: |
+      Remove any generated configuration files and temporary files from the repository.
+    run: once
+    silent: true
+    cmds:
+      - cmd: rm -rf .cache
+      - cmd: rm -rf .task

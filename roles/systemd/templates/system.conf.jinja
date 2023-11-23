@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+#
+# See systemd-system.conf(5) for details.
+
+[Manager]
+CtrlAltDelBurstAction=reboot-force
+CrashShell=no
+CrashReboot=yes
+DumpCore=no
+NoNewPrivileges=no
+
+ShowStatus=yes
+{% if systemd_system_watchdog_enable %}
+
+WatchdogDevice=/dev/watchdog0
+RuntimeWatchdogSec=30s
+RebootWatchdogSec=60s
+{% endif %}

@@ -1,0 +1,23 @@
+---
+# vars file for bootstrap
+
+bootstrap_mount_base: /mnt
+
+bootstrap_pacstrap_packages:
+  - apparmor
+  - efibootmgr
+  - efivar
+  - lvm2
+  - firewalld
+  - openssh
+  - sudo
+  - fish
+  - starship
+  - tmux
+  - sudo
+  - neovim
+  - wget
+  - man-db
+  - man-pages
+  - texinfo
+  - netdata

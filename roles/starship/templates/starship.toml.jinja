@@ -1,0 +1,69 @@
+# {{ ansible_managed }}
+
+# Configure the prompt display for the left-hand-side of the terminal
+format = """
+{%- if directory == "root" %}
+[╭╴](fg:#bf616a)$time[╶─╴](fg:#bf616a)[  ](fg:#5e81ac)$directory [╶─╴](fg:#bf616a)$shell
+[│ ](fg:#bf616a)[ ](fg:#5e81ac)[╶─╴](fg:#eceff4)[{{ env_location | default('unknown') }}](fg:#eceff4)
+[│ ](fg:#bf616a)[ ](fg:#5e81ac)[╶─╴](fg:#eceff4)[{{ env_name | default('unknown') }}](fg:#{{ env_colour | default('d8dee9') }})[/](fg:#5e81ac)[{{ env_purpose | default('unknown') }}](fg:#eceff4)
+[╰╴](fg:#bf616a)$username$hostname $character
+{%- else -%}
+[╭╴](fg:#5e81ac)$time[╶─╴](fg:#5e81ac)[  ](fg:#5e81ac)$directory [╶─╴](fg:#5e81ac)$shell
+[│ ](fg:#5e81ac)[ ](fg:#5e81ac)[╶─╴](fg:#eceff4)[{{ env_location | default('unknown') }}](fg:#eceff4)
+[│ ](fg:#5e81ac)[ ](fg:#5e81ac)[╶─╴](fg:#eceff4)[{{ env_name | default('unknown') }}](fg:#{{ env_colour | default('d8dee9') }})[/](fg:#5e81ac)[{{ env_purpose | default('unknown') }}](fg:#eceff4)
+[╰╴](fg:#5e81ac)$username$hostname $character
+{%- endif -%}
+"""
+
+# Configure the prompt display for the right-hand-side of the terminal
+right_format = "[ ](fg:#d8dee9)$cmd_duration"
+
+# General configuration options
+add_newline = true
+
+[time]
+disabled = false
+format = "[$time](fg:#d8dee9)"
+
+[shell]
+disabled = false
+format = "[$indicator](fg:#5e81ac)"
+fish_indicator = "fish"
+bash_indicator = "bash"
+unknown_indicator = "?sh"
+
+[directory]
+disabled = false
+format = "[$path](fg:#eceff4)"
+home_symbol = "~"
+truncate_to_repo = true
+truncation_length = 15
+repo_root_format = "[](fg:#5e81ac)[$repo_root](fg:#5e81ac)[$path](fg:#eceff4)"
+repo_root_style = "x" # This is required to enable repo_root_format
+
+[username]
+show_always = true
+format = "[$user]($style)"
+style_user = "fg:#5e81ac"
+style_root = "fg:#bf616a"
+
+[hostname]
+disabled = false
+format = " [on](fg:#eceff4) [$hostname](fg:#bf616a)"
+trim_at = ""
+ssh_only = false
+
+[character]
+disabled = false
+success_symbol = "[](fg:#d8dee9)"
+error_symbol = "[](fg:#bf616a)"
+
+[cmd_duration]
+disabled = false
+format = "[$duration](fg:#5e81ac)"
+{% if directory != "root" %}
+
+[sudo]
+disabled = false
+format = "[ ](fg:#eceff4)[ ](fg:#bf616a)"
+{% endif %}

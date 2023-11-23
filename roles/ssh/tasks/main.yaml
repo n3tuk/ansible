@@ -1,0 +1,89 @@
+---
+# tasks file for ssh
+
+- name: Install the SSH packages locally
+  community.general.pacman:
+    name: "{{ ssh_packages }}"
+    state: latest
+  # Work on the assumption that the service will have been pre-installed as part
+  # of the bootstrap role when initialising the initial system, so only attempt
+  # installation or update when bootstrap_mount_base is not set.
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - sshd
+    - packages
+
+- name: Create the SSH configuration directories
+  ansible.builtin.file:
+    path: "{{ bootstrap_mount_base | default('') }}/{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  loop:
+    - etc/ssh
+    - etc/ssh/ssh_config.d
+    - etc/ssh/sshd_config.d
+  loop_control:
+    label: "/{{ directory }}"
+    loop_var: directory
+  tags:
+    - sshd
+    - configuration
+
+- name: Configure the SSH service with sshd_config
+  ansible.builtin.template:
+    src: sshd_config.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/sshd_config"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Restart sshd locally
+  tags:
+    - sshd
+    - configuration
+
+- name: Configure the sshd_config drop-ins
+  ansible.builtin.template:
+    src: "{{ drop_in }}.jinja"
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/ssh/sshd_config.d/{{ drop_in }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - 10-service.conf
+    - 11-keys.conf
+    - 15-logging.conf
+    - 30-access.conf
+    - 50-permissions.conf
+  loop_control:
+    label: "/etc/ssh/sshd_config.d/{{ drop_in }}"
+    loop_var: drop_in
+  notify:
+    - Restart sshd locally
+  tags:
+    - sshd
+    - configuration
+
+- name: Ensure sshd is enabled in the chroot
+  # If installing into the chroot'd environment, call systemd directly via
+  # arch-chroot instead of using the systemd module
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c 'systemctl enable sshd.service'
+  when: not ansible_check_mode and bootstrap_mount_base | default('') | length
+  tags:
+    - sshd
+    - service
+
+- name: Ensure sshd is running locally
+  ansible.builtin.systemd_service:
+    name: sshd.service
+    enabled: true
+    state: started
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - sshd
+    - service

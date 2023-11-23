@@ -1,0 +1,13 @@
+---
+# defaults file for filesystems
+
+# Set the size for the /tmp tmpfs filesystem on the host
+filesystems_tmpfs_size: 256M
+
+filesystems_wipe_enable: false
+
+# Set the physical volumes and logical volumes to be created on the host
+filesystems_physical_drives: []
+filesystems_physical_partitions: []
+filesystems_volume_groups: []
+filesystems_logical_volumes: []

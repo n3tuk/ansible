@@ -1,0 +1,14 @@
+---
+# handlers file for kernels
+
+- name: Run mkinitcpio locally
+  # This handler is building boot files specifically inside non-chroot'd environments
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: mkinitcpio -P
+  when: not bootstrap_mount_base | default('') | length
+
+- name: Run sbctl sign-all locally
+  # This handler is building boot files specifically inside non-chroot'd environments
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: sbctl sign-all
+  when: not bootstrap_mount_base | default('') | length

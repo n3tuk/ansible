@@ -1,0 +1,8 @@
+---
+# vars file for users
+
+users_default_shell: /usr/bin/bash
+users_default_system: false
+users_default_groups: []
+
+users_default_key_type: ssh-rsa

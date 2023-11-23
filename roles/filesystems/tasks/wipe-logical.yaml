@@ -1,0 +1,58 @@
+---
+# wipe logical tasks file for filesystems
+
+- name: Read current logical volumes
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      set -o pipefail
+      lvdisplay --colon 2>/dev/null | cut -d : -f 1
+    executable: /usr/bin/bash
+  register: lvol_info
+  # This can be safely run in --check mode
+  check_mode: true
+  tags:
+    - filesystems
+    - wipe
+    - logical
+
+- name: Delete all logical volumes
+  community.general.lvol:
+    vg: storage
+    lv: "{{ item }}"
+    state: absent
+    force: true
+  loop: "{{ lvol_info.stdout_lines }}"
+  loop_control:
+    extended: true
+  when:
+    - lvol_info.stdout_lines|length > 0
+  tags:
+    - filesystems
+    - wipe
+    - logical
+
+- name: Read current volume groups
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: |-
+      set -o pipefail
+      vgdisplay --colon 2>/dev/null | cut -d : -f 1
+    executable: /usr/bin/bash
+  # This can be safely run in --check mode
+  check_mode: false
+  register: lvg_info
+  tags:
+    - filesystems
+    - wipe
+    - logical
+
+- name: Delete all volume groups
+  community.general.lvg:
+    vg: "{{ item }}"
+    state: absent
+  loop: "{{ lvg_info.stdout_lines }}"
+  when:
+    - lvg_info.stdout_lines|length > 0
+  tags:
+    - filesystems
+    - wipe
+    - logical

@@ -1,0 +1,11 @@
+---
+# create tasks file for filesystems
+
+- name: Create the physical partitions
+  ansible.builtin.include_tasks: create-physical.yaml
+
+- name: Create the logical volumes
+  ansible.builtin.include_tasks: create-logical.yaml
+
+- name: Mount the filesystems
+  ansible.builtin.include_tasks: create-mount.yaml

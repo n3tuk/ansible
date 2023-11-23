@@ -1,0 +1,28 @@
+---
+# pacstrap tasks file for bootstrap
+
+- name: Prepare the mirrorlist locally
+  # The mirrorlist file is copied into the bootstrap environment via pacstrap,
+  # so save it locally first and then it will be used to build the new system
+  ansible.builtin.copy:
+    src: mirrorlist
+    dest: /etc/pacman.d/mirrorlist
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: Ensure the Arch Linux keyring is up-to-date locally
+  community.general.pacman:
+    name: archlinux-keyring
+    update_cache: true
+    state: latest
+
+- name: Run pacstrap to build the system
+  ansible.builtin.command:
+    cmd: >-
+      pacstrap -K /mnt
+        base linux-firmware
+        {{ kernels_install | join(' ') }}
+        {{ bootstrap_pacstrap_packages | join(' ') }}
+        {{ bootstrap_pacstrap_extras | join(' ') }}
+    creates: /mnt/var/log/pacman.log

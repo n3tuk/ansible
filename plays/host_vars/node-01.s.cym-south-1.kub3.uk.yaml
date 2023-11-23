@@ -1,0 +1,21 @@
+---
+# Node-specific configuration for node-01.s.cym-south-1.kub3.uk
+
+filesystems_luks_enabled: true
+
+systemd_networkd_access_vlan: 32
+systemd_networkd_ipv4_address: 172.23.32.9/24
+systemd_networkd_ipv4_gateway: 172.23.32.1
+systemd_networkd_ipv6_address: 2a02:8010:8006:3a32:4a21:bff:fe56:446/64
+
+systemd_networkd_vlans:
+  - 30
+  - 31
+  - 32
+
+virtual_machines_domains:
+  vault-01: {}
+  cache-01: {}
+  netdata-s: {}
+  netdata-p: {}
+  netdata-d: {}

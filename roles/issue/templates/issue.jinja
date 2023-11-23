@@ -1,0 +1,38 @@
+
+
+
+
+
+
+
+
+
+
+\e{darkgray} ──> \e{reset}{{ ansible_nodename }}
+
+  \e{darkgray}    Machine Type\e{reset}: {{ device_type | title }}
+  \e{darkgray}          {{ ansible_processor[2] }}\e{reset}
+  \e{darkgray}          {{ ( ansible_memtotal_mb / 1024 ) | round(method='ceil') }}GiB RAM\e{reset}
+
+  \e{darkgray}        Location\e{reset}: {{ env_location }}
+  \e{darkgray}     Environment\e{reset}: \e{yellow}{{ env_name }}\e{reset}
+  \e{darkgray}         Purpose\e{reset}: {{ env_purpose }}
+
+  \e{darkgray}Operating System\e{reset}: Arch Linux
+  \e{darkgray}          Kernel\e{reset}: \r
+
+  \e{darkgray}    IPv6 Address\e{reset}: {{ systemd_networkd_ipv6_address }}
+  \e{darkgray}    IPv4 Address\e{reset}: {{ systemd_networkd_ipv4_address }}
+\e{red}
+ ┌────────────────────────────────────────────────────────────────────────────┐
+ │ Access to this server is authorised only for the owner of n3t.uk Lab       │
+ │ Environment and other pre-authorised personnel. All other access is        │
+ │ strictly prohibited and any detected unauthorised access will be           │
+ │ investigated and reported to local law enforcement for prosecution.        │
+ │                                                                            │
+ │ If you are not authorised, then please leave this console.                 │
+ │                                                                            │
+ │ If you require authorisation, please contact access@n3t.uk.                │
+ └────────────────────────────────────────────────────────────────────────────┘
+\e{reset}
+\t \e{darkgray}\d\e{reset}

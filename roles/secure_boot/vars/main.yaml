@@ -1,0 +1,5 @@
+---
+# vars file for secure_boot
+
+secure_boot_packages:
+  - sbctl

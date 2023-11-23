@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+set -q fish_greeting || set -Ux fish_greeting ''
+
+# Setup NeoVim as the default editor
+set -x EDITOR (which nvim)
+
+# Commands to run in interactive sessions can go here
+if status is-interactive
+  # Launch Starship!
+  if type -q starship
+    starship init fish | source
+  end
+end
+
+# Source any machine-specific configuration
+if test -e ~/.config/fish/local.fish
+  source ~/.config/fish/local.fish
+end
+
+# Source any environmentally-set credentials
+if test -e ~/.config/fish/secrets.fish
+  source ~/.config/fish/secrets.fish
+end

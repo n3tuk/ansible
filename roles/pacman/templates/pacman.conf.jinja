@@ -1,0 +1,33 @@
+# {{ ansible_managed }}
+
+[options]
+Architecture = auto
+HoldPkg = pacman glibc
+# IgnorePkg =
+# IgnoreGroup =
+# NoUpgrade =
+# NoExtract =
+
+UseSyslog
+Color
+# NoProgressBar
+CheckSpace
+VerbosePkgLists
+ParallelDownloads = 5
+
+SigLevel = Required DatabaseOptional
+LocalFileSigLevel = Optional
+# RemoteFileSigLevel = Required
+
+[core]
+Include = /etc/pacman.d/mirrorlist
+
+[extra]
+Include = /etc/pacman.d/mirrorlist
+
+[community]
+Include = /etc/pacman.d/mirrorlist
+
+[private]
+SigLevel = Never
+Server = https://repo.nwk.io/private

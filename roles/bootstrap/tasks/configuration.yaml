@@ -1,0 +1,40 @@
+---
+# configuration tasks file for bootstrap
+
+- name: Set the Time Zone in the chroot
+  ansible.builtin.file:
+    src: /usr/share/zoneinfo/Europe/London
+    path: "{{ bootstrap_mount_base | default('') }}/etc/localtime"
+    state: link
+    force: true
+
+- name: Configure basic configuration files in the chroot
+  ansible.builtin.template:
+    src: "{{ file }}.jinja"
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/{{ file }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - pacman.conf
+    - vconsole.conf
+    - hostname
+  loop_control:
+    label: "/etc/{{ file }}"
+    loop_var: file
+
+- name: Configure locale configuration files in the chroot
+  ansible.builtin.template:
+    src: "{{ file }}.jinja"
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/{{ file }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - locale.gen
+    - locale.conf
+  loop_control:
+    label: "/etc/{{ file }}"
+    loop_var: file
+  notify:
+    - Run locale-gen in chroot

@@ -1,0 +1,33 @@
+---
+# handlers file for systemd
+
+- name: Restart systemd-journald locally
+  ansible.builtin.systemd_service:
+    name: systemd-journald.service
+    daemon_reload: false
+    state: restarted
+  # Only allow a handler to run when we're not inside a chroot environment
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - systemd
+    - systmed-journald
+    - service
+
+- name: Run systemd daemon-reload locally
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - systemd
+    - service
+
+- name: Restart systemd-timesyncd locally
+  ansible.builtin.systemd_service:
+    name: systemd-timesyncd.service
+    daemon_reload: false
+    state: restarted
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - systemd
+    - systemd-timesyncd
+    - service

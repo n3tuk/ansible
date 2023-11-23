@@ -1,0 +1,11 @@
+---
+# defaults file for libvirtd
+
+libvirtd_images_dir: /var/lib/libvirt/images
+
+libvirtd_image_arch_prefix: https://mirror.bytemark.co.uk/archlinux/iso/
+libvirtd_image_arch_checksum: 477f50617d648e46d6e326549aa56ab92115a29a97f2ca364e944cea06970608
+libvirtd_image_arch_version: 2023.11.01
+
+libvirtd_volume_groups:
+  - storage

@@ -1,0 +1,10 @@
+---
+# local group tasks for users
+
+- name: Create and configure the local group {{ group.name }}
+  ansible.builtin.group:
+    name: "{{ group.name }}"
+    system: "{{ group.settings.system | default(false) }}"
+  tags:
+    - groups
+    - configuration

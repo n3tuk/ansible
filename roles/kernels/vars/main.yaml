@@ -1,0 +1,9 @@
+---
+# vars file for kernels
+
+kernels_packages:
+  - efivar
+  - efibootmgr
+
+kernels_ucode:
+  - intel-ucode

@@ -1,0 +1,40 @@
+---
+# tasks file for starship
+
+- name: Install Starship
+  community.general.pacman:
+    name: "{{ starship_packages }}"
+    state: latest
+  tags:
+    - starship
+    - package
+
+- name: Prepare the local directories
+  ansible.builtin.file:
+    path: "{{ bootstrap_mount_base | default('') }}/{{ directory }}/.config"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  loop: "{{ starship_config_dirs }}"
+  loop_control:
+    loop_var: directory
+    label: "/{{ directory }}/.config"
+  tags:
+    - starship
+    - configuration
+
+- name: Configure Starship
+  ansible.builtin.template:
+    src: starship.toml.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/{{ directory }}/.config/starship.toml"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  loop: "{{ starship_config_dirs }}"
+  loop_control:
+    loop_var: directory
+    label: "/{{ directory }}/.config/starship.toml"
+  tags:
+    - starship
+    - configuration

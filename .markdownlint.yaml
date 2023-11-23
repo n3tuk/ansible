@@ -26,5 +26,12 @@ MD013:
   # Stern length checking
   stern: false
 
+# no-inline-html:
+MD033:
+  allowed_elements:
+    - "a"
+    - "pre"
+    - "br"
+
 # no-bare-urls
 MD034: false

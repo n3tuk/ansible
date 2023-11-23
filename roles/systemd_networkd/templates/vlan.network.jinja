@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+[Match]
+Name={{ systemd_networkd_ethernet_name }}.{{ '%02d' | format(item.0) }}
+
+[Link]
+MTUBytes={{ systemd_networkd_ethernet_mtu }}
+
+[Network]
+Bridge=bri{{ '%02d' | format(item.0) }}

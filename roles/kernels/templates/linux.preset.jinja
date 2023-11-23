@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+#
+# mkinitcpio preset file for the '{{ kernel }}' package
+
+ALL_config="/etc/mkinitcpio.conf"
+ALL_kver="/boot/vmlinuz-{{ kernel }}"
+{% if kernels_mkinitcpio_microcode -%}
+ALL_microcode="/boot/intel-ucode.img"
+{%- endif %}
+
+PRESETS=('default')
+
+default_config="/etc/mkinitcpio.conf"
+default_image="/boot/initramfs-{{ kernel }}.img"
+default_uki="/efi/EFI/Linux/{{ kernel }}.efi"
+default_options=""

@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+#
+# See timesyncd.conf(5) for details.
+
+[Time]
+FallbackNTP={{ systemd_timesyncd_fallback_ntp | join(' ') }}

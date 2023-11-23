@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+
+AddressFamily any
+ListenAddress ::
+Port {{ ssh_server_tcp_port }}
+Protocol 2
+
+MaxStartups {{ ssh_server_max_startups }}
+
+TCPKeepAlive yes
+ClientAliveInterval 15
+ClientAliveCountMax 6
+Compression delayed
+
+UseDNS no
+
+Subsystem sftp /usr/lib/ssh/sftp-server

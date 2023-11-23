@@ -1,0 +1,11 @@
+---
+# Deploy updated firewall configuration with firewalld
+
+- name: Deploy updated firewall configuration with firewalld
+  hosts: all
+  become: true
+  become_user: root
+  roles:
+    - role: firewalld
+  tags:
+    - firewalld
