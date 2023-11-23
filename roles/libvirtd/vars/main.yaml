@@ -1,0 +1,7 @@
+---
+# vars file for libvirtd
+
+libvirtd_packages:
+  - libvirt
+  - libvirt-python
+  - python-lxml

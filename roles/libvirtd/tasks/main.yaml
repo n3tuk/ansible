@@ -1,0 +1,66 @@
+---
+# tasks file for libvirtd
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: This role does not support being run when bootstrapping hosts. Failing.
+  when: bootstrap_mount_base | default('') | length
+
+- name: Install the libvirt packages
+  community.general.pacman:
+    name: "{{ libvirtd_packages }}"
+    state: latest
+  tags:
+    - libvirtd
+    - packages
+
+- name: Configure the libvirt service
+  ansible.builtin.template:
+    src: libvirtd.conf.jinja
+    dest: /etc/libvirt/libvirtd.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  notify:
+    - Restart libvirt
+  tags:
+    - libvirt
+    - configuration
+
+- name: Ensure libvirtd is running
+  ansible.builtin.systemd:
+    name: libvirtd.service
+    daemon_reload: false
+    enabled: true
+    state: started
+  tags:
+    - libvirtd
+    - service
+
+- name: Ensure virtlogd is running
+  ansible.builtin.systemd:
+    name: virtlogd.service
+    daemon_reload: false
+    # This service does not to be enabled, as it will be enabled through
+    # libvirtd.service above, starting when it starts
+    enabled: false
+    state: started
+  tags:
+    - libvirtd
+    - service
+
+- name: Ensure libvirt-guests is running
+  ansible.builtin.systemd:
+    name: libvirt-guests.service
+    daemon_reload: false
+    enabled: true
+    state: started
+  tags:
+    - libvirtd
+    - service
+
+- name: Download installation images for libvirtd Storage Pool
+  ansible.builtin.include_tasks: images.yaml
+
+- name: Configure Storage Pools for libvirtd
+  ansible.builtin.include_tasks: storage.yaml

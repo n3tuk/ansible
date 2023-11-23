@@ -1,0 +1,15 @@
+---
+# images tasks for libvirtd
+
+- name: Download the ISO image archlinux-{{ libvirtd_image_arch_version }}-x86_64.iso
+  ansible.builtin.get_url: # noqa name[template]
+    url: "{{ libvirtd_image_arch_prefix }}/{{ libvirtd_image_arch_version }}/archlinux-{{ libvirtd_image_arch_version }}-x86_64.iso"
+    dest: "{{ libvirtd_images_dir }}/archlinux-{{ libvirtd_image_arch_version }}-x86_64.iso"
+    tmp_dest: "{{ libvirtd_images_dir }}"
+    checksum: "sha256:{{ libvirtd_image_arch_checksum }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - libvirtd
+    - images

@@ -189,6 +189,19 @@ tasks:
             --limit {{ .limit }} \
             --forks 10
 
+  libvirtd:
+    desc: Configure libvirtd and deploy Virtual Machines
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/libvirtd.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/libvirtd.yaml \
+            --limit {{ .limit }} \
+            --forks 10
+
   clean:
     desc: Clean up the temporary files from the repository
     summary: |
