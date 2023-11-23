@@ -56,6 +56,7 @@ task: [bootstrap] ansible-playbook \
 | [`users`][role-users]                       | A role to install and configure the users and groups on the system, including the `root` user.                                                                                                                |
 | [`firewalld`][role-firewalld]               | A role to install and configure a firewall for the system using `firewalld`.                                                                                                                                  |
 | [`libvirtd`][role-libvirtd]                 | A role to install and configure `libvirtd` for the system and prepare the Storage Pools for Virtual Machines.                                                                                                 |
+| [`machines`][role-machines]                 | A role to configure all the virtual machines to run on a node, alongside the storage and any other devices required by that machine.                                                                          |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -75,3 +76,4 @@ task: [bootstrap] ansible-playbook \
 [role-users]: https://github.com/n3tuk/ansible/tree/main/roles/users
 [role-firewalld]: https://github.com/n3tuk/ansible/tree/main/roles/firewalld
 [role-libvirtd]: https://github.com/n3tuk/ansible/tree/main/roles/libvirtd
+[role-machines]: https://github.com/n3tuk/ansible/tree/main/roles/machines

@@ -1,10 +1,12 @@
 ---
-- name: Set up and launch all virtual machines physical nodes
+- name: Set up and launch all virtual machines on physical nodes
   hosts: nodes
   become: true
   become_user: root
   roles:
     # - role: systemd_networkd
     - role: libvirtd
+    - role: machines
   tags:
-    - virtual-machines
+    - libvirtd
+    - machines

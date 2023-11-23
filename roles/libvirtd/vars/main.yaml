@@ -5,3 +5,5 @@ libvirtd_packages:
   - libvirt
   - libvirt-python
   - python-lxml
+  - python-netaddr
+  - openbsd-netcat
