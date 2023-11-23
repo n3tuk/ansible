@@ -1,23 +1,34 @@
 ---
 # storage tasks for libvirtd
 
-- name: Create the Storage Pool for installation images
+- name: Undefine the default storage pool
   community.libvirt.virt_pool:
-    command: define
-    name: images
-    xml: "{{ lookup('template', 'images.xml.jinja') }}"
-    autostart: true
+    name: default
+    state: undefined
   tags:
     - libvirtd
     - storage
     - configuration
 
-- name: Create the Storage Pools for LVM Volume Groups
+- name: Define the storage pool for installation images
   community.libvirt.virt_pool:
+    name: images
     command: define
+    xml: "{{ lookup('template', 'images.xml.jinja') }}"
+    autostart: true
+    state: active
+  tags:
+    - libvirtd
+    - storage
+    - configuration
+
+- name: Define the storage pools for LVM volume groups
+  community.libvirt.virt_pool:
     name: "{{ name }}"
+    command: define
     xml: "{{ lookup('template', 'lvm.xml.jinja') }}"
     autostart: true
+    state: active
   loop: "{{ libvirtd_volume_groups }}"
   loop_control:
     label: "{{ name }}"
