@@ -101,6 +101,7 @@ tasks:
             "\033[34m   (DNS)" \
             "\033[33m   (No Route)" \
             "\033[31m   (Permission Denied)" \
+            "\033[31m   (Connection Refused)" \
             "\033[0m"
           echo
           echo "Pinging all known hosts in the inventory to test for access..."
@@ -115,6 +116,7 @@ tasks:
               /SUCCESS/                    { printf "\033[32m   %s\033[0m\n", $1 }
               /Could not resolve hostname/ { printf "\033[34m   %s\033[0m\n", $1 }
               /No route to host/           { printf "\033[33m   %s\033[0m\n", $1 }
+              /Connection refused/         { printf "\033[31m   %s\033[0m\n", $1 }
               /Permanently added/          { node=$1 }
               /Permission denied/          { printf "\033[31m   %s\033[0m\n", node }
           '
