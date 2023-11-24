@@ -151,6 +151,26 @@ tasks:
             --limit {{ .limit }} \
             --forks 10
 
+  reboot:
+    desc: Update and upgrade the packages on systems
+    silent: true
+    cmds:
+      - cmd: |-
+          echo "This command will initiate a sequential reboot of the following hosts:"
+          ansible --inventory inventory.yaml --list-hosts {{ .limit }} | grep -v '\s\+hosts' | sort
+          read -p "Are you sure? (y/n) " -r
+          echo # Force a new line
+          if [[ ! ${REPLY} =~ ^[Yy] ]]; then
+            exit 1
+          fi
+      - cmd: |-
+          ansible \
+            --inventory inventory.yaml \
+            --forks 1 \
+            --ask-become-pass \
+            --module-name ansible.builtin.reboot \
+            --one-line {{ .limit }}
+
   baseline:
     desc: Baseline servers using the baseline Ansible Play
     silent: true
