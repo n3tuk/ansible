@@ -10,7 +10,7 @@
     mode: u=rw,g=r,o=r
   notify:
     - Install n3t.uk Root CA locally
-    - Install n3t.uk Root CA in chroot
+    - Install n3t.uk Root CA in the chroot
   tags:
     - ca
     - configuration
