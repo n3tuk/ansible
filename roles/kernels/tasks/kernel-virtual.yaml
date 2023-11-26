@@ -1,0 +1,14 @@
+---
+# virtual machine kernel tasks for kernels
+
+- name: Configure systemd-boot entry for {{ kernel }}
+  ansible.builtin.template:
+    src: entry.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/efi/loader/entries/{{ kernel }}.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - kernel
+    - systemd-boot
+    - configuration
