@@ -31,3 +31,6 @@
   tags:
     - pacman
     - configuraton
+
+- name: Refresh the handlers for pacman
+  ansible.builtin.meta: flush_handlers
