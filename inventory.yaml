@@ -7,8 +7,6 @@ all:
         vault-01.p.cym-south-1.kub3.uk:
         netdata-01.s.cym-south-1.kub3.uk:
         cache-01.s.cym-south-1.kub3.uk:
-        culhwch.london.n3t.uk:
-        olwen.london.n3t.uk:
 
     production:
       hosts:
@@ -36,6 +34,7 @@ all:
 
     virtual:
       children:
+        services:
         remote:
         netdata:
         boundary:
@@ -60,7 +59,7 @@ all:
 
     bootstrap:
       children:
-        remote:
+        services:
         netdata:
         nodes:
         boundary:
