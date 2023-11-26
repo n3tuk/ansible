@@ -67,7 +67,7 @@
 - name: Register the physical volumes in fstab
   ansible.posix.mount:
     fstab: "{{ filesystems_mount_base }}/etc/fstab"
-    src: "/dev/{{ item.device }}p{{ item.number }}"
+    src: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
     path: "{{ item.path }}"
     fstype: "{{ item.fs_type }}"
     opts: "defaults,rw,noatime{% if item.mount_opts is defined and item.mount_opts | length > 0 %},{% endif %}{{ item.mount_opts | default([]) | join(',') }}"
@@ -75,7 +75,7 @@
   when: item.path is defined
   loop: "{{ filesystems_physical_partitions | default([]) }}"
   loop_control:
-    label: "/dev/{{ item.device }}p{{ item.number }}"
+    label: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
   tags:
     - filesystems
     - configuration

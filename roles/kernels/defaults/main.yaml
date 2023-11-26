@@ -23,3 +23,5 @@ kernels_mkinitcpio_hooks:
   - lvm2
   - filesystems
   - fsck
+
+kernels_secure_boot_sign: false

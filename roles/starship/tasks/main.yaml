@@ -5,6 +5,7 @@
   community.general.pacman:
     name: "{{ starship_packages }}"
     state: latest
+  ignore_errors: "{{ ansible_check_mode }}"
   tags:
     - starship
     - package

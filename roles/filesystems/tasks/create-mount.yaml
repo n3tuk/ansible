@@ -27,23 +27,6 @@
     - logical
     - physical
 
-- name: Temporarily mount the physical volumes
-  ansible.posix.mount:
-    src: "/dev/{{ item.device }}p{{ item.number }}"
-    path: "{{ filesystems_mount_base }}{{ item.path }}"
-    fstype: "{{ item.fs_type }}"
-    opts: "defaults,noatime{% if item.mount_opts is defined and item.mount_opts | length > 0 %},{% endif %}{{ item.mount_opts | default([]) | join(',') }},x-mount.mkdir"
-    state: ephemeral
-  when: item.path is defined
-  ignore_errors: "{{ ansible_check_mode }}"
-  loop: "{{ filesystems_physical_partitions | default([]) }}"
-  loop_control:
-    label: "/dev/{{ item.device }}p{{ item.number }}"
-  tags:
-    - filesystems
-    - mount
-    - physical
-
 - name: Temporarily mount the logical volumes
   ansible.posix.mount:
     src: "/dev/{{ item.group }}/{{ item.name }}"
@@ -62,6 +45,26 @@
     - filesystems
     - mount
     - logical
+
+# The physical devices should be mounted after the logical, as /mnt (i.e. the
+# storage/system logical volume) needs to be mounted first so that the efi
+# directory can be created inside it for mounting the EFI filesystem
+- name: Temporarily mount the physical volumes
+  ansible.posix.mount:
+    src: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
+    path: "{{ filesystems_mount_base }}{{ item.path }}"
+    fstype: "{{ item.fs_type }}"
+    opts: "defaults,noatime{% if item.mount_opts is defined and item.mount_opts | length > 0 %},{% endif %}{{ item.mount_opts | default([]) | join(',') }},x-mount.mkdir"
+    state: ephemeral
+  when: item.path is defined
+  ignore_errors: "{{ ansible_check_mode }}"
+  loop: "{{ filesystems_physical_partitions | default([]) }}"
+  loop_control:
+    label: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
+  tags:
+    - filesystems
+    - mount
+    - physical
 
 - name: Temporarily mount the tmpfs volume
   ansible.posix.mount:

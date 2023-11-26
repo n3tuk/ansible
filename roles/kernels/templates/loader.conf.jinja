@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+
+# Disable the timeout and automatically boot the default kernel (unless a space
+# is held down as systemd-boot starts) and keep the default screen size selected
+# by the UEFI in the event the menu is shown by systemd-boot at start
+timeout menu-hidden
+console-mode keep
+
+# Disable editing in systemd-boot as so not to change potential kernel options
+# and settings before booting
+editor no
+
+# Enable the ability to select "Reboot into firmware" in the options to access
+# the UEFI firmware for this device, and disable the automatic generation of
+# entries for searched kernels and loaders
+auto-firmware yes
+auto-entries no
+
+default {{ kernels_install | first }}.conf

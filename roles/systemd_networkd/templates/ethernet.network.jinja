@@ -13,16 +13,17 @@ IPForward=yes
 {% else %}
 IPForward=no
 {% endif %}
-
 {% if systemd_networkd_access_vlan == 0 %}
-# IP Address for IPv4
+
 Address={{ systemd_networkd_ipv4_address }}
 Gateway={{ systemd_networkd_ipv4_gateway }}
 
-# IP Address for IPv6
 Address={{ systemd_networkd_ipv6_address }}
+# Router for IPv6 found through Router Advertisements
+IPv6AcceptRA=yes
 
 {% else %}
+LinkLocalAddressing=no
 IPv6AcceptRA=no
 {% endif %}
 IPv6PrivacyExtensions=no

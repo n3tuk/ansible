@@ -27,7 +27,10 @@
     group: root
     mode: u=rw,g=r,o=r
   notify:
-    - Refresh the pacman database locally
+    - Refresh the pacman databases locally
   tags:
     - pacman
     - configuraton
+
+- name: Refresh the handlers for pacman
+  ansible.builtin.meta: flush_handlers

@@ -24,4 +24,5 @@
   ansible.builtin.include_tasks: wipe-physical.yaml
   loop: "{{ filesystems_physical_drives }}"
   loop_control:
+    label: "/dev/{{ drive }}"
     loop_var: drive

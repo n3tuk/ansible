@@ -15,6 +15,10 @@
   notify:
     - Run mkinitcpio locally
     - Run sbctl sign-all locally
+  tags:
+    - kernel
+    - mkinitcpio
+    - configuration
 
 # This assumes that the directory will have been created, which should have been
 # completed via the pacstrap step on bootstrapping, so should always be present
@@ -28,6 +32,9 @@
   notify:
     - Run mkinitcpio locally
     - Run sbctl sign-all locally
+  tags:
+    - kernel
+    - configuration
 
 - name: Create the EFI directories
   ansible.builtin.file:
@@ -42,6 +49,9 @@
   loop_control:
     label: "/efi/{{ directory }}"
     loop_var: directory
+  tags:
+    - kernel
+    - configuration
 
 - name: Install common kernel packages locally
   community.general.pacman:
@@ -51,12 +61,26 @@
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
   when: not bootstrap_mount_base | default('') | length
+  tags:
+    - kernel
+    - packages
+
+- name: Prepare the systemd-boot bootloader
+  ansible.builtin.include_tasks: bootctl.yaml
+  when: device_type | default("virtual") == "virtual"
 
 - name: Install the Intel Microcode package locally
   community.general.pacman:
     name: "{{ kernels_ucode }}"
     state: latest
-  when: kernels_mkinitcpio_microcode | default(false) and not bootstrap_mount_base | default('') | length
+  # Microcodes can and should only be installed on physical hosts
+  when: |-
+    kernels_mkinitcpio_microcode | default(false) and
+    device_type | default("virtual") == "physical" and
+    not bootstrap_mount_base | default('') | length
+  tags:
+    - kernel
+    - packages
 
 - name: Install and configure Linux kernels
   ansible.builtin.include_tasks: kernel.yaml

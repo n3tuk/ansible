@@ -12,6 +12,8 @@ bootstrap_pacstrap_packages:
   - openssh
   - sudo
   - fish
+  - bash
+  - bash-completion
   - starship
   - tmux
   - sudo

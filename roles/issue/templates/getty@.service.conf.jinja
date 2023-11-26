@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+
+# Override the agetty comment to include the longer version of the hostname in
+# the prompt, to remove hints about numeral lock or caps lock, and to allow the
+# screen to be cleared.
+
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty -o '-p -- \\u' --long-hostname --nohints - $TERM

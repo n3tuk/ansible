@@ -3,7 +3,6 @@
 
 filesystems_luks_enabled: true
 
-systemd_networkd_access_vlan: 32
 systemd_networkd_ipv4_address: 172.23.32.2/24
 systemd_networkd_ipv4_gateway: 172.23.32.1
 systemd_networkd_ipv6_address: 2a02:8010:8006:3a32:4a21:bff:fe55:f359/64
@@ -12,3 +11,88 @@ systemd_networkd_vlans:
   - 32
   - 40
   - 41
+
+machines_list:
+  - name: vault-01
+    environment: production
+    location: cym-south-1
+    purpose: vault-node
+    vcpu: 2
+    memory:
+      current: 4
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 40
+
+  - name: etcd-01
+    environment: production
+    location: cym-south-1
+    purpose: etcd-node
+    vcpu: 2
+    memory:
+      current: 4
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 40
+
+  - name: controller-01
+    environment: production
+    location: cym-south-1
+    purpose: k8s-controller
+    vcpu: 2
+    memory:
+      current: 4
+    volumes:
+      - dev: vda
+        size: 64G
+    vlan: 40
+
+  - name: storage-01
+    environment: production
+    location: cym-south-1
+    purpose: k8s-storage-node
+    vcpu: 2
+    memory:
+      current: 8
+    volumes:
+      - dev: vda
+        size: 64G
+      - dev: vdb
+        size: 1T
+    vlan: 41
+
+  - name: worker-01
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 41
+  - name: worker-07
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 1
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 41
+  - name: worker-13
+    environment: production
+    location: cym-south-1
+    purpose: k8s-worker-node
+    vcpu: 1
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 128G
+    vlan: 41

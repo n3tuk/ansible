@@ -5,7 +5,7 @@
 # creates the correct files on install
 - name: Configure presets for {{ kernel }}
   ansible.builtin.template:
-    src: "linux.preset.jinja"
+    src: linux.preset.jinja
     dest: "{{ bootstrap_mount_base | default('') }}/etc/mkinitcpio.d/{{ kernel }}.preset"
     owner: root
     group: root
@@ -15,6 +15,9 @@
   notify:
     - Run mkinitcpio locally
     - Run sbctl sign-all locally
+  tags:
+    - kernel
+    - configuration
 
 - name: Install locally the kernel {{ kernel }}
   community.general.pacman:
@@ -24,6 +27,10 @@
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
   when: not bootstrap_mount_base | default('') | length
+  tags:
+    - kernel
+    - packages
+    - configuration
 
 - name: Force running mkinitcpio in the chroot for {{ kernel }}
   # This handler is building boot files specifically inside chroot'd environments
@@ -34,49 +41,15 @@
   # then the installation of the presets will be after installation, so force
   # the run when bootstrap_mount_base is configured to handle this
   when: bootstrap_mount_base | default('') | length
+  tags:
+    - kernel
+    - mkinitcpio
+    - configuration
 
-- name: Sign locally the kernel {{ kernel }}
-  # This handler is building boot files specifically inside non-chroot'd environments
-  ansible.builtin.command: # noqa no-changed-when
-    cmd: sbctl sign -s /efi/EFI/Linux/{{ kernel }}.efi
-  when: |-
-    not ansible_check_mode and
-    not bootstrap_mount_base | default('') | length and
-    kernels_secure_boot_sign
+- name: Install and configure the kernel for physical machines
+  ansible.builtin.include_tasks: kernel-physical.yaml
+  when: device_type | default("virtual") == "physical"
 
-- name: Sign inside the chroot the kernel {{ kernel }}
-  ansible.builtin.command: # noqa no-changed-when
-    cmd: |-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/fish -c 'sbctl sign -s /efi/EFI/Linux/{{ kernel }}.efi'
-  when: |-
-    not ansible_check_mode and
-    bootstrap_mount_base | default('') | length and
-    kernels_secure_boot_sign
-
-- name: Check the UEFI entry for the kernel {{ kernel }}
-  ansible.builtin.shell: # noqa no-changed-when
-    cmd: |-
-      set -o pipefail
-      efibootmgr \
-        | grep -c '{{ kernel }}.efi' \
-      || true
-  # This can be safely run in --check mode
-  check_mode: false
-  register: check_kernel
-
-- name: Add an UEFI entry for the kernel {{ kernel }}
-  # efibootmgr is installed on the Arch Linux image, so this does not need to be
-  # run inside the chroot environment to work successfully. However, only run
-  # the command if it has not been run previously, or errors will be thrown
-  ansible.builtin.shell: # noqa no-changed-when
-    cmd: |-
-      efibootmgr \
-        --create \
-        --bootnum {{ ansible_loop.index0 + 10 }} \
-        --disk {{ filesystems_physical_drives | first }} \
-        --part 1 \
-        --label "Arch Linux ({{ kernel }})" \
-        --loader /EFI/Linux/{{ kernel }}.efi \
-  when: |-
-    not ansible_check_mode and
-    check_kernel.stdout[0] == "0"
+- name: Install and configure the kernel for virtual machines
+  ansible.builtin.include_tasks: kernel-virtual.yaml
+  when: device_type | default("virtual") == "virtual"

@@ -1,9 +1,8 @@
 # {{ ansible_managed }}
 #
 # See crypttab(5) for details.
-
 {% for v in filesystems_physical_partitions %}
 {%   if v.luks|default(false) %}
-crypt-{{ v.device }}p{{ v.number }} /dev/{{ v.device }}p{{ v.number }} none discard,tpm2-device=auto
+crypt-{{ v.device }}{% if v.device[:4] == 'nvme' %}p{% endif %}{{ v.number }} /dev/{{ v.device }}{% if v.device[:4] == 'nvme' %}p{% endif %}{{ v.number }} none discard,tpm2-device=auto
 {%   endif %}
 {% endfor %}

@@ -1,12 +1,11 @@
 ---
 # defaults file for systemd-networkd
 
-systemd_networkd_ethernet_name: enp86s0
+systemd_networkd_ethernet_name: eth0
 systemd_networkd_ethernet_mtu: 1500
-systemd_networkd_vlans:
-  - 32
 
-systemd_networkd_access_vlan: 32
+systemd_networkd_access_vlan: 0
+systemd_networkd_vlans: []
 
 systemd_networkd_ipv4_address:
 systemd_networkd_ipv4_gateway:

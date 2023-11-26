@@ -99,6 +99,7 @@
     insertafter: EOF
     state: present
   when: user.settings.ssh_keys is defined
+  ignore_errors: "{{ ansible_check_mode }}"
   loop: "{{ user.settings.ssh_keys }}"
   loop_control:
     label: "{{ key.comment | default(user.name) }}"
