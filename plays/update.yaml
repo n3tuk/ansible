@@ -1,0 +1,31 @@
+---
+# Update the package databases on all virtual, and the physical hosts, updating
+# the virtual hosts first and completely before updating the physical hosts.
+
+- name: Update all virtual machines
+  hosts: virtual
+  become: true
+  become_user: root
+  roles:
+    - role: ca
+    - role: pacman
+  tasks:
+    - name: Refresh the pacman databases
+      community.general.pacman:
+        update_cache: true
+  tags:
+    - virtual-machines
+
+- name: Update all physical machines
+  hosts: physical
+  become: true
+  become_user: root
+  roles:
+    - role: ca
+    - role: pacman
+  tasks:
+    - name: Refresh the pacman databases
+      community.general.pacman:
+        update_cache: true
+  tags:
+    - physical-machines

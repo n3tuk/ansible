@@ -136,6 +136,23 @@ tasks:
             --force-handlers \
             --limit {{ .limit }} \
             --forks 10
+      # Remove any cached facts after running a bootstrap as the configuration
+      # of the host will change significantly, and a baseline needs a refresh
+      - cmd: rm -rf .cache
+
+  update:
+    desc: Update the pacman package databases on systems
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/update.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/update.yaml \
+            --force-handlers \
+            --limit {{ .limit }} \
+            --forks 10
 
   upgrade:
     desc: Update and upgrade the packages on systems

@@ -1,18 +1,16 @@
 ---
-# Upgrade all virtual, and the physical hosts, updating the virtual hosts first
-# and completely before updating the physical hosts.
+# Upgrade all the installed packages on all virtual, and the physical hosts,
+# updating the virtual hosts first and completely before updating the physical
+# hosts.
+
+- name: Update all machines
+  ansible.builtin.import_playbook: update.yaml
 
 - name: Upgrade all virtual machines
   hosts: virtual
   become: true
   become_user: root
-  roles:
-    - role: ca
-    - role: pacman
   tasks:
-    - name: Refresh the pacman databases
-      community.general.pacman:
-        update_cache: true
     - name: Upgrade all avilable packages
       community.general.pacman:
         upgrade: true
@@ -23,15 +21,9 @@
   hosts: physical
   become: true
   become_user: root
-  roles:
-    - role: ca
-    - role: pacman
   tasks:
-    - name: Refresh the pacman databases
-      community.general.pacman:
-        update_cache: true
     - name: Upgrade all avilable packages
       community.general.pacman:
         upgrade: true
   tags:
-    - virtual-machines
+    - physical-machines
