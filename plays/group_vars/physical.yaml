@@ -12,7 +12,7 @@ filesystems_physical_partitions:
     start: 1MiB
     end: 512MiB
     flags:
-      - boot
+      - esp
     pv_type: fat32
     fs_type: vfat
     fs_opts: -F 32 -n ESP
