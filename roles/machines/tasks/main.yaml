@@ -8,7 +8,7 @@
     size: "{{ machine.1.size }}"
   loop: "{{ machines_list | subelements('volumes', 'skip_missing=true') }}"
   loop_control:
-    label: "/dev/{{ machine.1.vg | default('storage') }}/machine-{{ machine.0.environment }}-{{ machine.0.name }}-{{ machine.1.dev }}"
+    label: "/dev/{{ machine.1.vg | default('storage') }}/vm-{{ machine.0.environment }}-{{ machine.0.name }}-{{ machine.1.dev }}"
     loop_var: machine
   tags:
     - machines
@@ -20,7 +20,7 @@
     verbosity: 2
   loop: "{{ machines_list }}"
   loop_control:
-    label: "{{ machine.name }}.{{ machine.environment[0:1] }}.{{ machine.location}}.kub3.uk"
+    label: "{{ machine.name }}.{{ machine.environment[0:1] }}.{{ machine.location }}.kub3.uk"
     loop_var: machine
 
 - name: Define the virtual machines
@@ -29,7 +29,7 @@
     xml: "{{ lookup('template', 'qemu.xml.jinja') }}"
   loop: "{{ machines_list }}"
   loop_control:
-    label: "{{ machine.name }}.{{ machine.environment[0:1] }}.{{ machine.location}}.kub3.uk"
+    label: "{{ machine.name }}.{{ machine.environment[0:1] }}.{{ machine.location }}.kub3.uk"
     loop_var: machine
   tags:
     - machines
@@ -38,11 +38,11 @@
 - name: Start the virtual machines
   community.libvirt.virt:
     name: "vm-{{ machine.environment }}-{{ machine.name }}"
-    command: start
+    state: running
     autostart: true
   loop: "{{ machines_list }}"
   loop_control:
-    label: "{{ machine.name }}.{{ machine.environment[0:1] }}.{{ machine.location}}.kub3.uk"
+    label: "{{ machine.name }}.{{ machine.environment[0:1] }}.{{ machine.location }}.kub3.uk"
     loop_var: machine
   tags:
     - machines
