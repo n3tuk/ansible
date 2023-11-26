@@ -61,6 +61,7 @@
     opts: "{{ item.fs_opts | default(omit) }}"
     state: present
   when: item.fs_type is defined
+  ignore_errors: "{{ ansible_check_mode }}"
   loop: "{{ filesystems_physical_partitions | default([]) }}"
   loop_control:
     label: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"

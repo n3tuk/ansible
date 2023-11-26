@@ -9,6 +9,7 @@
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
   when: not bootstrap_mount_base | default('') | length
+  ignore_errors: "{{ ansible_check_mode }}"
   tags:
     - fish
     - packages

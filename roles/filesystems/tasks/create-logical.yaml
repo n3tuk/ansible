@@ -7,6 +7,7 @@
     vg: "{{ item.name }}"
     pvresize: true
     state: present
+  ignore_errors: "{{ ansible_check_mode }}"
   loop: "{{ filesystems_volume_groups | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
@@ -20,6 +21,7 @@
     vg: "{{ item.group }}"
     lv: "{{ item.name }}"
     size: "{{ item.size }}"
+  ignore_errors: "{{ ansible_check_mode }}"
   loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
   loop_control:
     label: "{{ item.group }}/{{ item.name }}"
@@ -35,6 +37,7 @@
     opts: "{{ item.fs_opts | default(omit) }}"
     state: present
   when: item.fs_type is defined
+  ignore_errors: "{{ ansible_check_mode }}"
   loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
   loop_control:
     label: "{{ item.group }}/{{ item.name }}"

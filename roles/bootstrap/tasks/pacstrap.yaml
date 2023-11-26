@@ -16,6 +16,7 @@
     name: archlinux-keyring
     update_cache: true
     state: latest
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Run pacstrap to build the system
   ansible.builtin.command:
@@ -26,3 +27,4 @@
         {{ bootstrap_pacstrap_packages | join(' ') }}
         {{ bootstrap_pacstrap_extras | join(' ') }}
     creates: /mnt/var/log/pacman.log
+  when: not ansible_check_mode
