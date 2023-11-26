@@ -2,7 +2,7 @@
 device_type: virtual
 
 filesystems_physical_drives:
-  - /dev/vda
+  - vda
 
 filesystems_physical_partitions:
   - name: ESP

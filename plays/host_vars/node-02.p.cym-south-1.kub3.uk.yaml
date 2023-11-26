@@ -60,7 +60,7 @@ machines_list:
     volumes:
       - dev: vda
         size: 64G
-      - dev: vda
+      - dev: vdb
         size: 1T
     vlan: 43
 

@@ -1,16 +1,16 @@
 ---
 # wipe physical tasks file for filesystems
 
-- name: "Read the partitions on {{ drive }}"
+- name: "Read the partitions on /dev/{{ drive }}"
   community.general.parted:
-    device: "{{ drive }}"
+    device: "/dev/{{ drive }}"
   register: gpt
   tags:
     - filesystems
     - wipe
     - physical
 
-- name: "Remove existing partitions for {{ drive }}"
+- name: "Remove existing partitions for /dev/{{ drive }}"
   community.general.parted:
     device: "{{ gpt.disk.dev }}"
     number: "{{ partition.num }}"

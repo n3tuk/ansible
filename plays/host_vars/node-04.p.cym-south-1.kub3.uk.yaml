@@ -49,7 +49,6 @@ machines_list:
       - dev: vda
         size: 64G
       - dev: vdb
-        vg: persistant
         size: 1T
     vlan: 41
 

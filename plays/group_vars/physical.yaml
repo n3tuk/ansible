@@ -2,7 +2,7 @@
 device_type: physical
 
 filesystems_physical_drives:
-  - /dev/nvme0n1
+  - nvme0n1
 
 filesystems_physical_partitions:
   - name: ESP
