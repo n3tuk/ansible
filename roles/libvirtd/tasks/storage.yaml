@@ -15,8 +15,16 @@
     name: images
     command: define
     xml: "{{ lookup('template', 'images.xml.jinja') }}"
-    autostart: true
+  tags:
+    - libvirtd
+    - storage
+    - configuration
+
+- name: Start the storage pool for installation images
+  community.libvirt.virt_pool:
+    name: images
     state: active
+    autostart: true
   tags:
     - libvirtd
     - storage
@@ -27,8 +35,20 @@
     name: "{{ name }}"
     command: define
     xml: "{{ lookup('template', 'lvm.xml.jinja') }}"
-    autostart: true
+  loop: "{{ libvirtd_volume_groups }}"
+  loop_control:
+    label: "{{ name }}"
+    loop_var: name
+  tags:
+    - libvirtd
+    - storage
+    - configuration
+
+- name: Start the storage pools for LVM volume groups
+  community.libvirt.virt_pool:
+    name: "{{ name }}"
     state: active
+    autostart: true
   loop: "{{ libvirtd_volume_groups }}"
   loop_control:
     label: "{{ name }}"

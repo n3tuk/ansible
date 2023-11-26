@@ -7,3 +7,7 @@ libvirtd_packages:
   - python-lxml
   - python-netaddr
   - openbsd-netcat
+  - dnsmasq
+
+libvirtd_snapshots_volume_name: vm-snapshots
+libvirtd_snapshots_volume_options: "-L SNAPSHOTS"

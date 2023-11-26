@@ -1,0 +1,63 @@
+---
+# services tasks for libvirtd
+
+- name: Configure the libvirt service
+  ansible.builtin.template:
+    src: libvirtd.conf.jinja
+    dest: /etc/libvirt/libvirtd.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  notify:
+    - Restart libvirtd
+  tags:
+    - libvirt
+    - configuration
+
+- name: Update autostart directorys for group permissions
+  ansible.builtin.file:
+    path: "/etc/libvirt/{{ directory }}"
+    owner: root
+    group: libvirt
+    mode: u=rwx,g=rwx,o=rx
+  loop:
+    - qemu/autostart
+    - storage/autostart
+  loop_control:
+    label: "/etc/libvirt/{{ directory }}"
+    loop_var: directory
+  tags:
+    - libvirt
+    - configuration
+
+- name: Ensure libvirtd is running
+  ansible.builtin.systemd:
+    name: libvirtd.service
+    daemon_reload: false
+    enabled: true
+    state: started
+  tags:
+    - libvirtd
+    - service
+
+- name: Ensure virtlogd is running
+  ansible.builtin.systemd:
+    name: virtlogd.service
+    daemon_reload: false
+    # This service does not to be enabled, as it will be enabled through
+    # libvirtd.service above, starting when it starts
+    enabled: false
+    state: started
+  tags:
+    - libvirtd
+    - service
+
+- name: Ensure libvirt-guests is running
+  ansible.builtin.systemd:
+    name: libvirt-guests.service
+    daemon_reload: false
+    enabled: true
+    state: started
+  tags:
+    - libvirtd
+    - service
