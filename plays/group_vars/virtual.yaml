@@ -79,6 +79,7 @@ kernels_kernels:
 kernels_mkinitcpio_modules:
   - virtio-gpu
 
+systemd_networkd_ethernet_name: enp3s0
 systemd_journald_max_size: 200M
 
 firewalld_public_interface: "{{ systemd_networkd_ethernet_name }}"

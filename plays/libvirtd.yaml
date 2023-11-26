@@ -4,7 +4,7 @@
   become: true
   become_user: root
   roles:
-    # - role: systemd_networkd
+    - role: systemd_networkd
     - role: libvirtd
     - role: machines
   tags:

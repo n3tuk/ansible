@@ -120,8 +120,10 @@ kernels_mkinitcpio_hooks:
   - filesystems
   - fsck
 
-systemd_system_watchdog_enabled: true
 systemd_networkd_ethernet_name: enp86s0
+systemd_networkd_access_vlan: 32
+
+systemd_system_watchdog_enabled: true
 systemd_journald_max_size: 200M
 systemd_timesyncd_fallback_ntp:
   - ntp0.zen.co.uk
