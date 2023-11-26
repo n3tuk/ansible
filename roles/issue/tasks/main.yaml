@@ -11,3 +11,46 @@
   tags:
     - issue
     - configuraton
+
+- name: Configure the drop-in directories for getty
+  ansible.builtin.file:
+    path: "{{ bootstrap_mount_base | default('') }}/etc/systemd/system/{{ drop_in }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+    state: directory
+  loop:
+    - getty@.service.d
+    - serial-getty@.service.d
+  loop_control:
+    label: "/etc/systemd/system/{{ drop_in }}"
+    loop_var: drop_in
+  tags:
+    - issue
+    - configuraton
+
+- name: Configure the drop-in for getty@.service
+  ansible.builtin.template:
+    src: getty@.service.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/system/getty@.service.d/prompt.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Restart getty@tty0.service
+  tags:
+    - issue
+    - configuraton
+
+- name: Configure the drop-in for serial-getty@.service
+  ansible.builtin.template:
+    src: serial-getty@.service.conf.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/system/serial-getty@.service.d/prompt.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Restart serial-getty@ttyS0.service
+  tags:
+    - issue
+    - configuraton

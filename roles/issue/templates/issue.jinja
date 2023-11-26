@@ -1,35 +1,46 @@
-  \d \e{darkgray}\t\e{reset}
+                                                  \d \e{halfbright}\t\e{reset}
 
-\e{darkgray}──> \e{reset}n3t.uk Lab Environment
+\e{halfbright}──> \e{reset}n3t.uk Lab Environment
 \e{red}
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Access to this server is authorised only for the owner of n3t.uk Lab Environment and other pre-authorised personnel. All other access is strictly        │
-  │ prohibited and any detected unauthorised access will be investigated and reported to local law enforcement for prosecution.                              │
-  │                                                                                                                                                          │
-  │ If you are not authorised, then please leave this console. If you require authorisation, please contact access@n3t.uk.                                   │
-  └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ Access to this server is authorised only for the owner of n3t.uk Lab    │
+  │ Environment and other pre-authorised personnel. All other access is     │
+  │ strictly prohibited and any detected unauthorised access will be        │
+  │ investigated and reported to local law enforcement for prosecution.     │
+  │                                                                         │
+  │ If you are not authorised, then please leave this console.              │
+  │                                                                         │
+  │ If you require authorisation, please contact access@n3t.uk.             │
+  └─────────────────────────────────────────────────────────────────────────┘
 \e{reset}
-\e{darkgray}──> \e{reset}{{ ansible_nodename }}
+\e{halfbright}──> \e{reset}{{ ansible_nodename }}
 
-  \e{darkgray}    Machine Type\e{reset}: {{ device_type | title }} Machine
+        {{ ansible_system_vendor }} {{ ansible_product_name }}{% if ansible_product_serial and ansible_product_serial != "NA" %} ({{ ansible_product_serial }}){% endif %}
 
-  \e{darkgray}          {{ ansible_processor[2] }}\e{reset}
-  \e{darkgray}          {{ '%02.1f' | format(( ansible_memory_mb.real.total / 1024)) }} GB RAM\e{reset} plus \e{darkgray}{{ '%02.1f' | format(( ansible_memory_mb.swap.total / 1024)) }} GB Swap\e{reset}
-{% for name, device in ansible_devices.items() %}
-{%   if device.model is defined and device.model %}
-  \e{darkgray}          {{ device.size }} {{ device.model }} ({{ device.serial }})\e{reset}
+  \e{halfbright}          {{ ansible_processor_vcpus }}x {{ ansible_processor[2] }}\e{reset}
+  \e{halfbright}          {{ '%02.1f' | format(( ansible_memory_mb.real.total / 1024)) }} GB RAM\e{reset} plus \e{halfbright}{{ '%02.1f' | format(( ansible_memory_mb.swap.total / 1024)) }} GB Swap\e{reset}
+{% for name in filesystems_physical_drives %}
+{%   if name in ansible_devices %}
+{%     if ansible_devices[name].model is defined
+          and ansible_devices[name].model %}
+  \e{halfbright}          {{ ansible_devices[name].size }} {{ ansible_devices[name].model }} ({{ ansible_devices[name].serial }})\e{reset}
+{%     else %}
+  \e{halfbright}          {{ ansible_devices[name].size }} Drive (/dev/{{ name }})\e{reset}
+{%     endif %}
 {%   endif %}
 {% endfor %}
 
-  \e{darkgray}        Location\e{reset}: {{ env_location }}
-  \e{darkgray}     Environment\e{reset}: \e{yellow}{{ env_name }}\e{reset}
-  \e{darkgray}         Purpose\e{reset}: {{ env_purpose }}
+  \e{halfbright}    Machine Type\e{reset}: {{ device_type | title }} Machine
 
-  \e{darkgray}Operating System\e{reset}: Arch Linux
-  \e{darkgray}          Kernel\e{reset}: \r
+  \e{halfbright}        Location\e{reset}: {{ env_location }}
+  \e{halfbright}     Environment\e{reset}: \e{yellow}{{ env_name }}\e{reset}
+  \e{halfbright}         Purpose\e{reset}: {{ env_purpose }}
 
-  \e{darkgray}    IPv6 Address\e{reset}: {{ systemd_networkd_ipv6_address }}
-  \e{darkgray}    IPv4 Address\e{reset}: {{ systemd_networkd_ipv4_address }}
+  \e{halfbright}Operating System\e{reset}: Arch Linux
+  \e{halfbright}          Kernel\e{reset}: \r
+
+  \e{halfbright}    IPv6 Address\e{reset}: {{ systemd_networkd_ipv6_address | split('/') | first }}
+  \e{halfbright}    IPv4 Address\e{reset}: {{ systemd_networkd_ipv4_address | split('/') | first }}
 
 
 

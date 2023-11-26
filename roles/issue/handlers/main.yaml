@@ -1,2 +1,26 @@
 ---
 # handlers file for issue
+
+- name: Restart getty@tty0.service
+  ansible.builtin.systemd_service:
+    name: getty@tty0.service
+    daemon_reload: true
+    state: restarted
+  # Only allow a handler to run when we're not inside a chroot environment
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - issue
+    - systmed
+    - service
+
+- name: Restart serial-getty@ttyS0.service
+  ansible.builtin.systemd_service:
+    name: serial-getty@ttyS0.service
+    daemon_reload: true
+    state: restarted
+  # Only allow a handler to run when we're not inside a chroot environment
+  when: not bootstrap_mount_base | default('') | length
+  tags:
+    - issue
+    - systmed
+    - service
