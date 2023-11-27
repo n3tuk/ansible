@@ -47,6 +47,8 @@
       dest: /etc/nginx
     - name: json-logging.conf
       dest: /etc/nginx/conf.d
+    - name: nginx
+      dest: /etc/logrotate.d
   loop_control:
     label: "{{ file.dest }}/{{ file.name }}"
     loop_var: file

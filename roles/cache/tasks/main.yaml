@@ -47,6 +47,8 @@
   loop:
     - name: cache.conf
       dest: /etc/nginx/vhosts.d
+    - name: nginx-cache
+      dest: /etc/logrotate.d
   loop_control:
     label: "{{ file.dest }}/{{ file.name }}"
     loop_var: file

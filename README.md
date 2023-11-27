@@ -61,6 +61,7 @@ task: [bootstrap] ansible-playbook \
 | [`machines`][role-machines]                 | A role to configure all the virtual machines to run on a node, alongside the storage and any other devices required by that machine.                                                                          |
 | [`nginx`][role-nginx]                       | A role to configure nginx on a system with standard settings, but not to configure any virtual hosts which it may serve.                                                                                      |
 | [`cache`][role-cache]                       | A role to configure a caching proxy virtual host in nginx which will proxy and cache Arch Linux repositories and packages.                                                                                    |
+| [`logrotate`][role-logrotate]               | A role to configure logrotate with sensible defaults to support the rotation and compression of historical log files.                                                                                         |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -83,3 +84,4 @@ task: [bootstrap] ansible-playbook \
 [role-machines]: https://github.com/n3tuk/ansible/tree/main/roles/machines
 [role-nginx]: https://github.com/n3tuk/ansible/tree/main/roles/nginx
 [role-cache]: https://github.com/n3tuk/ansible/tree/main/roles/cache
+[role-logrotate]: https://github.com/n3tuk/ansible/tree/main/roles/logrotate

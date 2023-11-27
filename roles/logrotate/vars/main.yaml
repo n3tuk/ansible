@@ -1,0 +1,5 @@
+---
+# vars file for logrotate
+
+logrotate_packages:
+  - logrotate

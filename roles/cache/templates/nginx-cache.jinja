@@ -1,0 +1,29 @@
+# {{ ansible_managed }}
+
+# Log rotation support for the nginx virtual host {{ cache_vhost_name}}
+# supporting the caching service for Arch Linux repositories.
+
+/var/log/nginx/{{ cache_vhost_name }}/*.log {
+  # Rotate these log files every day and keep up to 28 days worth; if they are
+  # missing just skip and carry on
+  daily
+  missingok
+  rotate 28
+
+  # Use date-based extension for the rotated log file, rather than numeric, to
+  # make it easier to see what days the log files are referencing, especially if
+  # there are days without log files
+  dateext
+  dateformat .%Y%m%d
+
+  # Compress the log files once rotated (by gzip with .gz extension by default)
+  compress
+
+  # Run the pre- and post-rotation commands once when all log files are
+  # processed, rather than once per file, which in this case is just to pass the
+  # USR1 signal to nginx, telling it to re-open the file handles for logging
+  sharedscripts
+  postrotate
+    test ! -r /run/nginx.pid || kill -USR1 `cat /run/nginx.pid`
+  endscript
+}
