@@ -19,5 +19,6 @@
     - role: bash
     - role: sudo
     - role: users
+    - role: logrotate
   tags:
     - update

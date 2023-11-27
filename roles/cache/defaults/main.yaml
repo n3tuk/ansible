@@ -1,0 +1,32 @@
+---
+# defaults file for cache
+
+cache_vhost_name: cache.s.cym-south-1.kub3.uk
+cache_vhost_names:
+  - 1.cache.s.cym-south-1.kub3.uk
+  - 2.cache.s.cym-south-1.kub3.uk
+  - 3.cache.s.cym-south-1.kub3.uk
+
+cache_volume_size: 450G
+
+cache_repos:
+  - name: core
+    upstream:
+      hostname: mirrors.ukfast.co.uk
+      prefix: /sites/archlinux.org
+    valid: 4w
+  - name: community
+    upstream:
+      hostname: mirrors.ukfast.co.uk
+      prefix: /sites/archlinux.org
+    valid: 4w
+  - name: extra
+    upstream:
+      hostname: mirrors.ukfast.co.uk
+      prefix: /sites/archlinux.org
+    valid: 4w
+  - name: private
+    upstream:
+      scheme: https
+      hostname: repo.nwk.io
+    valid: 1w

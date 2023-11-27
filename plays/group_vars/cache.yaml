@@ -1,0 +1,6 @@
+---
+env_name: services
+env_location: cym-south-1
+env_colour: bf616a
+
+env_purpose: repository-cache

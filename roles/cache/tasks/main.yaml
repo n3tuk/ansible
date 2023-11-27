@@ -1,0 +1,57 @@
+---
+# tasks file for cache
+
+- name: Create the logical volume for the cache
+  community.general.lvol:
+    vg: "{{ cache_volume_group }}"
+    lv: "{{ cache_volume_name }}"
+    size: "{{ cache_volume_size }}"
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - cache
+    - filesystem
+
+- name: Create the cache volume filesystem
+  community.general.filesystem:
+    device: "/dev/{{ cache_volume_group }}/{{ cache_volume_name }}"
+    fstype: ext4
+    opts: "{{ cache_volume_options | default(omit) }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - cache
+    - filesystem
+
+- name: Register and mount the cache volume
+  ansible.posix.mount:
+    src: "/dev/{{ cache_volume_group }}/{{ cache_volume_name }}"
+    path: "{{ cache_volume_path }}"
+    fstype: ext4
+    opts: defaults,rw,noatime,nosuid,noexec,nodev
+    state: mounted
+  tags:
+    - cache
+    - filesystems
+
+- name: Configure the caching nginx virtual host
+  ansible.builtin.template:
+    src: "{{ file.name }}.jinja"
+    dest: "{{ file.dest }}/{{ file.name }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    # This handler will be pulled in from the nginx role which should be run
+    # within the same play as this role
+    - Restart nginx
+  loop:
+    - name: cache.conf
+      dest: /etc/nginx/vhosts.d
+    - name: nginx-cache
+      dest: /etc/logrotate.d
+  loop_control:
+    label: "{{ file.dest }}/{{ file.name }}"
+    loop_var: file
+  tags:
+    - nginx
+    - configuraton

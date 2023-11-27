@@ -1,0 +1,66 @@
+---
+# tasks file for nginx
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: This role does not support being run when bootstrapping hosts. Failing.
+  when: bootstrap_mount_base | default('') | length
+
+- name: Install nginx
+  community.general.pacman:
+    name: "{{ nginx_packages }}"
+    state: latest
+  tags:
+    - nginx
+    - package
+
+- name: Configure the nginx drop-in directories
+  ansible.builtin.file:
+    path: "/etc/nginx/{{ directory }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+    state: directory
+  loop:
+    - conf.d
+    - vhosts.d
+  loop_control:
+    label: "/etc/nginx/{{ directory }}"
+    loop_var: directory
+  tags:
+    - nginx
+    - configuration
+
+- name: Configure nginx
+  ansible.builtin.template:
+    src: "{{ file.name }}.jinja"
+    dest: "{{ file.dest }}/{{ file.name }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Restart nginx
+  loop:
+    - name: nginx.conf
+      dest: /etc/nginx
+    - name: mime.types
+      dest: /etc/nginx
+    - name: json-logging.conf
+      dest: /etc/nginx/conf.d
+    - name: nginx
+      dest: /etc/logrotate.d
+  loop_control:
+    label: "{{ file.dest }}/{{ file.name }}"
+    loop_var: file
+  tags:
+    - nginx
+    - configuraton
+
+- name: Ensure nginx is enabled
+  ansible.builtin.systemd_service:
+    name: nginx.service
+    enabled: true
+    state: started
+  tags:
+    - nginx
+    - service

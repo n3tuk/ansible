@@ -1,0 +1,35 @@
+---
+# tasks file for logrotate
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: This role does not support being run when bootstrapping hosts. Failing.
+  when: bootstrap_mount_base | default('') | length
+
+- name: Install logrotate
+  community.general.pacman:
+    name: "{{ logrotate_packages }}"
+    state: latest
+  tags:
+    - logrotate
+    - package
+
+- name: Configure logrotate
+  ansible.builtin.template:
+    src: logrotate.conf.jinja
+    dest: /etc/logrotate.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - logrotate
+    - configuraton
+
+- name: Ensure the logrotate timer is enabled
+  ansible.builtin.systemd_service:
+    name: logrotate.timer
+    enabled: true
+    state: started
+  tags:
+    - logrotate
+    - service

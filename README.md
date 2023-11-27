@@ -14,6 +14,7 @@ n3tuk.
 | [`users.yaml`][play-users]         | [`users`][taskfile]     | A play which will run an create or update of all the users and groups on a system.                                                               |
 | [`firewalld.yaml`][play-firewalld] | [`firewalld`][taskfile] | A play which will update the firewall configuration through `firewalld` on a system.                                                             |
 | [`libvirtd.yaml`][play-libvirtd]   | [`libvirtd`][taskfile]  | A play which will update the configuration of `libvirtd` on a system and prepare the Storage Pools.                                              |
+| [`cache.yaml`][play-cache]         | [`cache`][taskfile]     | A play which will update the configuration of caching proxies.                                                                                   |
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -31,6 +32,7 @@ task: [bootstrap] ansible-playbook \
 [play-users]: https://github.com/n3tuk/ansible/blob/main/plays/upgrade.yaml
 [play-firewalld]: https://github.com/n3tuk/ansible/blob/main/plays/firewalld.yaml
 [play-libvirtd]: https://github.com/n3tuk/ansible/blob/main/plays/libvirtd.yaml
+[play-cache]: https://github.com/n3tuk/ansible/blob/main/plays/cache.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
@@ -57,6 +59,9 @@ task: [bootstrap] ansible-playbook \
 | [`firewalld`][role-firewalld]               | A role to install and configure a firewall for the system using `firewalld`.                                                                                                                                  |
 | [`libvirtd`][role-libvirtd]                 | A role to install and configure `libvirtd` for the system and prepare the Storage Pools for Virtual Machines.                                                                                                 |
 | [`machines`][role-machines]                 | A role to configure all the virtual machines to run on a node, alongside the storage and any other devices required by that machine.                                                                          |
+| [`nginx`][role-nginx]                       | A role to configure nginx on a system with standard settings, but not to configure any virtual hosts which it may serve.                                                                                      |
+| [`cache`][role-cache]                       | A role to configure a caching proxy virtual host in nginx which will proxy and cache Arch Linux repositories and packages.                                                                                    |
+| [`logrotate`][role-logrotate]               | A role to configure logrotate with sensible defaults to support the rotation and compression of historical log files.                                                                                         |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -77,3 +82,6 @@ task: [bootstrap] ansible-playbook \
 [role-firewalld]: https://github.com/n3tuk/ansible/tree/main/roles/firewalld
 [role-libvirtd]: https://github.com/n3tuk/ansible/tree/main/roles/libvirtd
 [role-machines]: https://github.com/n3tuk/ansible/tree/main/roles/machines
+[role-nginx]: https://github.com/n3tuk/ansible/tree/main/roles/nginx
+[role-cache]: https://github.com/n3tuk/ansible/tree/main/roles/cache
+[role-logrotate]: https://github.com/n3tuk/ansible/tree/main/roles/logrotate

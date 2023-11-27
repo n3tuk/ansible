@@ -1,0 +1,33 @@
+# {{ ansible_managed }}
+
+# By default, rotate all logs weekly from the data of the first rotation for the
+# found log file, and keep four weeks worth, compressed
+weekly
+rotate 4
+compress
+
+# Once rotate, create a new empty log file to replace it
+create
+
+# Ignore any pacman-saved filed, if found
+tabooext + .pacorig .pacnew .pacsave
+
+# Process any drop-ins for logrotate.d, configured for the individual packages
+# installed or configurations deployed by Ansible on this system
+include /etc/logrotate.d
+
+/var/log/wtmp {
+    monthly
+    nocompress
+    create 0664 root utmp
+    minsize 1M
+    rotate 1
+}
+
+/var/log/btmp {
+    missingok
+    monthly
+    nocompress
+    create 0600 root utmp
+    rotate 1
+}

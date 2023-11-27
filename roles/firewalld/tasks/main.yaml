@@ -23,6 +23,17 @@
     - firewalld
     - service
 
+- name: Configure logrotate for firewalld
+  ansible.builtin.template:
+    src: firewall.jinja
+    dest: /etc/logrotate.d/firewalld
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - firewalld
+    - configuraton
+
 - name: Configure the Services for firewalld
   ansible.builtin.include_tasks: services.yaml
 

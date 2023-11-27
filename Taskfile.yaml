@@ -96,12 +96,10 @@ tasks:
     silent: true
     cmds:
       - cmd: |-
-          echo -e "Keys:" \
-            "\033[32m  (OK)" \
-            "\033[34m   (DNS)" \
-            "\033[33m   (No Route)" \
-            "\033[31m   (Permission Denied)" \
-            "\033[31m   (Connection Refused)" \
+          echo -e "Keys:\n" \
+            "  \033[32m   OK       \033[34m   DNS\n" \
+            "  \033[33m   No Route \033[33m   Timeout\n" \
+            "  \033[31m   Refused) \033[31m   Denied" \
             "\033[0m"
           echo
           echo "Pinging all known hosts in the inventory to test for access..."
@@ -117,6 +115,7 @@ tasks:
               /Could not resolve hostname/ { printf "\033[34m   %s\033[0m\n", $1 }
               /No route to host/           { printf "\033[33m   %s\033[0m\n", $1 }
               /Connection refused/         { printf "\033[31m   %s\033[0m\n", $1 }
+              /Connection timed out/       { printf "\033[33m   %s\033[0m\n", $1 }
               /Permanently added/          { node=$1 }
               /Permission denied/          { printf "\033[31m   %s\033[0m\n", node }
           '
@@ -240,6 +239,19 @@ tasks:
             --ask-become-pass plays/libvirtd.yaml \
             --limit {{ .limit }} \
             --forks 10
+
+  cache:
+    desc: Deploy updated caching configurations
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/cache.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/cache.yaml \
+            --limit {{ .limit }} \
+            --forks 3
 
   clean:
     desc: Clean up the temporary files from the repository
