@@ -1,0 +1,103 @@
+# {{ ansible_managed }}
+
+# A virtual host to provide a caching proxy for Arch Linux repositories provided
+# both by Arch Linux, and the internal n3t.uk Arch Linux too.
+
+# Configure a proxy cache against the logical volume created for this service
+proxy_cache_path
+  /srv/http/cache/repositories
+  levels=1:2 keys_zone=repositories:60m
+  inactive=90d max_size=32g;
+proxy_temp_path /srv/http/cache/tmp 1 2;
+
+server {
+  server_name
+{% for hostname in cache_vhost_names %}
+    {{ hostname }}{% if loop.last %};{% endif %}
+
+{% endfor %}
+
+  listen 80 reuseport;
+  listen [::]:80 reuseport;
+
+  # Don't try and compress anything managed by this virtual host as it will all
+  # be packages which are compressed already, so won't save space or bandwidth
+  gzip off;
+
+  # Block dot files from being serviced, including the .well-known directory,
+  # regardless of whether anything exists or not
+  location ~ /\.(?!well-known) {
+    deny all;
+  }
+
+  # This is just a basic website for proxying requests and caching the files, so
+  # disable anything other than GET and HEAD from being accepted.
+  if ($request_method !~ ^(GET|HEAD)$) {
+    return '405';
+  }
+
+  # Use HTTP/1.1 for connecting to the upstream servers and ensure that the
+  # connection is closed after each request (rather than use keepalives)
+  proxy_http_version 1.1;
+  proxy_set_header Connection "";
+
+  proxy_connect_timeout 5s;
+  proxy_send_timeout 5s;
+  proxy_read_timeout 15s;
+
+  # Set the logs for this virtual host, using JSON-based logging for requests
+  access_log /var/log/nginx/{{ cache_vhost_name }}/access.log json-mirror buffer=512k flush=1m;
+  error_log  /var/log/nginx/{{ cache_vhost_name }}/error.log warn;
+
+  # Allow this proxy to revalidate the files first when saved locally but are
+  # outside the validity period, avoiding re-downloading the file if there are
+  # no changes to it and it still exists upstream.
+  proxy_cache_revalidate on;
+  # Lock the file as it's being processed so only one copy is fetched at a time
+  proxy_cache_lock on;
+  proxy_cache_lock_age 15s;
+  proxy_cache_lock_timeout 25s;
+  # Override the key used to be use the URI as we can use different hostnames on
+  # the inbound requests as well as the upstream, and this is only a file server,
+  # so there will be no query strings, etc.
+  proxy_cache_key $uri;
+
+  # Allow the proxy to cache any response for up to a minute (including errors
+  # like 404 or 500) to avoid overloading the upstream if there are issues.
+  proxy_cache_valid any 1m;
+  # In the event there are issues with the upstream server and we have the file
+  # locally, allow it to be served locally, even when the file is stale
+  proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+
+  # Add some cache status headers for debugging purposes, you can remove these lines if you want
+  add_header X-Upstream-Status $upstream_status;
+  add_header X-Cache-Status $upstream_cache_status;
+
+{% for repo in cache_repos %}
+  location /{{ repo.name }} {
+{% if repo.upstream.prefix is defined %}
+    rewrite /(.*)$ {{ repo.upstream.prefix }}/$1 break;
+{% endif %}
+    proxy_pass {{ repo.upstream.scheme | default('http') }}://{{ repo.upstream.hostname }};
+    proxy_cache repositories;
+    proxy_cache_valid 200 5m;
+
+    location ~ \.pkg\.tar\.zst(\.sig)?$ {
+{% if repo.upstream.prefix is defined %}
+      rewrite /(.*)$ {{ repo.upstream.prefix }}/$1 break;
+{% endif %}
+      proxy_pass {{ repo.upstream.scheme | default('http') }}://{{ repo.upstream.hostname }};
+      proxy_cache repositories;
+      proxy_cache_valid 200 {{ repo.valid | default('13w') }};
+    }
+  }
+
+{% endfor %}
+  location = /favicon.ico {
+    log_not_found off;
+  }
+
+  location = /robots.txt {
+    log_not_found off;
+  }
+}

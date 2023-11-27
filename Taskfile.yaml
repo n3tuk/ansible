@@ -241,6 +241,19 @@ tasks:
             --limit {{ .limit }} \
             --forks 10
 
+  cache:
+    desc: Deploy updated caching configurations
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/cache.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/cache.yaml \
+            --limit {{ .limit }} \
+            --forks 3
+
   clean:
     desc: Clean up the temporary files from the repository
     summary: |

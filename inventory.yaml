@@ -34,8 +34,8 @@ all:
 
     virtual:
       children:
-        services:
         remote:
+        cache:
         netdata:
         boundary:
         vault:

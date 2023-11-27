@@ -1,0 +1,52 @@
+# {{ ansible_managed }}
+
+# A set of log_format arguments which help to provide the logging of requests in
+# JSON structures, with one for standard requests and another for those which
+# are proxies onto other hosts or services.
+
+log_format json-combined escape=json
+  '{'
+    '"time":"$time_iso8601",'
+    '"msec":$msec,'
+    '"server_address":"$server_addr",'
+    '"server_port":$server_port,'
+    '"server_protocol":"$server_protocol",'
+    '"remote_address":"$remote_addr",'
+    '"remote_port":$remote_port,'
+    '"remote_user":"$remote_user",'
+    '"request_method":"$request_method",'
+    '"host":"$host",'
+    '"request_uri":"$request_uri",'
+    '"uri":"$uri",'
+    '"status":$status,'
+    '"body_bytes_sent":$body_bytes_sent,'
+    '"request":"$request",'
+    '"request_time":$request_time,'
+    '"http_referrer":"$http_referer",'
+    '"http_user_agent":"$http_user_agent"'
+  '}';
+
+log_format json-mirror escape=json
+  '{'
+    '"time":"$time_iso8601",'
+    '"msec":$msec,'
+    '"server_address":"$server_addr",'
+    '"server_port":$server_port,'
+    '"server_protocol":"$server_protocol",'
+    '"remote_address":"$remote_addr",'
+    '"remote_port":$remote_port,'
+    '"remote_user":"$remote_user",'
+    '"request_method":"$request_method",'
+    '"host":"$host",'
+    '"request_uri":"$request_uri",'
+    '"uri":"$uri",'
+    '"status":$status,'
+    '"upstream_status":"$upstream_status",'
+    '"upstream_cache_status":"$upstream_cache_status",'
+    '"body_bytes_sent":$body_bytes_sent,'
+    '"request":"$request",'
+    '"request_time":$request_time,'
+    '"upstream_response_time":"$upstream_response_time",'
+    '"http_referrer":"$http_referer",'
+    '"http_user_agent":"$http_user_agent"'
+  '}';

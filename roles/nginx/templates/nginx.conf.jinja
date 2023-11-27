@@ -1,0 +1,69 @@
+# {{ ansible_managed }}
+
+# The root nginx configuration setting the defaults for the nginx service and
+# for request processing, with the ability to pull in drop-in configurations for
+# both nginx and the virtual hosts it will serve.
+
+user http;
+pid /run/nginx.pid;
+worker_processes auto;
+worker_rlimit_nofile 65535;
+
+events {
+  multi_accept on;
+  worker_connections 65535;
+}
+
+http {
+  charset utf-8;
+
+  # Disable exposing the version of this nginx server
+  server_tokens off;
+
+  # Set performance options for the handling of data and processing
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
+
+  # Disable logging "not found" errors (i.e. 404 on files) into the error logs
+  log_not_found off;
+
+  # Boost the hash size of the types hash to improve performance (memory
+  # alignment) and scaling the storage
+  types_hash_max_size 4096;
+
+  # My default limit the body of requests to a small value which is reasonable
+  # for most requests, which can be increased if POST data is expected
+  client_max_body_size 64k;
+
+  # Configure for the processing of MIME types for files and requests based on
+  # file extensions and set the default
+  include mime.types;
+  default_type application/octet-stream;
+
+  # By default do not log requests as they should be set for each of the virtual
+  # hosts configured, and log warning or above messages to a common error file
+  access_log off;
+  error_log /var/log/nginx/error.log warn;
+
+  # Configure standard SSL settings for this server, incuding using TLSv1.3 only
+  # (1.2 or lower are disabled) and simple caching and stapling settings
+  ssl_protocols TLSv1.3;
+
+  ssl_session_timeout 1h;
+  ssl_session_cache shared:SSL:10m;
+  ssl_session_tickets off;
+
+  ssl_stapling on;
+  ssl_stapling_verify on;
+
+  # Configure the default resolver for this server to use the built-in stub
+  # resolver via systemd-resolver, which will ensure we make use of DNS over TLS
+  # or DNS over HTTPS, as well as DNSSEC, rather than just simple outgoing calls
+  resolver 127.0.0.53 valid=60s;
+  resolver_timeout 2s;
+
+  # Include drop-ins for http and server configurations
+  include /etc/nginx/conf.d/*.conf;
+  include /etc/nginx/vhosts.d/*.conf;
+}

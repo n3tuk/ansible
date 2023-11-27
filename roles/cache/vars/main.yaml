@@ -1,0 +1,7 @@
+---
+# vars file for cache
+
+cache_volume_path: /srv/http/cache
+cache_volume_group: storage
+cache_volume_name: cache
+cache_volume_options: "-L SNAPSHOTS"
