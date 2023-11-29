@@ -1,0 +1,108 @@
+---
+# tasks file for netdata
+
+# TODO: Install and start KSM via ksmd
+#   https://learn.netdata.cloud/docs/configuring/optimizing-metrics-database/database-modes-for-parent-child-setups
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: This role does not support being run when bootstrapping hosts. Failing.
+  when: bootstrap_mount_base | default('') | length
+
+- name: Install Netdata
+  community.general.pacman:
+    name: "{{ netdata_packages }}"
+    state: latest
+  tags:
+    - netdata
+    - package
+
+- name: Prepare the filesystem for Netdata
+  ansible.builtin.include_tasks: storage.yaml
+  when: netdata_node_type == "parent"
+
+- name: Configure Netdata
+  ansible.builtin.template:
+    src: "{{ file.name }}.jinja"
+    dest: "{{ file.dest }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Restart Netdata
+  loop:
+    - name: "{{ netdata_node_type }}.netdata.conf"
+      dest: /etc/netdata/netdata.conf
+    - name: "{{ netdata_node_type }}.stream.conf"
+      dest: /etc/netdata/stream.conf
+    - name: netdata
+      dest: /etc/logrotate.d/netdata
+  loop_control:
+    label: "{{ file.dest }}"
+    loop_var: file
+  tags:
+    - nginx
+    - configuraton
+
+- name: Configure Netdata alerting
+  ansible.builtin.template:
+    src: "{{ file.name }}.jinja"
+    dest: "{{ file.dest }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  when: netdata_node_type == "parent"
+  notify:
+    - Restart Netdata
+  loop:
+    - name: health_alarm_notify.conf
+      dest: /etc/netdata/health_alarm_notify.conf
+  loop_control:
+    label: "{{ file.dest }}"
+    loop_var: file
+  tags:
+    - nginx
+    - configuraton
+
+- name: Add the Netdata service to the internal zone
+  ansible.posix.firewalld:
+    zone: internal
+    service: "{{ service }}"
+    permanent: false
+    immediate: true
+    state: enabled
+  when: netdata_node_type == "parent"
+  loop:
+    - netdata-dashboard
+  loop_control:
+    label: "{{ service }}"
+    loop_var: service
+  notify:
+    - Run firewall-cmd --runtime-to-permanent
+  tags:
+    - netdata
+    - firewall
+
+- name: Ensure Netdata is enabled
+  ansible.builtin.systemd_service:
+    name: netdata.service
+    enabled: true
+    state: started
+  tags:
+    - netdata
+    - service
+
+- name: Claim node in Netdata Cloud
+  ansible.builtin.shell: # noqa no-changed-when
+    cmd: |-
+      netdata-claim.sh \
+        -token={{ netdata_cloud_claim_token }} \
+        -rooms={{ netdata_cloud_claim_room }} \
+        -url={{ netdata_cloud_claim_url }}
+    creates: /var/lib/netdata/cloud.d/claimed_id
+  when: netdata_node_type == "parent"
+  notify:
+    - Restart Netdata
+  tags:
+    - netdata
+    - service

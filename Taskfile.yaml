@@ -253,6 +253,19 @@ tasks:
             --limit {{ .limit }} \
             --forks 3
 
+  netdata:
+    desc: Deploy the Netdata configurations for parents and children
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/netdata.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/netdata.yaml \
+            --limit {{ .limit }} \
+            --forks 5
+
   clean:
     desc: Clean up the temporary files from the repository
     summary: |
