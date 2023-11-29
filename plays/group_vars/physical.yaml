@@ -129,8 +129,6 @@ systemd_timesyncd_fallback_ntp:
   - ntp0.zen.co.uk
   - ntp1.zen.co.uk
 
-firewalld_public_interface: "bri{{ '%02d' | format(systemd_networkd_access_vlan) }}"
-
 # Add the libvirt group to the following users to allow access to the libvirt
 # daemon on the physical hosts, allowing these users to manage virtual machines
 users_users:

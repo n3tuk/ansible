@@ -1,6 +1,0 @@
----
-# handlers file for firewalld
-
-- name: Run firewall-cmd --runtime-to-permanent
-  ansible.builtin.command: # noqa no-changed-when
-    cmd: /usr/sbin/firewall-cmd --runtime-to-permanent
