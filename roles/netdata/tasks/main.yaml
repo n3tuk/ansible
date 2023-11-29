@@ -64,25 +64,6 @@
     - nginx
     - configuraton
 
-- name: Add the Netdata service to the internal zone
-  ansible.posix.firewalld:
-    zone: internal
-    service: "{{ service }}"
-    permanent: false
-    immediate: true
-    state: enabled
-  when: netdata_node_type == "parent"
-  loop:
-    - netdata-dashboard
-  loop_control:
-    label: "{{ service }}"
-    loop_var: service
-  notify:
-    - Run firewall-cmd --runtime-to-permanent
-  tags:
-    - netdata
-    - firewall
-
 - name: Ensure Netdata is enabled
   ansible.builtin.systemd_service:
     name: netdata.service

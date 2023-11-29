@@ -6,7 +6,6 @@
   become: true
   become_user: root
   roles:
-    - role: firewalld
     - role: netdata
 
 - name: Configure the Netdata child agents

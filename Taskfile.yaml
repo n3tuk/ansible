@@ -214,19 +214,6 @@ tasks:
             --limit {{ .limit }} \
             --forks 10
 
-  firewalld:
-    desc: Deploy updated firewall configuration through the firewalld Ansible Play
-    silent: true
-    cmds:
-      - cmd: |-
-          ansible-playbook \
-            --syntax-check plays/firewalld.yaml
-      - cmd: |-
-          ansible-playbook \
-            --ask-become-pass plays/firewalld.yaml \
-            --limit {{ .limit }} \
-            --forks 10
-
   libvirtd:
     desc: Configure libvirtd and deploy Virtual Machines
     silent: true

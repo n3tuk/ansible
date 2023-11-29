@@ -8,7 +8,6 @@ bootstrap_pacstrap_packages:
   - efibootmgr
   - efivar
   - lvm2
-  - firewalld
   - openssh
   - sudo
   - fish
