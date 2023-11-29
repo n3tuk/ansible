@@ -1,0 +1,8 @@
+---
+# Node-specific configuration for netdata-01.d.cym-south-1.kub3.uk
+
+systemd_networkd_ipv4_address: 172.23.31.6/24
+systemd_networkd_ipv4_gateway: 172.23.31.1
+systemd_networkd_ipv6_address: 2a02:8010:8006:3a31:a6:4eff:fe95:52c8/64
+
+netdata_cache_volume_size: 475G

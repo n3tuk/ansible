@@ -1,0 +1,10 @@
+---
+# handlers file for netdata
+
+- name: Restart Netdata
+  ansible.builtin.systemd_service:
+    name: netdata.service
+    state: restarted
+  tags:
+    - netdata
+    - service

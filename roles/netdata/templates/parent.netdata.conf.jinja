@@ -1,0 +1,37 @@
+# {{ ansible_managed }}
+
+# This is a parent node which will collect data from child nodes using the
+# following API key, locally storing that data and processing/alerting on it
+
+[global]
+  run as user = netdata
+
+[db]
+  mode = dbengine
+  storage tiers = 3
+
+  # To allow memory pressure to offload index from ram
+  dbengine page descriptors in file mapped memory = yes
+
+  # Storage Tier 0
+  update every = 1 # 1 Second
+  # Provide 14 days of 1s metrics
+  #   (9500 x 1byte x 86400 seconds) = 765MB per day
+  dbengine multihost disk space MB = 10240
+  dbengine page cache size MB = 512
+
+  # Storage Tier 1
+  dbengine tier 1 update every iterations = 60 # 60 Seconds
+  # Provide 90 days of 1m metrics
+  #   (9500 x 4byte x 1440 minutes) = 50MB per day
+  dbengine tier 1 multihost disk space MB = 5120
+  dbengine tier 1 page cache size MB = 32
+  dbengine tier 1 backfill = new
+
+  # Storage Tier 2
+  dbengine tier 2 update every iterations = 60 # 3600 Seconds
+  # Provide 365 days of 5m metrics
+  #   (9500 x 4byte x 288 x 5 minutes) = 10MB per day
+  dbengine tier 2 multihost disk space MB = 4096
+  dbengine tier 2 page cache size MB = 32
+  dbengine tier 2 backfill = new

@@ -1,0 +1,17 @@
+---
+# Configure the caching service for Arch Linux repositories
+
+- name: Configure the Netdata parent services
+  hosts: netdata
+  become: true
+  become_user: root
+  roles:
+    - role: firewalld
+    - role: netdata
+
+- name: Configure the Netdata child agents
+  hosts: all:!netdata
+  become: true
+  become_user: root
+  roles:
+    - role: netdata

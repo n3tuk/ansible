@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+
+# This is a parent node which will collect data from child nodes using the
+# following API key, locally storing that data and processing/alerting on it
+
+[{{ netdata_api_key }}]
+  enabled = yes
+  allow_from = 172.23.*.*
+  multiple connections = allow
+  enable compression = yes
+
+  default memory mode = dbengine
+
+  # alerts checks, only while the child is connected
+  health enabled by default = auto
+  default postpone alarms on connect seconds = 60

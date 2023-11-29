@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+# This is a client node meaning that the service will only collect data and
+# forward it onto a parent node for storage, processing, and alerting
+
+[global]
+  run as user = netdata
+
+  # Disable the local database as this is a client node which will forward
+  # metrics onto the parent node(s) defined in the stream.conf file
+  memory mode = none
+
+[web]
+  # Disable the web interface for this node as the data will be streamed to the
+  # parent node and then viewed in the NetData Dashboard at app.netdata.cloud
+  mode = none
+
+[ml]
+  # As no data is saved locally, disable the Machine Learning functions
+  enabled = no
+
+[health]
+  # As no data is saved locally, do not process alerts for this node
+  enabled = no

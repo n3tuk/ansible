@@ -1,0 +1,69 @@
+# For ISO 8601 dates, use '+%FT%T%z'
+# For RFC 5322 dates, use '+%a, %d %b %Y %H:%M:%S %z'
+# For RFC 3339 dates, use '+%F %T%:z'
+# For RFC 1123 dates, use '+%a, %d %b %Y %H:%M:%S %Z'
+# For RFC 1036 dates, use '+%A, %d-%b-%y %H:%M:%S %Z'
+# For a reasonably local date and time (in that order), use '+%x %X'
+# For the old default behavior (compatible with ANSI C's asctime() function), leave this empty.
+date_format='+%FT%T%z'
+use_fqdn='YES'
+
+SEND_EMAIL="NO"
+SEND_DYNATRACE="NO"
+SEND_GOTIFY="NO"
+SEND_OPSGENIE="NO"
+SEND_PUSHBULLET="NO"
+SEND_TWILIO="NO"
+SEND_MESSAGEBIRD="NO"
+SEND_KAVENEGAR="NO"
+SEND_SLACK="NO"
+SEND_MSTEAMS="NO"
+SEND_ROCKETCHAT="NO"
+SEND_ALERTA="NO"
+SEND_FLOCK="NO"
+SEND_HIPCHAT="NO"
+SEND_KAFKA="NO"
+SEND_PD="NO"
+SEND_FLEEP="NO"
+SEND_IRC="NO"
+SEND_SYSLOG="NO"
+SEND_PROWL="NO"
+SEND_AWSSNS="NO"
+SEND_SMS="NO"
+SEND_CUSTOM="NO"
+
+#------------------------------------------------------------------------------
+# pushover (pushover.net) global notification options
+SEND_PUSHOVER="{% if netdata_alarm_pushover_enabled %}YES{% else %}NO{% endif %}"
+PUSHOVER_APP_TOKEN="{{ netdata_alarm_pushover_app_token }}"
+DEFAULT_RECIPIENT_PUSHOVER="{{ netdata_alarm_pushover_recipient }}"
+
+#------------------------------------------------------------------------------
+# telegram (telegram.org) global notification options
+SEND_TELEGRAM="NO"
+TELEGRAM_RETRIES_ON_LIMIT="3"
+
+# Contact the bot @BotFather to create a new bot and receive a bot token.
+# Without it, netdata cannot send telegram messages.
+TELEGRAM_BOT_TOKEN=""
+
+# To get your chat ID send the command /getid to telegram bot @myidbot
+# (https://t.me/myidbot). Each user also needs to open a conversation with the
+# bot that will be sending notifications.
+# If a role's recipients are not configured, a message will be sent to
+# this chat id (empty = do not send a notification for unconfigured roles):
+DEFAULT_RECIPIENT_TELEGRAM=""
+
+#------------------------------------------------------------------------------
+# discord (discord.com) global notification options
+SEND_DISCORD="NO"
+DISCORD_WEBHOOK_URL=""
+DEFAULT_RECIPIENT_DISCORD=""
+
+#------------------------------------------------------------------------------
+# ntfy.sh global notification options
+SEND_NTFY="NO"
+NTFY_USERNAME=""
+NTFY_PASSWORD=""
+NTFY_ACCESS_TOKEN=""
+DEFAULT_RECIPIENT_NTFY=""

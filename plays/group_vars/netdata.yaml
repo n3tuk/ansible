@@ -1,1 +1,3 @@
 ---
+env_purpose: netdata-parent-node
+netdata_node_type: parent

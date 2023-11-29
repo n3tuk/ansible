@@ -1,0 +1,19 @@
+---
+# defaults file for netdata
+
+netdata_api_key: parent-child-api-key
+
+netdata_node_type: child
+
+netdata_stream_port: 19999
+netdata_stream_encrypted: false
+
+netdata_cloud_claim_token:
+netdata_cloud_claim_room:
+netdata_cloud_claim_url: https://app.netdata.cloud
+
+netdata_volume_size: 64G
+
+netdata_alarm_pushover_enabled: true
+netdata_alarm_pushover_app_token:
+netdata_alarm_pushover_recipient:

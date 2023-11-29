@@ -36,7 +36,7 @@
 - name: Configure the caching nginx virtual host
   ansible.builtin.template:
     src: "{{ file.name }}.jinja"
-    dest: "{{ file.dest }}/{{ file.name }}"
+    dest: "{{ file.dest }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=r
@@ -46,11 +46,11 @@
     - Restart nginx
   loop:
     - name: cache.conf
-      dest: /etc/nginx/vhosts.d
+      dest: /etc/nginx/vhosts.d/cache.conf
     - name: nginx-cache
-      dest: /etc/logrotate.d
+      dest: /etc/logrotate.d/nginx-cache
   loop_control:
-    label: "{{ file.dest }}/{{ file.name }}"
+    label: "{{ file.dest }}"
     loop_var: file
   tags:
     - nginx

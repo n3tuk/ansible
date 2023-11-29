@@ -20,5 +20,6 @@
     - role: sudo
     - role: users
     - role: logrotate
+    - role: netdata
   tags:
     - update

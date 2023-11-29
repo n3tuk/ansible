@@ -1,0 +1,11 @@
+---
+# vars file for netdata
+
+netdata_packages:
+  - netdata
+  - netdata-go-plugins
+
+netdata_volume_path: /var/cache/netdata
+netdata_volume_group: storage
+netdata_volume_name: netdata
+netdata_volume_options: "-L NETDATA"

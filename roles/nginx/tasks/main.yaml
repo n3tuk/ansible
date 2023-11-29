@@ -31,10 +31,27 @@
     - nginx
     - configuration
 
+- name: Configure the nginx logging directories
+  ansible.builtin.file:
+    path: "/var/log/{{ directory }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+    state: directory
+  loop:
+    - nginx
+    - nginx/localhost
+  loop_control:
+    label: "/var/log/{{ directory }}"
+    loop_var: directory
+  tags:
+    - nginx
+    - configuration
+
 - name: Configure nginx
   ansible.builtin.template:
     src: "{{ file.name }}.jinja"
-    dest: "{{ file.dest }}/{{ file.name }}"
+    dest: "{{ file.dest }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=r
@@ -42,15 +59,19 @@
     - Restart nginx
   loop:
     - name: nginx.conf
-      dest: /etc/nginx
+      dest: /etc/nginx/nginx.conf
     - name: mime.types
-      dest: /etc/nginx
+      dest: /etc/nginx/mime.types
     - name: json-logging.conf
-      dest: /etc/nginx/conf.d
+      dest: /etc/nginx/conf.d/json-logging.conf
+    - name: localhost.conf
+      dest: /etc/nginx/vhosts.d/localhost.conf
+    - name: netdata.conf
+      dest: /etc/netdata/go.d/nginx.conf
     - name: nginx
-      dest: /etc/logrotate.d
+      dest: /etc/logrotate.d/nginx
   loop_control:
-    label: "{{ file.dest }}/{{ file.name }}"
+    label: "{{ file.dest }}"
     loop_var: file
   tags:
     - nginx

@@ -1,0 +1,43 @@
+# {{ ansible_managed }}
+
+# A virtual host to provide access to the status page for netdata collection
+
+server {
+  server_name
+    localhost;
+
+  listen 127.0.0.1:80;
+  listen [::1]:80;
+
+  # Don't try and compress anything managed by this virtual host as it will all
+  # be packages which are compressed already, so won't save space or bandwidth
+  gzip off;
+
+  # Block dot files from being serviced, including the .well-known directory,
+  # regardless of whether anything exists or not
+  location ~ /\.(?!well-known) {
+    deny all;
+  }
+
+  # This is just a basic website for proxying requests and caching the files, so
+  # disable anything other than GET and HEAD from being accepted.
+  if ($request_method !~ ^(GET|HEAD)$) {
+    return '405';
+  }
+
+  # Set the logs for this virtual host, using JSON-based logging for requests
+  access_log /var/log/nginx/localhost/access.log json-combined buffer=512k flush=1m;
+  error_log  /var/log/nginx/localhost/error.log warn;
+
+  location = /status {
+    stub_status;
+  }
+
+  location = /favicon.ico {
+    log_not_found off;
+  }
+
+  location = /robots.txt {
+    log_not_found off;
+  }
+}

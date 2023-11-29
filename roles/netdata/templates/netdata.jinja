@@ -1,0 +1,30 @@
+# {{ ansible_managed }}
+
+# Log rotation support for the netdata service on both clients and parents.
+
+/var/log/netdata/*.log {
+  # Rotate these log files every day and keep up to 14 days worth; if they are
+  # missing just skip and carry on
+  daily
+  missingok
+  rotate 14
+
+  # Use date-based extension for the rotated log file, rather than numeric, to
+  # make it easier to see what days the log files are referencing, especially if
+  # there are days without log files
+  dateext
+  dateformat .%Y%m%d
+
+  # Compress the log files once rotated by delayed by one (by gzip with .gz
+  # extension by default)
+  delaycompress
+  compress
+
+  # Run the pre- and post-rotation commands once when all log files are
+  # processed, rather than once per file, which in this case is just to pass the
+  # HUP signal to netdata
+  sharedscripts
+  postrotate
+    /bin/kill -HUP `cat /run/netdata/netdata.pid 2>/dev/null` 2>/dev/null || true
+  endscript
+}
