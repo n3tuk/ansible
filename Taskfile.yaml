@@ -80,16 +80,8 @@ tasks:
       - "plays/group_vars/*.yaml"
       - "roles/*/*/*.yaml"
     cmds:
-      - cmd: |-
-          yamllint \
-            --config-file .yamllint.yaml \
-            --format colored \
-            plays/ roles/
-      - cmd: |-
-          ansible-lint \
-            --profile production \
-            --format brief \
-            --show-relpath
+      - cmd: yamllint --config-file .yamllint.yaml plays/ roles/
+      - cmd: ansible-lint -c .config/ansible-lint.yaml
 
   ping:
     desc: Attempt to ping all nodes through Ansible

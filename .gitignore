@@ -2,3 +2,4 @@
 
 # Ansible temporary files and cache store
 .cache/
+results.sarif
