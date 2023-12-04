@@ -13,6 +13,18 @@ systemd_networkd_vlans:
   - 41
 
 machines_list:
+  - name: haproxy-01
+    environment: production
+    location: cym-south-1
+    purpose: haproxy-load-balancer
+    vcpu: 1
+    memory:
+      current: 2
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 40
+
   - name: boundary-01
     environment: production
     location: cym-south-1

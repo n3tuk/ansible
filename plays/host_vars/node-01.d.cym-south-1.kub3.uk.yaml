@@ -17,6 +17,43 @@ systemd_networkd_vlans:
   - 55
 
 machines_list:
+  - name: haproxy-01
+    environment: development
+    location: cym-south-1
+    purpose: haproxy-load-balancer
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 50
+  - name: haproxy-02
+    environment: development
+    location: cym-south-1
+    purpose: haproxy-load-balancer
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 52
+  - name: haproxy-03
+    environment: development
+    location: cym-south-1
+    purpose: haproxy-load-balancer
+    vcpu: 1
+    memory:
+      current: 1
+      shared: true
+    volumes:
+      - dev: vda
+        size: 32G
+    vlan: 54
+
   - name: boundary-01
     environment: development
     location: cym-south-1

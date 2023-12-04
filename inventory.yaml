@@ -31,8 +31,8 @@ all:
       children:
         cache:
         netdata:
-        vault:
         haproxy:
+        vault:
         kubernetes:
 
     physical:
@@ -49,8 +49,8 @@ all:
         cache:
         netdata:
         services:
-        vault:
         haproxy:
+        vault:
         kubernetes:
 
     nodes:
@@ -63,14 +63,20 @@ all:
       hosts:
         cache-01.s.cym-south-1.kub3.uk:
 
-    vault:
-      hosts:
-        vault-[01:03].p.cym-south-1.kub3.uk:
-        vault-[01:03].d.cym-south-1.kub3.uk:
-        vault-01.s.cym-south-1.kub3.uk:
-
     netdata:
       hosts:
         netdata-01.p.cym-south-1.kub3.uk:
         netdata-01.d.cym-south-1.kub3.uk:
         netdata-01.s.cym-south-1.kub3.uk:
+
+    haproxy:
+      hosts:
+        haproxy-[01:03].p.cym-south-1.kub3.uk:
+        haproxy-[01:03].d.cym-south-1.kub3.uk:
+        haproxy-01.s.cym-south-1.kub3.uk:
+
+    vault:
+      hosts:
+        vault-[01:03].p.cym-south-1.kub3.uk:
+        vault-[01:03].d.cym-south-1.kub3.uk:
+        vault-01.s.cym-south-1.kub3.uk:

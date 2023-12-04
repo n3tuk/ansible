@@ -1,0 +1,6 @@
+---
+# Node-specific configuration for haproxy-01.d.cym-south-1.kub3.uk
+
+systemd_networkd_ipv4_address: 172.23.50.2/24
+systemd_networkd_ipv4_gateway: 172.23.50.1
+systemd_networkd_ipv6_address: 2a02:8010:8006:3a50:6b:abff:fe06:8141
