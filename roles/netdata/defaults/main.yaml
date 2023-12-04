@@ -17,3 +17,7 @@ netdata_volume_size: 64G
 netdata_alarm_pushover_enabled: true
 netdata_alarm_pushover_app_token:
 netdata_alarm_pushover_recipient:
+
+netdata_alarm_telegram_enabled: true
+netdata_alarm_telegram_bot_token:
+netdata_alarm_telegram_recipient:
