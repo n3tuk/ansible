@@ -40,19 +40,19 @@ DEFAULT_RECIPIENT_PUSHOVER="{{ netdata_alarm_pushover_recipient }}"
 
 #------------------------------------------------------------------------------
 # telegram (telegram.org) global notification options
-SEND_TELEGRAM="NO"
+SEND_TELEGRAM="{% if netdata_alarm_telegram_enabled %}YES{% else %}NO{% endif %}"
 TELEGRAM_RETRIES_ON_LIMIT="3"
 
 # Contact the bot @BotFather to create a new bot and receive a bot token.
 # Without it, netdata cannot send telegram messages.
-TELEGRAM_BOT_TOKEN=""
+TELEGRAM_BOT_TOKEN="{{ netdata_alarm_telegram_bot_token }}"
 
 # To get your chat ID send the command /getid to telegram bot @myidbot
 # (https://t.me/myidbot). Each user also needs to open a conversation with the
 # bot that will be sending notifications.
 # If a role's recipients are not configured, a message will be sent to
 # this chat id (empty = do not send a notification for unconfigured roles):
-DEFAULT_RECIPIENT_TELEGRAM=""
+DEFAULT_RECIPIENT_TELEGRAM="{{ netdata_alarm_telegram_recipient }}"
 
 #------------------------------------------------------------------------------
 # discord (discord.com) global notification options

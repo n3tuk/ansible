@@ -4,6 +4,8 @@
 netdata_packages:
   - netdata
   - netdata-go-plugins
+  # Needed for access to the hostname binary
+  - inetutils
 
 netdata_volume_path: /var/cache/netdata
 netdata_volume_group: storage
