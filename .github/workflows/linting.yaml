@@ -24,7 +24,7 @@ jobs:
         uses: ansible/ansible-lint@v6
 
       - name: Upload the ansible-lint SARIF file
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
           category: Ansible Linting
