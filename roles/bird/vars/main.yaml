@@ -1,0 +1,5 @@
+---
+# vars file for bird
+
+bird_packages:
+  - bird

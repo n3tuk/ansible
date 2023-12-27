@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+[NetDev]
+Name={{ item.0.name }}
+Kind=dummy
+
+MACAddress={{ ('02' + ((env_name + "-" + ansible_hostname + "-" + item.0.name) | hash("sha256") | truncate(10, true, ""))) | ansible.utils.hwaddr('unix') }}

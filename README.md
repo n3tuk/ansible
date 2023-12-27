@@ -5,18 +5,46 @@ n3tuk.
 
 ## Playbooks
 
-| Playbook                           | `task`&nbsp;Command     | Description                                                                                                                                      |
+<<<<<<< HEAD
+| Playbook | `task`&nbsp;Command | Description |
 | :--------------------------------- | :---------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `n/a`                              | [`ping`][taskfile]      | A task-specific command which will attempt to `ping` all hosts configured in the [`inventory`][inventory] using the standard `become` process.   |
+| `n/a` | [`ping`][taskfile] | A task-specific command which will attempt to `ping` all hosts configured in the [`inventory`][inventory] using the standard `become` process. |
 | [`bootstrap.yaml`][play-bootstrap] | [`bootstrap`][taskfile] | A play which will bootstrap any host listed under the bootstrap group, and is normally used for both physical nodes as well as virtual machines. |
-| [`baseline.yaml`][play-baseline]   | [`baseline`][taskfile]  | A play which will configure physical and virtual machines to baselined settings.                                                                 |
-| [`upgrade.yaml`][play-upgrade]     | [`upgrade`][taskfile]   | A play which will run an update and upgrade of all Arch Linux packages of using `pacman`.                                                        |
-| [`users.yaml`][play-users]         | [`users`][taskfile]     | A play which will run an create or update of all the users and groups on a system.                                                               |
-| [`libvirtd.yaml`][play-libvirtd]   | [`libvirtd`][taskfile]  | A play which will update the configuration of `libvirtd` on a system and prepare the Storage Pools.                                              |
-| [`cache.yaml`][play-cache]         | [`cache`][taskfile]     | A play which will update the configuration of caching proxies.                                                                                   |
-| [`netdata.yaml`][play-netdata]     | [`netdata`][taskfile]   | A play which will update the configuration of Netdata on both parent and child nodes.                                                            |
-| [`vault.yaml`][play-vault]         | [`vault`][taskfile]     | A play which will update the configuration of Hashicorp Vault in each of the environments of the Lab.                                            |
-| [`testing.yaml`][play-testing]     | [`testing`][taskfile]   | A play which will update the configuration of test Kubernetes clusters using k3s.                                                                |
+| [`baseline.yaml`][play-baseline] | [`baseline`][taskfile] | A play which will configure physical and virtual machines to baselined settings. |
+| [`upgrade.yaml`][play-upgrade] | [`upgrade`][taskfile] | A play which will run an update and upgrade of all Arch Linux packages of using `pacman`. |
+| [`users.yaml`][play-users] | [`users`][taskfile] | A play which will run an create or update of all the users and groups on a system. |
+| [`libvirtd.yaml`][play-libvirtd] | [`libvirtd`][taskfile] | A play which will update the configuration of `libvirtd` on a system and prepare the Storage Pools. |
+| [`cache.yaml`][play-cache] | [`cache`][taskfile] | A play which will update the configuration of caching proxies. |
+| [`netdata.yaml`][play-netdata] | [`netdata`][taskfile] | A play which will update the configuration of Netdata on both parent and child nodes. |
+| [`vault.yaml`][play-vault] | [`vault`][taskfile] | A play which will update the configuration of Hashicorp Vault in each of the environments of the Lab. |
+| [`testing.yaml`][play-testing] | [`testing`][taskfile] | A play which will update the configuration of test Kubernetes clusters using k3s. |
+||||||| parent of a56ec38 (Add bird and haproxy roles to configure load balancing)
+| Playbook | `task`&nbsp;Command | Description |
+| :--------------------------------- | :---------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `n/a` | [`ping`][taskfile] | A task-specific command which will attempt to `ping` all hosts configured in the [`inventory`][inventory] using the standard `become` process. |
+| [`bootstrap.yaml`][play-bootstrap] | [`bootstrap`][taskfile] | A play which will bootstrap any host listed under the bootstrap group, and is normally used for both physical nodes as well as virtual machines. |
+| [`baseline.yaml`][play-baseline] | [`baseline`][taskfile] | A play which will configure physical and virtual machines to baselined settings. |
+| [`upgrade.yaml`][play-upgrade] | [`upgrade`][taskfile] | A play which will run an update and upgrade of all Arch Linux packages of using `pacman`. |
+| [`users.yaml`][play-users] | [`users`][taskfile] | A play which will run an create or update of all the users and groups on a system. |
+| [`libvirtd.yaml`][play-libvirtd] | [`libvirtd`][taskfile] | A play which will update the configuration of `libvirtd` on a system and prepare the Storage Pools. |
+| [`cache.yaml`][play-cache] | [`cache`][taskfile] | A play which will update the configuration of caching proxies. |
+| [`netdata.yaml`][play-netdata] | [`netdata`][taskfile] | A play which will update the configuration of Netdata on both parent and child nodes. |
+| [`vault.yaml`][play-vault] | [`vault`][taskfile] | A play which will update the configuration of Hashicorp Vault in each of the environments of the Lab. |
+=======
+| Playbook | `task`&nbsp;Command | Description |
+| :------------------------------------------- | :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `n/a` | [`ping`][taskfile] | A task-specific command which will attempt to `ping` all hosts configured in the [`inventory`][inventory] using the standard `become` process. |
+| [`bootstrap.yaml`][play-bootstrap] | [`bootstrap`][taskfile] | A play which will bootstrap any host listed under the bootstrap group, and is normally used for both physical nodes as well as virtual machines. |
+| [`baseline.yaml`][play-baseline] | [`baseline`][taskfile] | A play which will configure physical and virtual machines to baselined settings. |
+| [`upgrade.yaml`][play-upgrade] | [`upgrade`][taskfile] | A play which will run an update and upgrade of all Arch Linux packages of using `pacman`. |
+| [`users.yaml`][play-users] | [`users`][taskfile] | A play which will run an create or update of all the users and groups on a system. |
+| [`libvirtd.yaml`][play-libvirtd] | [`libvirtd`][taskfile] | A play which will update the configuration of `libvirtd` on a system and prepare the Storage Pools. |
+| [`cache.yaml`][play-cache] | [`cache`][taskfile] | A play which will update the configuration of caching proxies. |
+| [`netdata.yaml`][play-netdata] | [`netdata`][taskfile] | A play which will update the configuration of Netdata on both parent and child nodes. |
+| [`vault.yaml`][play-vault] | [`vault`][taskfile] | A play which will update the configuration of Hashicorp Vault in each of the environments of the Lab. |
+| [`load-balancers.yaml`][play-load-balancers] | [`load-balancers`][taskfile] | A play which will update the configuration of high-avilbility load balancers. |
+
+> > > > > > > a56ec38 (Add bird and haproxy roles to configure load balancing)
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -36,6 +64,7 @@ task: [bootstrap] ansible-playbook \
 [play-cache]: https://github.com/n3tuk/ansible/blob/main/plays/cache.yaml
 [play-netdata]: https://github.com/n3tuk/ansible/blob/main/plays/netdata.yaml
 [play-vault]: https://github.com/n3tuk/ansible/blob/main/plays/vault.yaml
+[play-load-balancers]: https://github.com/n3tuk/ansible/blob/main/plays/load-balancers.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
@@ -67,6 +96,8 @@ task: [bootstrap] ansible-playbook \
 | [`netdata`][role-netdata]                   | A role to configure netdata either as a parent node for centralised storage and processing, or a child to collect data and stream it to a parent node.                                                        |
 | [`vault`][role-vault]                       | A role to install and configure Hashicorp Vault along with associated proxies, certificates, and firewall rules.                                                                                              |
 | [`k3s`][role-k3s]                           | A role to install and configure k3s nodes to build and run Kubernetes clusters in different setups, including single-node as well as server/agent setups.                                                     |
+| [`bird`][role-bird]                         | A role to install and configure bird to help manging internal routing protocols for highly-avilable services.                                                                                                 |
+| [`haproxy`][role-haproxy]                   | A role to install and configure haproxy for internal load-balancing of services.                                                                                                                              |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -92,3 +123,5 @@ task: [bootstrap] ansible-playbook \
 [role-netdata]: https://github.com/n3tuk/ansible/tree/main/roles/netdata
 [role-vault]: https://github.com/n3tuk/ansible/tree/main/roles/vault
 [role-k3s]: https://github.com/n3tuk/ansible/tree/main/roles/k3s
+[role-bird]: https://github.com/n3tuk/ansible/tree/main/roles/bird
+[role-haproxy]: https://github.com/n3tuk/ansible/tree/main/roles/haproxy

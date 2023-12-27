@@ -1,0 +1,42 @@
+# {{ ansible_managed }}
+
+# Vault has a http health endpoint on /v1/sys/health that returns different http codes
+# depending on the status of the running vault instance.
+#
+# See: https://www.vaultproject.io/api/system/health.html#read-health-information
+#
+#    * 200 if initialized, unsealed, and active
+#    * 429 if unsealed and standby
+#    * 472 if data recovery mode replication secondary and active
+#    * 473 if performance standby
+#    * 501 if not initialized
+#    * 503 if sealed
+
+# Redirect http --> https
+frontend vault_http
+  mode http
+  # bind to the ip you give clients
+  bind 1.2.3.6:80
+  redirect scheme https code 301 if !{ ssl_fc }
+
+# Primary https listener
+frontend vault_https
+  mode tcp
+  log global
+  timeout client 30000
+  # bind to the ip you give to clients
+  bind 1.2.3.6:443
+  description Vault over https
+  default_backend vault_https
+  option tcplog
+
+backend vault_https
+  mode tcp
+  timeout check 5000
+  timeout server 30000
+  timeout connect 5000
+  option httpchk GET /v1/sys/health
+  server vault-server1 1.2.3.4:8200 check check-ssl verify none inter 5000
+  server vault-server2 1.2.3.5:8200 check check-ssl verify none inter 5000
+  server vault-server3 1.2.3.6:8200 check check-ssl verify none inter 5000
+  http-check expect rstatus (200|429)

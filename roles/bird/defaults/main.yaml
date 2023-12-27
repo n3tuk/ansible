@@ -1,0 +1,5 @@
+---
+# defaults file for bird
+
+bird_as: 64513
+bird_interface: lb01

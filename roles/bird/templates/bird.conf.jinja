@@ -1,0 +1,41 @@
+# {{ ansible_managed }}
+
+router id {{ ansible_default_ipv4.address }};
+log syslog all;
+
+protocol device {
+  scan time 10;
+}
+
+# Generate routes only for the {{ bird_interface }} interface on this host
+protocol direct PROXY {
+  interface "{{ bird_interface }}";
+  ipv4 { import all; export none; };
+  ipv6 { import all; export none; };
+}
+
+# Forbid synchronizing BIRD routing tables with the OS kernel.
+protocol kernel KERNEL {
+  ipv4 { import none; export none; };
+}
+
+filter PROXY_INTERFACE {
+  if (   source = RTS_DEVICE
+      && ifname = "{{ bird_interface }}") then { accept; }
+  reject;
+}
+
+protocol bfd NETWORK {
+  interface "{{ ansible_default_ipv4.interface }}" {};
+  neighbor {{ ansible_default_ipv4.gateway }} dev "{{ ansible_default_ipv4.interface }}" local {{ ansible_default_ipv4.address }} multihop no;
+}
+
+protocol bgp ROUTER {
+  description "router-lan-01.bridgend.n3t.uk";
+  local {{ ansible_default_ipv4.address }} as {{ bird_as }};
+  neighbor {{ ansible_default_ipv4.gateway }} as {{ bird_as }};
+  bfd on;
+
+  ipv4 { import none; export filter PROXY_INTERFACE; };
+  ipv6 { import none; export filter PROXY_INTERFACE; };
+}

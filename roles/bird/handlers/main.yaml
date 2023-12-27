@@ -1,0 +1,8 @@
+---
+# handlers file for bird
+
+- name: Reload bird
+  ansible.builtin.systemd:
+    name: bird.service
+    daemon_reload: false
+    state: reloaded

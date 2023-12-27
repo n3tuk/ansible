@@ -16,7 +16,7 @@ machines_list:
   - name: haproxy-03
     environment: production
     location: cym-south-1
-    purpose: haproxy-node
+    purpose: haproxy-load-balancer
     vcpu: 1
     memory:
       current: 2

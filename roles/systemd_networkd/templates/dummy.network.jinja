@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+
+[Match]
+Name={{ item.0.name }}
+
+[Network]
+DHCP=no
+IPForward=no
+
+Address={{ item.0.ipv4 }}
+Address={{ item.0.ipv6 }}
+
+LinkLocalAddressing=no
+IPv6AcceptRA=no
+IPv6PrivacyExtensions=no
+MulticastDNS=no
+LLMNR=no

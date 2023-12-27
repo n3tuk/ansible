@@ -245,6 +245,19 @@ tasks:
             --limit {{ .limit }} \
             --forks 3
 
+  load-balancers:
+    desc: Deploy the highly-avilable load-balancers for internal load balancing
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/load-balancers.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/load-balancers.yaml \
+            --limit {{ .limit }} \
+            --forks 10
+
   netdata:
     desc: Deploy the Netdata configurations for parents and children
     silent: true

@@ -30,7 +30,7 @@
 - name: Configure VLAN and bridge network interfaces
   ansible.builtin.template:
     src: "{{ item.1 }}.jinja"
-    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/network/{{item.1.split('.')[0] }}{{ '%02d' | format(item.0) }}.{{ item.1.split('.')[1] }}"
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/network/{{ item.1.split('.')[0] }}{{ '%02d' | format(item.0) }}.{{ item.1.split('.')[1] }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=r
@@ -39,7 +39,24 @@
   # bridge interface for KVM/QEMU access
   loop: "{{ systemd_networkd_vlans | product(['vlan.netdev', 'vlan.network', 'bridge.netdev', 'bridge.network']) }}"
   loop_control:
-    label: "{{item.1.split('.')[0] }}{{ '%02d' | format(item.0) }}.{{ item.1.split('.')[1] }}"
+    label: "/etc/systemd/network/{{item.1.split('.')[0] }}{{ '%02d' | format(item.0) }}.{{ item.1.split('.')[1] }}"
+  notify:
+    - Run networkctl reload locally
+  tags:
+    - systemd-networkd
+    - configuraton
+
+- name: Configure dummy network interfaces
+  ansible.builtin.template:
+    src: "{{ item.1 }}.jinja"
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/network/{{ item.0.name }}.{{ item.1.split('.')[1] }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  when: item.0.enabled is defined and item.0.enabled
+  loop: "{{ systemd_networkd_dummy_interfaces | product(['dummy.netdev', 'dummy.network']) }}"
+  loop_control:
+    label: "/etc/systemd/network/{{ item.0.name }}.{{item.1.split('.')[1] }}"
   notify:
     - Run networkctl reload locally
   tags:

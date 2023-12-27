@@ -3,4 +3,10 @@
 
 systemd_networkd_ipv4_address: 172.23.31.2/24
 systemd_networkd_ipv4_gateway: 172.23.31.1
-systemd_networkd_ipv6_address: 2a02:8010:8006:3a31:6c:cbff:fef1:d13d
+systemd_networkd_ipv6_address: 2a02:8010:8006:3a31:6c:cbff:fef1:d13d/64
+
+systemd_networkd_dummy_interfaces:
+  - enabled: true
+    name: lb01
+    ipv4: 172.23.0.3/32
+    ipv6: 2a02:8010:8006:3a00::3/128

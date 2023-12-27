@@ -1,0 +1,35 @@
+---
+# tasks file for bird
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: This role does not support being run when bootstrapping hosts. Failing.
+  when: bootstrap_mount_base | default('') | length
+
+- name: Install bird
+  community.general.pacman:
+    name: "{{ bird_packages }}"
+    state: latest
+  tags:
+    - bird
+    - package
+
+- name: Configure bird
+  ansible.builtin.template:
+    src: bird.conf.jinja
+    dest: /etc/bird.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Reload bird
+  tags:
+    - bird
+    - configuraton
+
+- name: Enable and start bird
+  ansible.builtin.systemd:
+    name: bird.service
+    daemon_reload: false
+    enabled: true
+    state: started
