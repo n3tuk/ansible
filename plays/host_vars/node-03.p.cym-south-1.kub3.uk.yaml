@@ -85,7 +85,7 @@ machines_list:
       - dev: vda
         size: 128G
     vlan: 45
-  - name: worker-09
+  - name: worker-15
     environment: production
     location: cym-south-1
     purpose: k8s-worker-node

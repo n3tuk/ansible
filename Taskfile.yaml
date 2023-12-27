@@ -1,7 +1,7 @@
 ---
 version: 3
 
-env:
+vars:
   limit: '{{ .limit | default "all" }}'
 
 tasks:
@@ -257,6 +257,54 @@ tasks:
             --ask-become-pass plays/netdata.yaml \
             --limit {{ .limit }} \
             --forks 5
+
+  vault:
+    desc: Deploy the Vault Cluster for an environment (services by default)
+    summary: |
+      Deploy the Vault Cluster for a specified environment (services by default)
+      using the vault Ansible Playbook, which will configure Vault itself, as
+      well as the local web-server, load balancing, and Cloudflare tunnels.
+
+      Set the following as overrides on the command-line:
+
+      - To change the environment being deployed:
+          environment=(services|development|production)
+      - To change the hosts that will be configured by the Playbook:
+          limit=((hostname|groupname):...)
+
+      $ task vault environment=production limit=vault-01.p.cym-south-1.kub3.uk
+
+      The playbook will operate on one server at a time, facilitating a rolling
+      deployment of configuration changes, ensuring that only one server is
+      restarted at a time, if required.
+    vars:
+      environment: '{{ .environment | default "services" }}'
+    env:
+      # Enable the retry file in Ansible, which will report on which hosts have
+      # failed in a particular run of a playbook, allowing the play to be re-run
+      # for those hosts until they all complete successfully
+      ANSIBLE_RETRY_FILES_ENABLED: "True"
+    silent: false
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/vault.yaml
+      - defer: |-
+          rm plays/vault.retry
+      # Pre-populate the retry file with the required targets from the limit
+      # variable (by default "all") to simplify the while loop below
+      - cmd: |-
+          echo "{{ .limit }}" > "plays/vault.retry"
+      - cmd: |-
+          while [[ -s "plays/vault.retry" ]]
+          do
+            ansible-playbook \
+              --ask-become-pass plays/vault.yaml \
+              --extra-vars vault_environment={{ .environment }} \
+              --limit "@plays/vault.retry" \
+              --forks 1
+            [[ "${?}" -eq 0 || "${?}" -eq 143 ]] && break
+          done
 
   clean:
     desc: Clean up the temporary files from the repository

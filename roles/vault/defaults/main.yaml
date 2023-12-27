@@ -1,0 +1,4 @@
+---
+# defaults file for vault
+
+vault_volume_size: 12G

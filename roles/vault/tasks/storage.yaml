@@ -1,0 +1,45 @@
+---
+# storage tasks file for vault
+
+- name: Create the logical volume for Vault
+  community.general.lvol:
+    vg: "{{ vault_volume_group }}"
+    lv: "{{ vault_volume_name }}"
+    size: "{{ vault_volume_size }}"
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - vault
+    - filesystem
+
+- name: Create the Vault volume filesystem
+  community.general.filesystem:
+    device: "/dev/{{ vault_volume_group }}/{{ vault_volume_name }}"
+    fstype: ext4
+    opts: "{{ vault_volume_options | default(omit) }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - vault
+    - filesystem
+
+- name: Register and mount the Vault volume
+  ansible.posix.mount:
+    src: "/dev/{{ vault_volume_group }}/{{ vault_volume_name }}"
+    path: "{{ vault_volume_path }}"
+    fstype: ext4
+    opts: defaults,rw,noatime,nosuid,noexec,nodev
+    state: mounted
+  tags:
+    - vault
+    - filesystems
+
+- name: Set the owner/group permissions on the Vault volume
+  ansible.builtin.file:
+    path: "{{ vault_volume_path }}"
+    owner: vault
+    group: vault
+    mode: u=rwx,g=rx,o=
+    state: directory
+  tags:
+    - vault
+    - filesystems

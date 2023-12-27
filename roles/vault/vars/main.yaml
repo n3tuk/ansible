@@ -1,0 +1,10 @@
+---
+# vars file for vault
+
+vault_packages:
+  - vault
+
+vault_volume_path: /srv/vault
+vault_volume_group: storage
+vault_volume_name: vault
+vault_volume_options: "-L VAULT"

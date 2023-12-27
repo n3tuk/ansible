@@ -36,7 +36,6 @@ task: [bootstrap] ansible-playbook \
 [play-cache]: https://github.com/n3tuk/ansible/blob/main/plays/cache.yaml
 [play-netdata]: https://github.com/n3tuk/ansible/blob/main/plays/netdata.yaml
 [play-vault]: https://github.com/n3tuk/ansible/blob/main/plays/vault.yaml
-[play-testing]: https://github.com/n3tuk/ansible/blob/main/plays/testing.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
@@ -62,7 +61,7 @@ task: [bootstrap] ansible-playbook \
 | [`users`][role-users]                       | A role to install and configure the users and groups on the system, including the `root` user.                                                                                                                |
 | [`libvirtd`][role-libvirtd]                 | A role to install and configure `libvirtd` for the system and prepare the Storage Pools for Virtual Machines.                                                                                                 |
 | [`machines`][role-machines]                 | A role to configure all the virtual machines to run on a node, alongside the storage and any other devices required by that machine.                                                                          |
-| [`nginx`][role-nginx]                       | A role to configure nginx on a system with standard settings, but not to configure any virtual hosts which it may serve.                                                                                      |
+| [`nginx`][role-nginx]                       | A role to install and configure nginx on a system with standard settings, but not to configure any virtual hosts which it may serve.                                                                          |
 | [`cache`][role-cache]                       | A role to configure a caching proxy virtual host in nginx which will proxy and cache Arch Linux repositories and packages.                                                                                    |
 | [`logrotate`][role-logrotate]               | A role to configure logrotate with sensible defaults to support the rotation and compression of historical log files.                                                                                         |
 | [`netdata`][role-netdata]                   | A role to configure netdata either as a parent node for centralised storage and processing, or a child to collect data and stream it to a parent node.                                                        |

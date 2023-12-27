@@ -1,0 +1,18 @@
+---
+# tasks file for vault
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: This role does not support being run when bootstrapping hosts. Failing.
+  when: bootstrap_mount_base | default('') | length
+
+- name: Install Vault
+  community.general.pacman:
+    name: "{{ vault_packages }}"
+    state: latest
+  tags:
+    - vault
+    - package
+
+- name: Prepare the filesystem for Vault
+  ansible.builtin.include_tasks: storage.yaml

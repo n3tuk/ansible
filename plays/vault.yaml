@@ -1,0 +1,25 @@
+---
+- name: Configure the Vault service in {{ vault_environment | title }}
+  hosts: "vault:&{{ vault_environment }}"
+  become: true
+  become_user: root
+  vars:
+    vault_environment: services
+  # Always ensure that we gather facts from all the nodes in the current
+  # environment, even if we're only changing a subset of the nodes, as we need
+  # this data as part of the firewall
+  pre_tasks:
+    - name: Gather facts from the Vault nodes in {{ vault_environment | title }}
+      ansible.builtin.setup:
+        gather_subset:
+          - default_ipv4
+          - default_ipv6
+      delegate_to: "{{ host }}"
+      delegate_facts: true
+      loop: "{{ groups['vault'] | intersect(groups[vault_environment]) }}"
+      loop_control:
+        label: "{{ host }}"
+        loop_var: host
+  roles:
+    - role: nginx
+    - role: vault

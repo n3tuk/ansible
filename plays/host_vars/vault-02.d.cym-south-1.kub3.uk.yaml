@@ -1,0 +1,6 @@
+---
+# Node-specific configuration for vault-02.d.cym-south-1.kub3.uk
+
+systemd_networkd_ipv4_address: 172.23.52.2/24
+systemd_networkd_ipv4_gateway: 172.23.52.1
+systemd_networkd_ipv6_address: 2a02:8010:8006:3a52:41:18ff:fead:bbb3/64

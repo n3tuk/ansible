@@ -2,4 +2,5 @@
 
 # Ansible temporary files and cache store
 .cache/
+plays/*.retry
 results.sarif
