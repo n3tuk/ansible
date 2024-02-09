@@ -69,6 +69,12 @@ server {
   # locally, allow it to be served locally, even when the file is stale
   proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
 
+  # Ensure we send the hostname to the upstream server and improve the TLS
+  # settings to ensure we use the latest protocols and re-use sessions for speed
+  proxy_ssl_server_name on;
+  proxy_ssl_protocols  TLSv1.2 TLSv1.3;
+  proxy_ssl_session_reuse on;
+
   # Add some cache status headers for debugging purposes, you can remove these lines if you want
   add_header X-Upstream-Status $upstream_status;
   add_header X-Cache-Status $upstream_cache_status;
@@ -79,14 +85,17 @@ server {
     rewrite /(.*)$ {{ repo.upstream.prefix }}/$1 break;
 {% endif %}
     proxy_pass {{ repo.upstream.scheme | default('http') }}://{{ repo.upstream.hostname }};
+    proxy_ssl_name {{ repo.upstream.hostname }};
     proxy_cache repositories;
     proxy_cache_valid 200 5m;
+
 
     location ~ \.pkg\.tar\.zst(\.sig)?$ {
 {% if repo.upstream.prefix is defined %}
       rewrite /(.*)$ {{ repo.upstream.prefix }}/$1 break;
 {% endif %}
       proxy_pass {{ repo.upstream.scheme | default('http') }}://{{ repo.upstream.hostname }};
+      proxy_ssl_name {{ repo.upstream.hostname }};
       proxy_cache repositories;
       proxy_cache_valid 200 {{ repo.valid | default('13w') }};
     }

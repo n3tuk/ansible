@@ -11,7 +11,13 @@
   become: true
   become_user: root
   tasks:
-    - name: Upgrade all avilable packages
+    - name: Upgrade the keyrings first
+      community.general.pacman:
+        name:
+          - archlinux-keyring
+          - alhp-keyring
+        state: latest
+    - name: Upgrade all available packages
       community.general.pacman:
         upgrade: true
   tags:
@@ -22,7 +28,13 @@
   become: true
   become_user: root
   tasks:
-    - name: Upgrade all avilable packages
+    - name: Upgrade the keyrings first
+      community.general.pacman:
+        name:
+          - archlinux-keyring
+          - alhp-keyring
+        state: latest
+    - name: Upgrade all available packages
       community.general.pacman:
         upgrade: true
   tags:

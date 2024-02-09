@@ -15,16 +15,38 @@ cache_repos:
       hostname: mirrors.ukfast.co.uk
       prefix: /sites/archlinux.org
     valid: 4w
-  - name: community
-    upstream:
-      hostname: mirrors.ukfast.co.uk
-      prefix: /sites/archlinux.org
-    valid: 4w
   - name: extra
     upstream:
       hostname: mirrors.ukfast.co.uk
       prefix: /sites/archlinux.org
     valid: 4w
+  - name: community
+    upstream:
+      hostname: mirrors.ukfast.co.uk
+      prefix: /sites/archlinux.org
+    valid: 4w
+  - name: multilib
+    upstream:
+      hostname: mirrors.ukfast.co.uk
+      prefix: /sites/archlinux.org
+    valid: 4w
+
+  - name: core-x86-64-v3
+    upstream:
+      scheme: https
+      hostname: alhp.krautflare.de
+    valid: 4w
+  - name: extra-x86-64-v3
+    upstream:
+      scheme: https
+      hostname: alhp.krautflare.de
+    valid: 4w
+  - name: multilib-x86-64-v3
+    upstream:
+      scheme: https
+      hostname: alhp.krautflare.de
+    valid: 4w
+
   - name: private
     upstream:
       scheme: https
