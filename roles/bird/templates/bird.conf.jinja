@@ -20,8 +20,8 @@ protocol kernel KERNEL {
 }
 
 filter PROXY_INTERFACE {
-  if (   source = RTS_DEVICE
-      && ifname = "{{ bird_interface }}") then { accept; }
+  if (    source = RTS_DEVICE
+       && ifname ~ "{{ bird_interface }}") then { accept; }
   reject;
 }
 
@@ -35,6 +35,11 @@ protocol bgp ROUTER {
   local {{ ansible_default_ipv4.address }} as {{ bird_as }};
   neighbor {{ ansible_default_ipv4.gateway }} as {{ bird_as }};
   bfd on;
+
+  # These capabilities are not currently supported in RouterOS v7.x releases and
+  # therefore must be disabled if the BGP connection is to be established
+  enable enhanced route refresh off;
+  long lived graceful restart no;
 
   ipv4 { import none; export filter PROXY_INTERFACE; };
   ipv6 { import none; export filter PROXY_INTERFACE; };
