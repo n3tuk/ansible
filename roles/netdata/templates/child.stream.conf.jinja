@@ -7,7 +7,7 @@
   # Send all available metrics from this client node to a parent node as the
   # destination for storage and processing of alerts
   enabled = yes
-  destination = tcp:netdata-01.{{ env_name[:1] }}.{{ env_location }}.kub3.uk:{{ netdata_stream_port }}{% if netdata_stream_encrypted %}:SSL{% endif %}
+  destination = tcp:netdata-01.{{ netdata_stream_destination[:1] }}.{{ env_location }}.kub3.uk:{{ netdata_stream_port }}{% if netdata_stream_encrypted %}:SSL{% endif %}
 
   api key = {{ netdata_api_key }}
   send charts matching = *

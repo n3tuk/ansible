@@ -3,7 +3,6 @@
 
 netdata_packages:
   - netdata
-  - netdata-go-plugins
   # Needed for access to the hostname binary
   - inetutils
 

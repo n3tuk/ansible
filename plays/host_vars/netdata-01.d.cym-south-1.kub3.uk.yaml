@@ -5,4 +5,10 @@ systemd_networkd_ipv4_address: 172.23.31.6/24
 systemd_networkd_ipv4_gateway: 172.23.31.1
 systemd_networkd_ipv6_address: 2a02:8010:8006:3a31:a6:4eff:fe95:52c8/64
 
-netdata_cache_volume_size: 475G
+netdata_volume_size: 475G
+netdata_dbengine_teir0_space: 200000
+netdata_dbengine_teir0_cache: 512
+netdata_dbengine_teir1_space: 150000
+netdata_dbengine_teir1_cache: 128
+netdata_dbengine_teir2_space: 100000
+netdata_dbengine_teir2_cache: 128
