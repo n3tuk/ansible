@@ -6,8 +6,8 @@ libvirtd_snapshots_volume_group: storage
 libvirtd_snapshots_volume_size: 64G
 
 libvirtd_image_arch_prefix: https://mirror.bytemark.co.uk/archlinux/iso/
-libvirtd_image_arch_checksum: 477f50617d648e46d6e326549aa56ab92115a29a97f2ca364e944cea06970608
-libvirtd_image_arch_version: 2023.11.01
+libvirtd_image_arch_checksum: 891ebab4661cedb0ae3b8fe15a906ae2ba22e284551dc293436d5247220933c5
+libvirtd_image_arch_version: 2024.02.01
 
 libvirtd_volume_groups:
   - storage

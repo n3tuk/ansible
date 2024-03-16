@@ -15,6 +15,8 @@ n3tuk.
 | [`libvirtd.yaml`][play-libvirtd]   | [`libvirtd`][taskfile]  | A play which will update the configuration of `libvirtd` on a system and prepare the Storage Pools.                                              |
 | [`cache.yaml`][play-cache]         | [`cache`][taskfile]     | A play which will update the configuration of caching proxies.                                                                                   |
 | [`netdata.yaml`][play-netdata]     | [`netdata`][taskfile]   | A play which will update the configuration of Netdata on both parent and child nodes.                                                            |
+| [`vault.yaml`][play-vault]         | [`vault`][taskfile]     | A play which will update the configuration of Hashicorp Vault in each of the environments of the Lab.                                            |
+| [`testing.yaml`][play-testing]     | [`testing`][taskfile]   | A play which will update the configuration of test Kubernetes clusters using k3s.                                                                |
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -33,6 +35,8 @@ task: [bootstrap] ansible-playbook \
 [play-libvirtd]: https://github.com/n3tuk/ansible/blob/main/plays/libvirtd.yaml
 [play-cache]: https://github.com/n3tuk/ansible/blob/main/plays/cache.yaml
 [play-netdata]: https://github.com/n3tuk/ansible/blob/main/plays/netdata.yaml
+[play-vault]: https://github.com/n3tuk/ansible/blob/main/plays/vault.yaml
+[play-testing]: https://github.com/n3tuk/ansible/blob/main/plays/testing.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
@@ -62,6 +66,8 @@ task: [bootstrap] ansible-playbook \
 | [`cache`][role-cache]                       | A role to configure a caching proxy virtual host in nginx which will proxy and cache Arch Linux repositories and packages.                                                                                    |
 | [`logrotate`][role-logrotate]               | A role to configure logrotate with sensible defaults to support the rotation and compression of historical log files.                                                                                         |
 | [`netdata`][role-netdata]                   | A role to configure netdata either as a parent node for centralised storage and processing, or a child to collect data and stream it to a parent node.                                                        |
+| [`vault`][role-vault]                       | A role to install and configure Hashicorp Vault along with associated proxies, certificates, and firewall rules.                                                                                              |
+| [`k3s`][role-k3s]                           | A role to install and configure k3s nodes to build and run Kubernetes clusters in different setups, including single-node as well as server/agent setups.                                                     |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -85,3 +91,5 @@ task: [bootstrap] ansible-playbook \
 [role-cache]: https://github.com/n3tuk/ansible/tree/main/roles/cache
 [role-logrotate]: https://github.com/n3tuk/ansible/tree/main/roles/logrotate
 [role-netdata]: https://github.com/n3tuk/ansible/tree/main/roles/netdata
+[role-vault]: https://github.com/n3tuk/ansible/tree/main/roles/vault
+[role-k3s]: https://github.com/n3tuk/ansible/tree/main/roles/k3s

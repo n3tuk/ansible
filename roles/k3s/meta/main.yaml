@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Jonathan Wright
+  description: Set up and prepare a single-node Kubernetes deployment
+  company: n3tuk
+  issue_tracker_url: https://github.com/n3tuk/ansible/issues
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+
+  galaxy_tags:
+    - k3s
+    - kubernetes
+
+dependencies: []

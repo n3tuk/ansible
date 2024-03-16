@@ -3,7 +3,7 @@
 # the virtual hosts first and completely before updating the physical hosts.
 
 - name: Update all virtual machines
-  hosts: virtual
+  hosts: virtual:!remote
   become: true
   become_user: root
   roles:

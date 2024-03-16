@@ -7,7 +7,7 @@
   ansible.builtin.import_playbook: update.yaml
 
 - name: Upgrade all virtual machines
-  hosts: virtual
+  hosts: virtual:!remote
   become: true
   become_user: root
   tasks:

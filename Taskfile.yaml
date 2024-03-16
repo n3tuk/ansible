@@ -219,16 +219,16 @@ tasks:
             --limit {{ .limit }} \
             --forks 10
 
-  cache:
-    desc: Deploy updated caching configurations
+  kubernetes:
+    desc: Deploy configurations for Kubernetes clusters
     silent: true
     cmds:
       - cmd: |-
           ansible-playbook \
-            --syntax-check plays/cache.yaml
+            --syntax-check plays/kubernetes.yaml
       - cmd: |-
           ansible-playbook \
-            --ask-become-pass plays/cache.yaml \
+            --ask-become-pass plays/kubernetes.yaml \
             --limit {{ .limit }} \
             --forks 3
 
