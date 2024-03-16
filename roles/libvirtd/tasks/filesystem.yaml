@@ -38,7 +38,7 @@
     path: /var/lib/libvirt/qemu
     owner: libvirt-qemu
     group: libvirt-qemu
-    mode: u=rwx,g=rx,o=
+    mode: u=rwx,g=rx,o=x
     state: directory
   notify:
     - Restart libvirtd
