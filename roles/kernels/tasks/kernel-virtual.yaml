@@ -7,7 +7,7 @@
     dest: "{{ bootstrap_mount_base | default('') }}/efi/loader/entries/{{ kernel }}.conf"
     owner: root
     group: root
-    mode: u=rw,g=r,o=r
+    mode: u=rwx,g=rx,o=rx
   tags:
     - kernel
     - systemd-boot

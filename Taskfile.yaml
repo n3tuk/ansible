@@ -232,6 +232,19 @@ tasks:
             --limit {{ .limit }} \
             --forks 3
 
+  cache:
+    desc: Deploy configurations for caching proxy
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check plays/cache.yaml
+      - cmd: |-
+          ansible-playbook \
+            --ask-become-pass plays/cache.yaml \
+            --limit {{ .limit }} \
+            --forks 3 --check --diff
+
   netdata:
     desc: Deploy the Netdata configurations for parents and children
     silent: true
