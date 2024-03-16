@@ -1,6 +1,6 @@
 ---
 # handlers file for pacman
 
-- name: Refresh the pacman databases locally
+- name: Refresh the pacman databases
   community.general.pacman:
     update_cache: true

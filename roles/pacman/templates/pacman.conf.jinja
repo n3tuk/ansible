@@ -17,17 +17,25 @@ ParallelDownloads = 5
 
 SigLevel = Required DatabaseOptional
 LocalFileSigLevel = Optional
-# RemoteFileSigLevel = Required
+RemoteFileSigLevel = Required
 
+{% if pacman_alhp_enable %}
+[core-x86-64-v3]
+Include = /etc/pacman.d/alhp
+
+[extra-x86-64-v3]
+Include = /etc/pacman.d/alhp
+
+{% endif %}
 [core]
-Include = /etc/pacman.d/mirrorlist
+Include = /etc/pacman.d/arch
 
 [extra]
-Include = /etc/pacman.d/mirrorlist
+Include = /etc/pacman.d/arch
 
 [community]
-Include = /etc/pacman.d/mirrorlist
+Include = /etc/pacman.d/arch
 
 [private]
 SigLevel = Never
-Server = https://repo.nwk.io/private
+Include = /etc/pacman.d/private

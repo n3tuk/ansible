@@ -6,15 +6,27 @@
     msg: This role does not support being run when bootstrapping hosts. Failing.
   when: bootstrap_mount_base | default('') | length
 
+- name: Check for the existance of the ALHP mirror file
+  ansible.builtin.stat:
+    path: /etc/pacman.d/alhp
+  register: alhp
+
 - name: Configure the mirrorlist
   ansible.builtin.copy:
-    src: mirrorlist
-    dest: /etc/pacman.d/mirrorlist
+    src: "{{ list }}"
+    dest: "/etc/pacman.d/{{ list }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=r
   notify:
-    - Refresh the pacman databases locally
+    - Refresh the pacman databases
+  loop:
+    - arch
+    - alhp
+    - private
+  loop_control:
+    label: "/etc/pacman.d/{{ list }}"
+    loop_var: list
   tags:
     - pacman
     - configuraton
@@ -26,11 +38,44 @@
     owner: root
     group: root
     mode: u=rw,g=r,o=r
+  vars:
+    pacman_alhp_enable: false
+  when: not alhp.stat.exists
+  tags:
+    - pacman
+    - configuraton
+
+- name: Update the pacman databases
+  community.general.pacman:
+    update_cache: true
+  when: not alhp.stat.exists
+
+# We always need to ensure that all keyrings are up-to-date or validation of any
+# downloaded packages may fail before the keyring is updated
+- name: Ensure all keyrings are upgraded
+  community.general.pacman:
+    name: "{{ pacman_keyrings }}"
+    state: latest
+
+- name: Configure pacman.conf
+  ansible.builtin.template:
+    src: pacman.conf.jinja
+    dest: /etc/pacman.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  vars:
+    pacman_alhp_enable: true
   notify:
-    - Refresh the pacman databases locally
+    - Refresh the pacman databases
   tags:
     - pacman
     - configuraton
 
 - name: Refresh the handlers for pacman
   ansible.builtin.meta: flush_handlers
+
+- name: Install pacman hooks
+  community.general.pacman:
+    name: "{{ pacman_hooks }}"
+    state: latest

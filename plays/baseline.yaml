@@ -1,6 +1,6 @@
 ---
 - name: Baseline all hosts
-  hosts: all
+  hosts: all:!remote
   become: true
   become_user: root
   roles:
