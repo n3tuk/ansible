@@ -13,13 +13,13 @@ SplitMode=none
 
 # Define the space usage for journald
 SystemMaxUse={{ systemd_journald_max_use }}
-SystemKeepFree=10%
+SystemKeepFree=20%
 
 RuntimeMaxUse=16M
 RuntimeKeepFree=75%
 
 MaxRetentionSec=30day
-MaxFileSec=1day
+MaxFileSec=1hour
 
 ForwardToSyslog=no
 ForwardToKMsg=no

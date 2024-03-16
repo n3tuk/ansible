@@ -34,8 +34,8 @@
 - name: Clear the root user authorized_keys
   # The root user is disabled in SSH, so it cannot be accessed remotely and as
   # such all SSH keys should be deleted to act as a further backup
-  ansible.posix.authorized_key:
-    dest: /root/.ssh/authorized_keys
+  ansible.posix.file:
+    path: /root/.ssh/authorized_keys
     state: absent
   tags:
     - users

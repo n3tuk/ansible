@@ -4,123 +4,34 @@ all:
     services:
       hosts:
         node-01.s.cym-south-1.kub3.uk:
-        vault-01.p.cym-south-1.kub3.uk:
         netdata-01.s.cym-south-1.kub3.uk:
         cache-01.s.cym-south-1.kub3.uk:
+        vault-01.p.cym-south-1.kub3.uk:
 
     production:
       hosts:
         node-[01:06].p.cym-south-1.kub3.uk:
-        boundary-[01:03].p.cym-south-1.kub3.uk:
-        vault-[01:03].p.cym-south-1.kub3.uk:
-        consul-[01:03].p.cym-south-1.kub3.uk:
-        etcd-[01:03].p.cym-south-1.kub3.uk:
-        controller-[01:03].p.cym-south-1.kub3.uk:
-        worker-[01:12].p.cym-south-1.kub3.uk:
-        storage-[01:06].p.cym-south-1.kub3.uk:
         netdata-01.p.cym-south-1.kub3.uk:
+        vault-[01:03].p.cym-south-1.kub3.uk:
 
     development:
       hosts:
         node-01.d.cym-south-1.kub3.uk:
-        boundary-[01:03].d.cym-south-1.kub3.uk:
-        vault-[01:03].d.cym-south-1.kub3.uk:
-        consul-[01:03].d.cym-south-1.kub3.uk:
-        etcd-[01:03].d.cym-south-1.kub3.uk:
-        controller-[01:03].d.cym-south-1.kub3.uk:
-        worker-[01:03].d.cym-south-1.kub3.uk:
-        storage-[01:03].d.cym-south-1.kub3.uk:
         netdata-01.d.cym-south-1.kub3.uk:
+        vault-[01:03].d.cym-south-1.kub3.uk:
 
     virtual:
       children:
-        remote:
         cache:
         netdata:
-        boundary:
         vault:
-        consul:
-        etcd:
-        kubernetes:
 
     physical:
       children:
         nodes:
-
-    kubernetes:
-      children:
-        controllers:
-        agents:
-
-    agents:
-      children:
-        workers:
-        storages:
-
-    bootstrap:
-      children:
-        services:
-        netdata:
-        nodes:
-        boundary:
-        vault:
-        consul:
-        etcd:
-        kubernetes:
-
-    remote:
-      hosts:
-        culhwch.london.n3t.uk:
-        olwen.london.n3t.uk:
-
-    cache:
-      hosts:
-        cache-01.s.cym-south-1.kub3.uk:
-
-    netdata:
-      hosts:
-        netdata-01.p.cym-south-1.kub3.uk:
-        netdata-01.d.cym-south-1.kub3.uk:
-        netdata-01.s.cym-south-1.kub3.uk:
-
-    nodes:
-      hosts:
-        node-[01:06].p.cym-south-1.kub3.uk:
-        node-01.d.cym-south-1.kub3.uk:
-        node-01.s.cym-south-1.kub3.uk:
-
-    boundary:
-      hosts:
-        boundary-[01:03].p.cym-south-1.kub3.uk:
-        boundary-[01:03].d.cym-south-1.kub3.uk:
 
     vault:
       hosts:
         vault-[01:03].p.cym-south-1.kub3.uk:
         vault-[01:03].d.cym-south-1.kub3.uk:
         vault-01.s.cym-south-1.kub3.uk:
-
-    consul:
-      hosts:
-        consul-[01:03].p.cym-south-1.kub3.uk:
-        consul-[01:03].d.cym-south-1.kub3.uk:
-
-    etcd:
-      hosts:
-        etcd-[01:03].p.cym-south-1.kub3.uk:
-        etcd-[01:03].d.cym-south-1.kub3.uk:
-
-    controllers:
-      hosts:
-        controller-[01:03].p.cym-south-1.kub3.uk:
-        controller-[01:03].d.cym-south-1.kub3.uk:
-
-    workers:
-      hosts:
-        worker-[01:18].p.cym-south-1.kub3.uk:
-        worker-[01:03].d.cym-south-1.kub3.uk:
-
-    storages:
-      hosts:
-        storage-[01:06].p.cym-south-1.kub3.uk:
-        storage-[01:03].d.cym-south-1.kub3.uk:
