@@ -89,4 +89,4 @@ kernels_mkinitcpio_modules:
 systemd_networkd_ethernet_name: enp3s0
 
 systemd_system_watchdog_enabled: true
-systemd_journald_max_size: 165M
+systemd_journald_max_use: 165M
