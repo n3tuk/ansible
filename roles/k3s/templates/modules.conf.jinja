@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+{% for module in k3s_kernel_modules %}
+{{ module }}
+{% endfor %}

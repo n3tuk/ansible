@@ -7,12 +7,20 @@ netdata_node_type: child
 
 netdata_stream_port: 19999
 netdata_stream_encrypted: false
+netdata_stream_destination: "{{ env_name }}"
 
 netdata_cloud_claim_token:
 netdata_cloud_claim_room:
 netdata_cloud_claim_url: https://app.netdata.cloud
 
 netdata_volume_size: 64G
+
+netdata_dbengine_teir0_space: 10240
+netdata_dbengine_teir0_cache: 512
+netdata_dbengine_teir1_space: 5120
+netdata_dbengine_teir1_cache: 32
+netdata_dbengine_teir2_space: 4096
+netdata_dbengine_teir2_cache: 32
 
 netdata_alarm_pushover_enabled: true
 netdata_alarm_pushover_app_token:

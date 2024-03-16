@@ -1,0 +1,9 @@
+---
+# Configure the caching service for Arch Linux repositories
+
+- name: Configure hosts for a single-node k3s deployments
+  hosts: testing
+  become: true
+  become_user: root
+  roles:
+    - role: k3s

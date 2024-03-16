@@ -11,6 +11,7 @@ systemd_networkd_vlans:
   - 30
   - 31
   - 32
+  - 39
 
 machines_list:
   - name: vault-01
@@ -34,7 +35,7 @@ machines_list:
       current: 2
     volumes:
       - dev: vda
-        size: 512G
+        size: 128G
     vlan: 31
   - name: netdata-01
     environment: services
@@ -69,3 +70,25 @@ machines_list:
       - dev: vda
         size: 1T
     vlan: 31
+  - name: testing-01
+    environment: testing
+    location: cym-south-1
+    purpose: k3s-testing-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 256G
+    vlan: 39
+  - name: testing-02
+    environment: testing
+    location: cym-south-1
+    purpose: k3s-testing-node
+    vcpu: 4
+    memory:
+      current: 12
+    volumes:
+      - dev: vda
+        size: 256G
+    vlan: 39
