@@ -63,7 +63,7 @@ filesystems_logical_volumes:
       - noexec
   - name: home
     group: storage
-    path: /mnt/home
+    path: /home
     size: 256M
     fs_type: ext4
     fs_opts: -L HOME
