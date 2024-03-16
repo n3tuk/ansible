@@ -7,7 +7,7 @@ cache_vhost_names:
   - 2.cache.s.cym-south-1.kub3.uk
   - 3.cache.s.cym-south-1.kub3.uk
 
-cache_volume_size: 450G
+cache_volume_size: 64G
 
 cache_repos:
   - name: core

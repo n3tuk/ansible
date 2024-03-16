@@ -7,7 +7,7 @@
 proxy_cache_path
   /srv/http/cache/repositories
   levels=1:2 keys_zone=repositories:60m
-  inactive=90d max_size=32g;
+  inactive=90d max_size=60g;
 proxy_temp_path /srv/http/cache/tmp 1 2;
 
 server {
