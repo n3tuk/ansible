@@ -2,9 +2,8 @@
 # Configure the caching service for Arch Linux repositories
 
 - name: Configure the host for a single-node Kubernetes deployment
-  hosts: minikube
+  hosts: testing
   become: true
   become_user: root
   roles:
-    # - role: bird
     - role: k3s
