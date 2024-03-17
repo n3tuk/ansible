@@ -76,7 +76,6 @@ filesystems_logical_volumes:
 bootstrap_pacstrap_extras:
   - qemu-guest-agent
 
-kernels_microcode: false
 kernels_install:
   - linux-hardened
   - linux-lts

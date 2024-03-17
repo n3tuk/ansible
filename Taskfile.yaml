@@ -243,7 +243,7 @@ tasks:
           ansible-playbook \
             --ask-become-pass plays/cache.yaml \
             --limit {{ .limit }} \
-            --forks 3 --check --diff
+            --forks 3
 
   netdata:
     desc: Deploy the Netdata configurations for parents and children
