@@ -1,42 +1,47 @@
 # {{ ansible_managed }}
 
-# Vault has a http health endpoint on /v1/sys/health that returns different http codes
-# depending on the status of the running vault instance.
-#
-# See: https://www.vaultproject.io/api/system/health.html#read-health-information
-#
-#    * 200 if initialized, unsealed, and active
-#    * 429 if unsealed and standby
-#    * 472 if data recovery mode replication secondary and active
-#    * 473 if performance standby
-#    * 501 if not initialized
-#    * 503 if sealed
+global
+  maxconn {{ haproxy_maxconn }}
+  log stdout format raw local0
+  user haproxy
+  pidfile /run/haproxy.pid
+  daemon
 
-# Redirect http --> https
-frontend vault_http
-  mode http
-  # bind to the ip you give clients
-  bind 1.2.3.6:80
-  redirect scheme https code 301 if !{ ssl_fc }
-
-# Primary https listener
-frontend vault_https
+defaults
   mode tcp
   log global
-  timeout client 30000
-  # bind to the ip you give to clients
-  bind 1.2.3.6:443
-  description Vault over https
-  default_backend vault_https
-  option tcplog
+  option dontlognull
+  timeout connect {{ haproxy_timeout.connect }}
+  timeout client {{ haproxy_timeout.client }}
+  timeout server {{ haproxy_timeout.server }}
 
-backend vault_https
+frontend metrics
+  mode http
+  bind 127.0.0.1:8404
+  bind [::1]:8404
+  http-request use-service prometheus-exporter if { path /metrics }
+  stats enable
+  stats uri /stats
+  stats refresh 10s
+
+frontend https
   mode tcp
-  timeout check 5000
-  timeout server 30000
-  timeout connect 5000
-  option httpchk GET /v1/sys/health
-  server vault-server1 1.2.3.4:8200 check check-ssl verify none inter 5000
-  server vault-server2 1.2.3.5:8200 check check-ssl verify none inter 5000
-  server vault-server3 1.2.3.6:8200 check check-ssl verify none inter 5000
-  http-check expect rstatus (200|429)
+  bind 172.23.0.3:443
+  bind [2a02:8010:8006:3a00::3]:443
+  option tcplog
+  tcp-request inspect-delay 5s
+  tcp-request content accept if { req.ssl_hello_type 1 }
+  acl vault_filter req_ssl_sni -i vault.s.cym-south-1.kub3.uk
+  use_backend vault if vault_filter
+
+frontend vault
+  mode tcp
+  bind 172.23.0.3:8200
+  bind [2a02:8010:8006:3a00::3]:8200
+  option tcplog
+  default_backend vault
+
+backend vault
+  mode tcp
+  option ssl-hello-chk
+  server vault-01 vault-01.s.cym-south-1.kub3.uk:8200 check send-proxy

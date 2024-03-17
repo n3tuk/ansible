@@ -1,2 +1,35 @@
 ---
 # tasks file for haproxy
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: This role does not support being run when bootstrapping hosts. Failing.
+  when: bootstrap_mount_base | default('') | length
+
+- name: Install haproxy
+  community.general.pacman:
+    name: "{{ haproxy_packages }}"
+    state: latest
+  tags:
+    - haproxy
+    - package
+
+- name: Configure haproxy
+  ansible.builtin.template:
+    src: haproxy.cfg.jinja
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Reload haproxy
+  tags:
+    - haproxy
+    - configuraton
+
+- name: Enable and start haproxy
+  ansible.builtin.systemd:
+    name: haproxy.service
+    daemon_reload: false
+    enabled: true
+    state: started

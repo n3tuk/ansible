@@ -1,2 +1,15 @@
 ---
 # defaults file for haproxy
+
+haproxy_maxconn: 512
+haproxy_timeout:
+  connect: 5s
+  client: 10s
+  server: 10s
+
+haproxy_frontends:
+  - name: vault-443
+    enabled: true
+    ipv4: "127.0.0.1"
+    ipv6: "[::1]"
+    port: 443
