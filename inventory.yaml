@@ -4,18 +4,24 @@ all:
     services:
       hosts:
         node-01.s.cym-south-1.kub3.uk:
-        netdata-01.s.cym-south-1.kub3.uk:
         cache-01.s.cym-south-1.kub3.uk:
+        netdata-01.s.cym-south-1.kub3.uk:
+        haproxy-01.s.cym-south-1.kub3.uk:
+        vault-01.p.cym-south-1.kub3.uk:
 
     production:
       hosts:
         node-[01:06].p.cym-south-1.kub3.uk:
         netdata-01.p.cym-south-1.kub3.uk:
+        haproxy-[01:03].p.cym-south-1.kub3.uk:
+        vault-[01:03].p.cym-south-1.kub3.uk:
 
     development:
       hosts:
         node-01.d.cym-south-1.kub3.uk:
         netdata-01.d.cym-south-1.kub3.uk:
+        haproxy-[01:03].d.cym-south-1.kub3.uk:
+        vault-[01:03].d.cym-south-1.kub3.uk:
 
     testing:
       hosts:
@@ -26,6 +32,7 @@ all:
         cache:
         netdata:
         vault:
+        haproxy:
         kubernetes:
 
     physical:
@@ -39,23 +46,31 @@ all:
     bootstrap:
       children:
         nodes:
+        cache:
         netdata:
         services:
         vault:
+        haproxy:
         kubernetes:
-
-    cache:
-      hosts:
-        cache-01.s.cym-south-1.kub3.uk:
-
-    netdata:
-      hosts:
-        netdata-01.p.cym-south-1.kub3.uk:
-        netdata-01.d.cym-south-1.kub3.uk:
-        netdata-01.s.cym-south-1.kub3.uk:
 
     nodes:
       hosts:
         node-[01:06].p.cym-south-1.kub3.uk:
         node-01.d.cym-south-1.kub3.uk:
         node-01.s.cym-south-1.kub3.uk:
+
+    cache:
+      hosts:
+        cache-01.s.cym-south-1.kub3.uk:
+
+    vault:
+      hosts:
+        vault-[01:03].p.cym-south-1.kub3.uk:
+        vault-[01:03].d.cym-south-1.kub3.uk:
+        vault-01.s.cym-south-1.kub3.uk:
+
+    netdata:
+      hosts:
+        netdata-01.p.cym-south-1.kub3.uk:
+        netdata-01.d.cym-south-1.kub3.uk:
+        netdata-01.s.cym-south-1.kub3.uk:
