@@ -4,10 +4,12 @@
 - name: Set the password for root locally
   ansible.builtin.user:
     name: root
-    password: "{{ users_users.root.password }}"
-    shell: "{{ users_users.root.shell | default(users_default_shell) }}"
+    password: "{{ users_root.password }}"
+    shell: "{{ users_root.shell | default(users_default_shell) }}"
     update_password: always
-  when: users_users.root.password is defined and users_users.root.password | length
+  when: |-
+    users_root.password is defined and
+    users_root.password.startswith('$')
   tags:
     - root
     - password

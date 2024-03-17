@@ -1,9 +1,9 @@
 ---
-users_users:
-  root:
-    password: "{fetch-from-vault}"
-    shell: /usr/bin/fish
+users_root:
+  password: "{fetch-from-vault}"
+  shell: /usr/bin/fish
 
+users_users:
   jonathan:
     bootstrap: true
     groups:

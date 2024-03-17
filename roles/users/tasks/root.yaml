@@ -16,9 +16,11 @@
 - name: Set the root user password
   ansible.builtin.user:
     name: root
-    password: "{{ users_root_password }}"
+    password: "{{ users_root.password }}"
     update_password: always
-  when: users_root_password is defined
+  when: |-
+    users_root.password is defined and
+    users_root.password.startswith('$')
   tags:
     - users
     - root
