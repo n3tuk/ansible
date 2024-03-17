@@ -97,12 +97,12 @@ bootstrap_pacstrap_extras:
   - qemu-desktop
   - jack2
 
-kernels_microcode: true
 kernels_secure_boot_sign: true
 kernels_install:
   - linux-hardened
   - linux-lts
 
+kernels_mkinitcpio_microcode: true
 kernels_mkinitcpio_modules:
   - i915
   - intel_lpss_pci
@@ -111,6 +111,7 @@ kernels_mkinitcpio_hooks:
   - systemd
   - keyboard
   - autodetect
+  - microcode
   - modconf
   - kms
   - block

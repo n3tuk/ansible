@@ -4,9 +4,6 @@
 
 ALL_config="/etc/mkinitcpio.conf"
 ALL_kver="/boot/vmlinuz-{{ kernel }}"
-{% if kernels_mkinitcpio_microcode -%}
-ALL_microcode="/boot/intel-ucode.img"
-{%- endif %}
 
 PRESETS=('default')
 
