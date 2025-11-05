@@ -1,0 +1,18 @@
+---
+# sysctl-specific tasks file for networking
+
+- name: Install sysctl settings
+  ansible.builtin.copy:
+    src: "{{ config }}"
+    dest: /etc/sysctl.d/{{ config }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - 10-ip-forwarding.conf
+  loop_control:
+    label: /etc/sysctl.d/{{ config }}
+    loop_var: config
+  tags:
+    - networking
+    - configuration

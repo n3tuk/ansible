@@ -1,0 +1,22 @@
+---
+device_type: Physical
+env_purpose: proxmox-node
+
+users_root:
+  # Keep the root user using bash to ensure that inter-node commands work under
+  # Proxmox when clustering
+  shell: /usr/bin/bash
+
+users_users:
+  jonathan:
+    # Override the groups for jonathan to utilise Debian-specific groups
+    groups:
+      - systemd-journal
+      - systemd-network
+      - sudo
+      - users
+
+filesystems_physical_drives: []
+
+# Login via root over SSH is required for Proxmox clustering
+ssh_server_permit_root_login: prohibit-password

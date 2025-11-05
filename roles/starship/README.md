@@ -1,8 +1,16 @@
 # n3t.uk Starship Ansible Role
 
 An Ansible role for the installation and configuration of the terminal utility
-[Starship][starship-rs] for the `root` user and new users (using the `/etc/skel`
+[Starship][starship-rs] for the `root` user and all new users (using the `/etc/skel`
 directory).
+
+> [!NOTE]
+> Starship configuration files already copied to created users are not updated
+> by this role. If required, users must copy the new file themselves:
+>
+> ```console
+> cp /etc/skel/.config/starship.toml $HOME/.config/starship.toml
+> ```
 
 [starship-rs]: https://starship.rs/
 
@@ -30,7 +38,6 @@ the command via `arch-chroot` into the new installation.
 | `env_name`             | `unknown`             | The name of the environment this sytem or server belongs, to be displayed on the terminal prompt.                                      |
 | `env_location`         | `unknown`             | The location of the configured server or system, to be displayed on the terminal prompt.                                               |
 | `env_colour`           | `d8dee9`              | The colour to be given to the `env_name` output on the terminal prompt.                                                                |
->>>>>>> 97d8928 (Add a role to manage the issue file for console access)
 
 ## Dependencies
 

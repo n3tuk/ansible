@@ -1,0 +1,27 @@
+---
+# debian-specific tasks file for tailscale
+
+- name: Add Tailscale repository
+  ansible.builtin.deb822_repository:
+    name: tailscale
+    types: deb
+    uris: "{{ tailscale_apt_repository }}"
+    suites: "{{ ansible_distribution_release }}"
+    components: main
+    signed_by: "{{ tailscale_apt_signkey }}"
+    state: present
+  tags:
+    - tailscale
+    - packages
+
+- name: Install Tailscale
+  ansible.builtin.apt:
+    name: "{{ tailscale_packages_debian }}"
+    state: present
+    # Ensure we refresh the apt repositories cache when installing Tailscale as
+    # may have added a new repository above
+    update_cache: true
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - tailscale
+    - packages

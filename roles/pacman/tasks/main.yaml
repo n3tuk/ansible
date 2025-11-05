@@ -14,7 +14,7 @@
 - name: Configure the mirrorlist
   ansible.builtin.copy:
     src: "{{ list }}"
-    dest: "/etc/pacman.d/{{ list }}"
+    dest: /etc/pacman.d/{{ list }}
     owner: root
     group: root
     mode: u=rw,g=r,o=r
@@ -25,7 +25,7 @@
     - alhp
     - private
   loop_control:
-    label: "/etc/pacman.d/{{ list }}"
+    label: /etc/pacman.d/{{ list }}
     loop_var: list
   tags:
     - pacman

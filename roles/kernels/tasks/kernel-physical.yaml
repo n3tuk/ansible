@@ -2,7 +2,7 @@
 # physical machine kernel tasks for kernels
 
 - name: Sign locally the kernel {{ kernel }}
-  # This handler is building boot files specifically inside non-chroot'd environments
+  # This handler is building files specifically inside non-chroot'd environments
   ansible.builtin.command: # noqa no-changed-when
     cmd: sbctl sign -s /efi/EFI/Linux/{{ kernel }}.efi
   when: |-
@@ -17,7 +17,8 @@
 - name: Sign inside the chroot the kernel {{ kernel }}
   ansible.builtin.command: # noqa no-changed-when
     cmd: |-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/fish -c 'sbctl sign -s /efi/EFI/Linux/{{ kernel }}.efi'
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c 'sbctl sign -s /efi/EFI/Linux/{{ kernel }}.efi'
   when: |-
     not ansible_check_mode and
     bootstrap_mount_base | default('') | length and

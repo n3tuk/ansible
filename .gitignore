@@ -2,3 +2,8 @@
 .cache/
 results.sarif
 .prettiercache
+
+.ansible/
+!.ansible/keys/ansible.gpg
+
+plays/encrypted_vars/become.yaml

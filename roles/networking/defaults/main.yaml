@@ -1,0 +1,5 @@
+---
+# defaults file for networking
+
+networking_loopback_address: fc00::1
+networking_openfabric_router_id: 49.0000.0000.0001.00

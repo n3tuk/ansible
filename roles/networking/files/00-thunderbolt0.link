@@ -1,0 +1,8 @@
+# DO NOT EDIT - Managed by Ansible
+
+[Match]
+Path=pci-0000:00:0d.2
+Driver=thunderbolt-net
+[Link]
+MACAddressPolicy=none
+Name=ent0

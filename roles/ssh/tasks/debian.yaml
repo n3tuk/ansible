@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for ssh on Arch Linux
+
+- name: Install SSH
+  ansible.builtin.apt:
+    name: "{{ ssh_packages_debian }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - sshd
+    - packages

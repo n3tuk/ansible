@@ -1,3 +1,25 @@
 ---
 all:
-  hosts: []
+  children:
+    proxmox:
+
+development:
+  hosts:
+    proxmox-[01:03].development.kub3.uk:
+
+services:
+  hosts:
+    proxmox-[01:02].services.kub3.uk:
+
+proxmox:
+  hosts:
+    proxmox-[01:03].development.kub3.uk:
+    proxmox-[01:02].services.kub3.uk:
+
+debian:
+  children:
+    proxmox:
+
+bootstrap:
+  children:
+    proxmox:

@@ -14,6 +14,7 @@
 
 - name: Configure the drop-in directories for getty
   ansible.builtin.file:
+    # yamllint disable-line rule:line-length
     path: "{{ bootstrap_mount_base | default('') }}/etc/systemd/system/{{ drop_in }}"
     owner: root
     group: root
@@ -23,7 +24,7 @@
     - getty@.service.d
     - serial-getty@.service.d
   loop_control:
-    label: "/etc/systemd/system/{{ drop_in }}"
+    label: /etc/systemd/system/{{ drop_in }}
     loop_var: drop_in
   tags:
     - issue
@@ -32,6 +33,7 @@
 - name: Configure the drop-in for getty@.service
   ansible.builtin.template:
     src: getty@.service.conf.jinja
+    # yamllint disable-line rule:line-length
     dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/system/getty@.service.d/prompt.conf"
     owner: root
     group: root
@@ -45,6 +47,7 @@
 - name: Configure the drop-in for serial-getty@.service
   ansible.builtin.template:
     src: serial-getty@.service.conf.jinja
+    # yamllint disable-line rule:line-length
     dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/system/serial-getty@.service.d/prompt.conf"
     owner: root
     group: root

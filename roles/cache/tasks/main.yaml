@@ -13,7 +13,7 @@
 
 - name: Create the cache volume filesystem
   community.general.filesystem:
-    device: "/dev/{{ cache_volume_group }}/{{ cache_volume_name }}"
+    device: /dev/{{ cache_volume_group }}/{{ cache_volume_name }}
     fstype: ext4
     opts: "{{ cache_volume_options | default(omit) }}"
     state: present
@@ -24,7 +24,7 @@
 
 - name: Register and mount the cache volume
   ansible.posix.mount:
-    src: "/dev/{{ cache_volume_group }}/{{ cache_volume_name }}"
+    src: /dev/{{ cache_volume_group }}/{{ cache_volume_name }}
     path: "{{ cache_volume_path }}"
     fstype: ext4
     opts: defaults,rw,noatime,nosuid,noexec,nodev

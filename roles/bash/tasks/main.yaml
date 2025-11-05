@@ -1,18 +1,20 @@
 ---
 # tasks file for bash
 
-- name: Install Bash
-  community.general.pacman:
-    name: "{{ bash_packages }}"
-    state: latest
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
   # Work on the assumption that the service will have been pre-installed as part
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
-  when: not bootstrap_mount_base | default('') | length
-  ignore_errors: "{{ ansible_check_mode }}"
-  tags:
-    - bash
-    - packages
+  when: |
+    ansible_distribution == 'Archlinux' and
+    (bootstrap_mount_base | default('') | length) > 0
+
+- name: Install on Debian Linux
+  ansible.builtin.include_tasks:
+    file: debian.yaml
+  when: ansible_distribution == 'Debian'
 
 - name: Configure Bash
   ansible.builtin.template:
@@ -24,7 +26,7 @@
   loop: "{{ bash_config_dirs | product(bash_config_files) }}"
   loop_control:
     loop_var: path
-    label: "/{{ path.0 }}/.{{ path.1 }}"
+    label: /{{ path.0 }}/.{{ path.1 }}
   tags:
     - bash
     - configuration

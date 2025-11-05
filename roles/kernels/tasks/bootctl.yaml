@@ -26,7 +26,7 @@
     - EFI
     - EFI/BOOT
   loop_control:
-    label: "/efi/{{ directory }}"
+    label: /efi/{{ directory }}
     loop_var: directory
   tags:
     - kernel
@@ -35,9 +35,10 @@
 
 - name: Install the systemd-boot bootloader in the chroot
   ansible.builtin.command: # noqa no-changed-when
-    cmd: |-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/fish -c 'bootctl install --esp-path=/efi'
-  when: |-
+    cmd: >-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }}
+        /usr/bin/fish -c 'bootctl install --esp-path=/efi'
+  when: >-
     not ansible_check_mode and
     bootstrap_mount_base | default('') | length
   tags:
@@ -49,7 +50,7 @@
   ansible.builtin.command: # noqa no-changed-when
     cmd: bootctl install
     creates: "{{ bootstrap_mount_base | default('') }}/efi/EFI/BOOT/BOOTX64.EFI"
-  when: |-
+  when: >-
     not ansible_check_mode and
     not bootstrap_mount_base | default('') | length
   tags:

@@ -3,7 +3,7 @@
 
 - name: Create the physical partitions
   community.general.parted:
-    device: "/dev/{{ item.device }}"
+    device: /dev/{{ item.device }}
     label: gpt
     number: "{{ item.number }}"
     name: "{{ item.name }}"
@@ -14,7 +14,8 @@
     flags: "{{ item.flags | default(omit) }}"
   loop: "{{ filesystems_physical_partitions | default([]) }}"
   loop_control:
-    label: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
+    # yamllint disable-line rule:line-length
+    label: /dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}
   tags:
     - filesystems
     - setup
@@ -22,7 +23,8 @@
 
 - name: Create LUKS container on physical partitions
   community.crypto.luks_device:
-    device: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
+    # yamllint disable-line rule:line-length
+    device: /dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}
     type: luks2
     cipher: aes-xts-plain64
     keysize: 512
@@ -31,7 +33,8 @@
     state: present
   loop: "{{ filesystems_physical_partitions | default([]) }}"
   loop_control:
-    label: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
+    # yamllint disable-line rule:line-length
+    label: /dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}
   when: item.luks|default(false)
   tags:
     - filesystems
@@ -41,13 +44,16 @@
 
 - name: Open LUKS containers on physical partitions
   community.crypto.luks_device:
-    device: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
+    # yamllint disable-line rule:line-length
+    device: /dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}
+    # yamllint disable-line rule:line-length
     name: crypt-{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}
     state: opened
     passphrase: "{{ filesystems_crypt_passphrase }}"
   loop: "{{ filesystems_physical_partitions | default([]) }}"
   loop_control:
-    label: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
+    # yamllint disable-line rule:line-length
+    label: /dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}
   when: item.luks|default(false)
   tags:
     - filesystems
@@ -56,15 +62,18 @@
 
 - name: Create the physical volume filesystems
   community.general.filesystem:
-    device: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ ansible_loop.index }}"
+    # yamllint disable-line rule:line-length
+    device: /dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ ansible_loop.index }}
     fstype: "{{ item.fs_type }}"
     opts: "{{ item.fs_opts | default(omit) }}"
     state: present
+    force: true
   when: item.fs_type is defined
   ignore_errors: "{{ ansible_check_mode }}"
   loop: "{{ filesystems_physical_partitions | default([]) }}"
   loop_control:
-    label: "/dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}"
+    # yamllint disable-line rule:line-length
+    label: /dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}
     extended: true
   tags:
     - filesystems

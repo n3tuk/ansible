@@ -54,8 +54,8 @@ rules:
 
   truthy:
     allowed-values:
-      - 'true'
-      - 'false'
+      - "true"
+      - "false"
     check-keys: false
 
   # This is required for ansible-lint

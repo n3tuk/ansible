@@ -1,0 +1,21 @@
+---
+# handlers file for networking
+
+# Update grub when networking changes
+
+- name: Update Grub configuration
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: /usr/sbin/update-grub
+
+- name: Reload the udev rules and trigger
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: /usr/bin/udevadm control --reload-rules && /usr/bin/udevadm trigger
+
+- name: Reload the interfaces configuration
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: /usr/sbin/ifreload -a
+
+- name: Reload FRR
+  ansible.builtin.systemd:
+    name: frr.service
+    state: reloaded

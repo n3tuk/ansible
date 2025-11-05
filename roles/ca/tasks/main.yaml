@@ -4,7 +4,8 @@
 - name: Copy the n3t.uk Root Certificate Authority certificate
   ansible.builtin.copy:
     src: n3tuk-root.pem
-    dest: "{{ bootstrap_mount_base | default('') }}/etc/ssl/private/n3tuk-root.pem"
+    dest: |
+      {{ bootstrap_mount_base | default('') }}/etc/ssl/private/n3tuk-root.pem
     owner: root
     group: root
     mode: u=rw,g=r,o=r

@@ -1,0 +1,11 @@
+---
+# defaults file for tailscale
+
+tailscale_auth_key: ""
+tailscale_args: ""
+tailscale_up_timeout: 120
+
+tailscale_exit_node: false
+tailscale_accept_routes: true
+tailscale_hostname: ""
+tailscale_ssh: false

@@ -3,9 +3,11 @@
 
 - name: Configure the root user in the chroot
   ansible.builtin.shell: # noqa no-changed-when
+    # yamllint disable rule:line-length
     cmd: |-
       /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
         /usr/bin/fish -c 'usermod -s {{ users_root.shell | default(users_default_shell) }} root'
+    # yamllint enable rule:line-length
   when: not ansible_check_mode
   tags:
     - users
@@ -18,7 +20,8 @@
   # not, so is safer for managing this task
   ansible.builtin.command: # noqa no-changed-when
     cmd: |-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/fish -c "usermod -p '{{ users_root.password }}' root"
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c "usermod -p '{{ users_root.password }}' root"
   when: |-
     not ansible_check_mode and
     users_root.password is defined and

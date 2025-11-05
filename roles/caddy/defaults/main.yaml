@@ -1,0 +1,21 @@
+---
+# defaults file for caddy
+
+caddy_user: caddy
+caddy_group: caddy
+
+caddy_url_base: https://caddyserver.com/api/download
+caddy_packages:
+  - github.com/caddy-dns/cloudflare
+
+caddy_update: false
+
+caddy_acme_email: admin@n3t.uk
+caddy_acme_cloudflare_enabled: true
+caddy_acme_cloudflare_api_token: ""
+
+caddy_tls_resolvers:
+  - 1.1.1.1
+  - 1.0.0.1
+  - 2606:4700:4700::1111
+  - 2606:4700:4700::1001

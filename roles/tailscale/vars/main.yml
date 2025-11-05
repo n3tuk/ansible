@@ -1,0 +1,14 @@
+---
+# vars file for tailscale
+
+tailscale_packages_debian:
+  - tailscale
+  - iproute2
+
+tailscale_service: tailscaled
+
+tailscale_apt_repository: >-
+  https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}
+# yamllint disable rule:line-length
+tailscale_apt_signkey: >-
+  https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}.noarmor.gpg

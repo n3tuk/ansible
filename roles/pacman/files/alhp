@@ -3,8 +3,9 @@
 # Use the three CNAMEs for cache-01.s.cym-south-1.kube.uk to allow three tries
 # against the same server in the event of network or protocol errors when
 # requesting databases or packages for all configured Arch Linux repositories
-Server = http://1.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
-Server = http://2.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
-Server = http://3.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
-# This is a fall-back server in case the above do not work
-Server = https://alhp.krautflare.de/$repo/os/$arch/
+CacheServer = http://1.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
+CacheServer = http://2.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
+CacheServer = http://3.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
+# These are fall-back servers in case the above do not work
+CacheServer = https://cdn.alhp.dev/$repo/os/$arch/
+Server = https://alhp.dev/$repo/os/$arch/

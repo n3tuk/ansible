@@ -1,5 +1,7 @@
 ---
 # vars file for ssh
 
-ssh_packages:
+ssh_packages_arch:
   - openssh
+ssh_packages_debian:
+  - ssh

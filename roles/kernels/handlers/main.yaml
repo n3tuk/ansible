@@ -13,6 +13,6 @@
   # environments and on physical machines only
   ansible.builtin.command: # noqa no-changed-when
     cmd: sbctl sign-all
-  when: |-
+  when: >-
     not bootstrap_mount_base | default('') | length and
     device_type | default("virtual") == "physical"

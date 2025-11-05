@@ -16,9 +16,11 @@
 
 - name: Create and configure the chroot group {{ group.name }}
   ansible.builtin.shell: # noqa no-changed-when
+    # yamllint disable rule:line-length
     cmd: |-
       /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
         /usr/bin/fish -c 'groupadd{% if group.settings.system %} -r{% endif %} {{ group.name }}'
+    # yamllint enable rule:line-length
   # Only create the group when the group was found not to exist based on above
   when: not ansible_check_mode and userdbctl.rc == 1
   tags:

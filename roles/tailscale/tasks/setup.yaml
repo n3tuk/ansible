@@ -1,0 +1,87 @@
+---
+# setup-specific tasks file for tailscale
+
+- name: Enable and start the Tailscale service
+  ansible.builtin.service:
+    name: "{{ tailscale_service }}"
+    state: started
+    enabled: true
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - tailscale
+    - service
+
+- name: Fetch Tailscale's status
+  ansible.builtin.command: >-
+    tailscale status --json
+  ignore_errors: "{{ ansible_check_mode }}"
+  changed_when: false
+  register: tailscale_status
+  tags:
+    - tailscale
+    - setup
+
+- name: Parse the Tailscale status response
+  vars:
+    tailscale_status_parsed: >-
+      {{ tailscale_status.stdout | from_json }}
+  ansible.builtin.set_fact:
+    tailscale_is_online: >-
+      {{ tailscale_status_parsed.Self.Online }}
+  when: >-
+    (not ansible_check_mode) and
+    (tailscale_status.stdout is defined) and
+    (tailscale_status.stdout | length > 0)
+  tags:
+    - tailscale
+    - setup
+
+- name: Bring up Tailscale
+  ansible.builtin.command: >-
+    tailscale up {{ tailscale_args | trim }}
+      --authkey={{ tailscale_auth_key | trim }}
+    {% if tailscale_hostname is defined and tailscale_hostname | length > 0 %}
+      --hostname={{ tailscale_hostname | trim }}
+    {% endif %}
+    {% if tailscale_exit_node %}
+      --exit-node=true
+    {% endif %}
+    {% if tailscale_accept_routes %}
+      --accept-routes=true
+    {% endif %}
+    {% if tailscale_ssh %}
+      --ssh=true
+    {% endif %}
+      --timeout={{ tailscale_up_timeout | int }}s
+  # Since the authorisation key is included in this task's output (provided as
+  # plain-text on the command-line), we do not want to log output here
+  no_log: true
+  changed_when: true
+  register: tailscale_start
+  # If a failure occurred due to state changes, we still want to log a redacted
+  # version of the error
+  ignore_errors: true
+  when: >-
+    (not ansible_check_mode) and
+    (not tailscale_is_online)
+  notify: Confirm Tailscale is Connected
+  async: "{{ (tailscale_up_timeout | int) + 10 }}"
+  poll: 5
+  tags:
+    - tailscale
+    - setup
+
+- name: Report non-sensitive stdout from Tailscale
+  ansible.builtin.debug:
+    msg: >
+      {{ tailscale_start.stdout
+         | replace(tailscale_auth_key, 'REDACTED')
+         | regex_replace('\\t', '')
+         | split('\n') }}
+  when: >-
+    (not ansible_check_mode) and
+    (tailscale_start is failed) and
+    (tailscale_start.stdout | length > 0)
+  tags:
+    - tailscale
+    - setup

@@ -1,5 +1,7 @@
 ---
 # vars file for starship
 
-starship_packages:
+starship_packages_arch:
+  - starship
+starship_packages_debian:
   - starship

@@ -1,0 +1,42 @@
+---
+# pre-flight specific tasks file for tailscale
+
+- name: Check for supported distributions
+  ansible.builtin.fail:
+    msg: >-
+      This Ansible role is intended to run on Arch- or Debian-based Linux
+      systems only.
+  when: >-
+    not (
+      ansible_distribution == 'Debian' or
+      ansible_distribution == 'Archlinux'
+    )
+  tags:
+    - tailscale
+    - pre-flight
+
+- name: Tailscale auth key is required
+  ansible.builtin.fail:
+    msg: >-
+      A Tailscale authorisation key (auth key) is required to set up Tailscale
+      on the network. Please ensure that the `tailscale_auth_key` variable is
+      set before running this Ansible role. You must include a Node
+      Authorization auth key. You can create new Tailscale authorisation keys in
+      the Admin console: https://login.tailscale.com/admin/machines/new-linux
+  when:
+    - not tailscale_auth_key
+  tags:
+    - tailscale
+    - pre-flight
+
+- name: Tailscale auth key is invalid
+  ansible.builtin.fail:
+    msg: >-
+      This Ansible role expects a `Linux server` type authorisation key for
+      setting up Tailscale as this is for setting up on servers only. You can
+      create new Tailscale authorisation keys in the Admin console:
+      https://login.tailscale.com/admin/machines/new-linux
+  when: not tailscale_auth_key.startswith('tskey-auth-')
+  tags:
+    - tailscale
+    - pre-flight

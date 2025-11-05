@@ -1,0 +1,937 @@
+---
+version: 3
+
+vars:
+  # ANSI Colours
+  cr: \e[1;31m
+  cg: \e[0;32m
+  cw: \e[1;37m
+  cc: \e[0m
+
+tasks:
+  switch:
+    desc: Switch the active version of Terraform installed
+    vars:
+      bin: >
+        {{ default (expandenv "$HOME/.local/bin") .TFSWITCH_BIN_DIR }}/terraform
+    summary: |-
+      Switch the active version of Terraform installed on the system by using
+      the required_version constraint in the terraform {} block (usually found
+      in terraform.tf) to define the latest version, and download and install,
+      if required.
+
+      This will always run the command, regardless of any changes in this
+      repository, as the version of Terraform in use can be changed by reasons
+      external to this repository, so always run and always update when
+      requested.
+
+      This does not need, nor interfere with, any system-installed version of
+      Terraform using either any system package manager, or homebrew. Instead, a
+      symlink is installed to '{{ .bin }}'.
+
+      Ensure that the above directory (i.e. '{{ dir .bin }}') is in your $PATH,
+      otherwise, to override this, set $TFSWITCH_BIN_DIR in your environment
+      before running `task {{ .TASK }}`.
+    silent: true
+    cmds:
+      - cmd: |-
+          tfswitch \
+            --bin='{{ .bin }}' \
+            --default='~> 1.9.0'
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+
+  lint:
+    desc: Lint all Terraform and associated files for this configuration
+    summary: |-
+      Run linting checks across this Terraform configuration to find any
+      potential issues within the repository by running the following steps:
+
+      - Parse selected JSON, YAML, and Markdown files through Prettier in order
+        to ensure they are syntactically correct, and that they are consistent
+        in their layout and usage;
+      - Review the format of selected Markdown files to ensure they are clean
+        and minimise the ability for the page to be incorrectly rendered, such
+        as de-duplicating headers, consistent text width, formatted list items,
+        and code layouts.
+      - Run tflint on the Terraform configuration, making sure that any
+        Terraform code is syntactically correct, properly formatted, and mostly
+        valid for runtime (e.g. using correct instance types, names are not too
+        long, and resource names are correctly formatted).
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, selecting
+      one of the environments as listed, to update the configuration and
+      backend:
+
+      $ task {{
+          .TASK | replace "lint" "environment"
+        }}:{{ "{" }}{{ .environments }}{{ "}" }}
+    silent: true
+    deps:
+      - task: validate
+    cmds:
+      - task: fmt
+      - task: prettier
+      - task: tflint
+      - task: markdownlint
+
+  fmt:
+    desc: Format all Terraform files for this configuration
+    summary: |-
+      Run the fmt action for all Terraform files in this Terraform configuration
+      to ensure they are all correctly structured. This provides a quick check
+      on the code to ensure it is valid, and changes in whitespace are removed.
+
+      The fmt action will be run over all .tf files in the current directory, as
+      well as looking for any .tfvars files in the variables/ directory (for
+      per-environment configuration). If there is a tests/ directory, then
+      .tftest.hcl files will be scanned for and processed there too.
+    silent: true
+    sources:
+      - "*.tf"
+      - variables/*.tfvars
+      - tests/*.tftest.hcl
+    cmds:
+      - cmd: |-
+          terraform fmt -no-color
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+      - for:
+          - tests
+          - variables
+        # Make sure to use the if here rather than "test ... &&" as in the
+        # latter case, if the directory does not exist the test will fail
+        cmd: |-
+          if test -d '{{ .ITEM }}'
+          then
+            terraform fmt -no-color '{{ .ITEM }}'
+            echo -e '{{ .ITEM }}/ {{ .cg }}Passed{{ .cc }}'
+          fi
+
+  prettier:
+    internal: true
+    silent: true
+    sources:
+      - "*.md"
+      - assets/**.yaml
+      - assets/**.json
+      - "{{ .root }}/.prettier.yaml"
+      - "{{ .root }}/.prettierignore"
+      - "{{ .root }}/.gitignore"
+    vars:
+      files:
+        sh: |-
+          find . \
+               -ignore_readdir_race \
+               -type f \
+               -not \
+            \(     -path './.terraform/*' \
+               -or -path './*/.trivy/*' \
+            \) -and \
+            \( -iname '*.md' \
+               -or -iwholename './assets/*.json' \
+               -or -iwholename './assets/*.yaml' \
+            \) -printf '%P ' \
+          2> /dev/null || true
+    cmds:
+      - cmd: |-
+          [[ -n '{{ .files }}' ]] || exit 0
+          prettier --log-level log \
+            --write --config '{{ .root }}/.prettier.yaml' \
+            --cache --cache-location .prettiercache \
+            {{ .files }}
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+
+  tflint:init:
+    internal: true
+    silent: true
+    sources:
+      - "{{ .root }}/.tflint.hcl"
+    cmds:
+      - cmd: |-
+          tflint --config '{{ .root }}/.tflint.hcl' --init \
+            | { grep -v 'already installed' || true; }
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+
+  tflint:
+    internal: true
+    silent: true
+    sources:
+      - "{{ .root }}/.tflint.hcl"
+      - "*.tf"
+      - variables/{{ .environment }}.tfvars
+      - assets/*
+      - templates/*
+    vars:
+      environment:
+        sh: |-
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+      options:
+        sh: |-
+          echo -n '--var=environment={{ .environment }}'
+          if [[ -f 'variables/{{ .environment }}.tfvars' ]]
+          then
+            echo -n ' --var-file=variables/{{ .environment }}.tfvars'
+          fi
+    deps:
+      - task: tflint:init
+    cmds:
+      - cmd: |-
+          echo 'environment:'
+          echo -e '  {{ .cw }}{{ .environment }}{{ .cc }}'
+          echo 'options:'
+          echo -e '  {{ .cw }}{{
+            splitList " " .options | join (cat .cc "\n " .cw)
+          }}{{ .cc}}'
+          tflint --config '{{ .root }}/.tflint.hcl' {{ .options }}
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+
+  markdownlint:
+    internal: true
+    silent: true
+    sources:
+      - "*.md"
+      - "**/*.md"
+      - "{{ .root }}/.markdownlint.yaml"
+      - "{{ .root }}/.markdownignore"
+    vars:
+      files:
+        sh: |-
+          find . \
+            -ignore_readdir_race \
+            -type f \
+            -not -path './.terraform/*' \
+            -iname '*.md' \
+            -printf '%P ' \
+          2> /dev/null || true
+    cmds:
+      - cmd: |-
+          [[ -n '{{ .files }}' ]] || exit 0
+          markdownlint \
+            --config '{{ .root }}/.markdownlint.yaml' \
+            --ignore-path '{{ .root }}/.markdownignore' \
+            {{ .files }}
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+
+  init:
+    internal: true
+    silent: true
+    sources:
+      # Monitor only the terraform.tf and the relevant environment backend
+      # configuration fine as these are where the providers should be configured
+      # and the remote backend defined, so any re-initialisation will only be
+      # needed when these files changes, rather than just any .tf file
+      - terraform.tf
+      - "{{ .root }}/environments/{{ .environment }}.conf"
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+      repository:
+        sh: cd .. && basename $PWD | sed -e 's/^alta-aware-//'
+    cmds:
+      # Perform some sanity checks on the backend configuration to ensure this
+      # maps to the name of the repository, otherwise we may overwrite another
+      # configuration's state files.
+      #
+      # Note: This works on the assumption that the name of the directory
+      #       matches the name of the repository (in long or short form), which
+      #       is known to be true in GitHub Actions. If the directory name is
+      #       incorrect, the checks will fail the configuration safely.
+      # yamllint disable rule:line-length
+      - cmd: |-
+          TFSTATE_FOLDER=$(
+            hcledit attribute get key \
+              -f ../environments/{{ .environment }}.conf \
+            | tr -d \" \
+            | cut -d / -f 3)
+          TFSTATE_FILE=$(
+            hcledit attribute get key \
+              -f ../environments/{{ .environment }}.conf \
+            | tr -d \" \
+            | cut -d / -f 4)
+          if [[ "${TFSTATE_FOLDER}" != "{{ .environment}}" ]]
+          then
+            echo -e '{{ .cr }}CRITICAL: The environment path of the Terraform state file object key{{ .cc }}'
+            echo -e '{{ .cr }}          for the remote S3 backend does not match the name of the environment!{{ .cc }}'
+            echo
+            echo -e '      found: {{ .cr }}'${TFSTATE_FOLDER}'{{ .cc }}'${TFSTATE_FILE:+/${TFSTATE_FILE}}
+            echo -e '   expected: {{ .cw }}{{ .environment }}{{ .cc }}/'${TFSTATE_FILE:-"{{ .repository }}.tfstate"}
+            echo
+            echo -e 'Check {{ .cw }}environments/{{ .environment }}.conf{{ .cc }} configuration file and update the'
+            echo -e 'value of the `{{ .cw }}key{{ .cc }}` attribute to the above filename {{ .cw }}before{{ .cc }}'
+            echo    'continuing.'
+            echo
+            echo -e '{{ .cr }}Refusing to initilise Terraform.{{ .cc }}'
+            exit 1
+          fi
+      - cmd: |-
+          TFSTATE_FILE=$(
+            hcledit attribute get key \
+              -f ../environments/{{ .environment }}.conf \
+            | tr -d \" \
+            | cut -d / -f 4)
+          if [[ "${TFSTATE_FILE}" != "{{ .repository }}.tfstate" ]]
+          then
+            echo -e '{{ .cr }}CRITICAL: The filename of the Terraform state file object key for the{{ .cc }}'
+            echo -e '{{ .cr }}          remote S3 backend does not match the name of the repository!{{ .cc }}'
+            echo
+            echo -e '      found: {{ .cr }}'${TFSTATE_FILE}'{{ .cc }}'
+            echo -e '   expected: {{ .cw }}{{ .repository }}.tfstate{{ .cc }}'
+            echo
+            echo -e 'Check {{ .cw }}environments/{{ .environment }}.conf{{ .cc }} configuration file and update the'
+            echo -e 'value of the `{{ .cw }}key{{ .cc }}` attribute to the above filename {{ .cw }}before{{ .cc }}'
+            echo    'continuing.'
+            echo
+            echo -e '{{ .cr }}Refusing to initilise Terraform.{{ .cc }}'
+            exit 1
+          fi
+      - cmd: |-
+          SESSION_NAME=$(
+            hcledit attribute get assume_role \
+              -f ../environments/{{ .environment }}.conf \
+            | grep session_name \
+            | cut -d \" -f 2)
+          if [[ "${SESSION_NAME}" != "state@{{ .repository }}" ]]
+          then
+            echo -e '{{ .cr }}CRITICAL: The session name for the access of the Terraform state file{{ .cc }}'
+            echo -e '{{ .cr }}via the remote S3 backend does not match the name of the repository!{{ .cc }}'
+            echo
+            echo -e '      found: {{ .cr }}'${SESSION_NAME}'{{ .cc }}'
+            echo -e '   expected: {{ .cw }}state@{{ .repository }}{{ .cc }}'
+            echo
+            echo -e 'Check {{ .cw }}environments/{{ .environment }}.conf{{ .cc }} configuration file and update the'
+            echo -e 'value of the `{{ .cw }}session_name{{ .cc }}` attribute under `{{ .cw }}assume_role{{ .cc }}`'
+            echo -e 'to the above name {{ .cw }}before{{ .cc }} continuing.'
+            echo
+            echo -e '{{ .cr }}Refusing to initilise Terraform.{{ .cc }}'
+            exit 1
+          fi
+      - cmd: |-
+          FILE=$(
+            realpath \
+              --relative-to="$PWD" \
+              "{{ .root }}/environments/{{ .environment }}.conf")
+          BACKEND='-backend=false'
+          if [[ "${TASK_INIT_BACKEND:-false}" == "true" ]]
+          then
+            BACKEND="-backend-config=${FILE}"
+          fi
+
+          echo 'environment:'
+          echo -e '  {{ .cw }}{{ .environment }}{{ .cc }}'
+          echo 'backend:'
+          echo -e '  {{ .cw }}'"${BACKEND}"'{{ .cc }}'
+          echo 'options:'
+          echo -e '  {{ .cw }}-var=environment={{ .environment }}{{ .cc }}'
+          if [[ -f 'variables/{{ .environment }}.tfvars' ]]
+          then
+            echo -e '  {{ .cw }}-var-file=variables/{{ .environment }}.tfvars{{ .cc }}'
+          fi
+
+          terraform init \
+            ${BACKEND} \
+            -no-color \
+            -input=false
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+      - task: lock
+      # yamllint enable rule:line-length
+    status:
+      - test -f .terraform.lock.hcl
+      - test -d .terraform
+
+  lock:
+    internal: true
+    silent: true
+    cmds:
+      - cmd: |-
+          terraform providers lock \
+            -no-color \
+            -platform=linux_amd64 \
+            -platform=darwin_arm64 \
+            -enable-plugin-cache
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+
+  environment:
+    desc: Show the environment for this Terraform configuration
+    summary: |-
+      Show the environment this Terraform configuration will be deployed to,
+      which selects the backend to be used when initilising Terraform, as well
+      as the value of the environment variable for the configuration, and as
+      such should control how this will be planned and applied.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and uses either internal logic, or variables
+      sourced through .tfvars files (stored under the variables/ directory), to
+      define the differences between environments.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, where the
+      `{name}` is the name of the environment to be deployed to:
+
+      $ task {{ .TASK }}:{{ "{" }}{{ .environments }}{{ "}" }}
+
+      environments:
+
+      The following are the currently supported environments for this Terraform
+      configuration:
+
+      - {{ .environments | splitList "," | join "\n- " }}
+    silent: true
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+    cmds:
+      # yamllint disable rule:line-length
+      - cmd: |-
+          case '{{ .environment }}' in
+            {{ .environments | splitList "," | join "|" }})
+              if [[ ! -f '{{ .root }}/environments/{{ .environment }}.conf' ]]
+              then
+                echo >&2 'The environment {{ .environment }} has no known backend configuration.'
+                echo >&2 'Run `task {{ .TASK }}:{{ .default }}` to reset.'
+                exit 1
+              fi
+              ;;
+            *)
+              if [[ '{{ .environment }}' != '{{ .default }}' ]]
+              then
+                echo >&2 'The environment {{ .environment }} is invalid.'
+                echo >&2 -e 'Environments must be one of: {{ .environments | splitList "," | join ", " }}.'
+                echo >&2 'Run `task {{ .TASK }}:{{ .default }}` to reset.'
+                exit 1
+              fi
+              ;;
+          esac
+      - cmd: |-
+          FILE=$(
+            realpath \
+              --relative-to="$PWD" \
+              "{{ .root }}/environments/{{ .environment }}.conf"
+          )
+          echo 'environment:'
+          echo -e '  {{ .cw }}{{ .environment }}{{ .cc }}'
+          echo "backend:"
+          echo -e '  {{ .cw }}'"${FILE}"'{{ .cc }}'
+          echo 'options:'
+          echo -e '  {{ .cw }}-var=environment={{ .environment }}{{ .cc }}'
+          if [[ -f 'variables/{{ .environment }}.tfvars' ]]
+          then
+            echo -e '  {{ .cw }}-var-file=variables/{{ .environment }}.tfvars{{ .cc }}'
+          fi
+      # yamllint enable rule:line-length
+
+  environment:*:
+    label: '{{ trimSuffix ":*" .TASK }}:{{ "{" }}{{ .environments }}{{ "}" }}'
+    desc: Select the environment for this Terraform configuration
+    summary: |-
+      Select the {{ index .MATCH 0 }} environment this Terraform configuration
+      will be developed against, including for testing, planning, and deploying.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and uses either internal logic, or variables
+      sourced through .tfvars files (stored under the variables/ directory), to
+      define the differences between environments.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, where the
+      `{name}` is the name of the environment to be deployed to:
+
+      $ task {{ trimSuffix ":*" .TASK }}:{{ "{" }}{{ .environments }}{{ "}" }}
+
+      environments:
+
+      The following are the currently supported environments for this Terraform
+      configuration:
+
+      - {{ .environments | splitList "," | join "\n- " }}
+    prefix: '{{ trimSuffix ":*" .TASK }}:{{ index .MATCH 0 }}'
+    silent: true
+    vars:
+      target: "{{ index .MATCH 0 }}"
+      # This variable may not be re-read after the Taskfile has loaded but
+      # before the task is called from within another task which has changed the
+      # contents of the this file. As such, if we're passed the variable as a
+      # value, check for it first and use that, before falling back to the
+      # contents of the file, or we may always fall back to the default value,
+      # even if the environment has been set to a non-default value.
+      environment:
+        sh: |-
+          if [[ -n "{{ .environment }}" ]]; then
+            echo -n "{{ .environment }}"
+          else
+            ENV=$(cat .environment 2>/dev/null || true)
+            [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+          fi
+    cmds:
+      # yamllint disable rule:line-length
+      - cmd: |-
+          case '{{ .target }}' in
+            {{ .environments | splitList "," | join "|" }})
+              if [[ ! -f '{{ .root }}/environments/{{ .target }}.conf' ]]; then
+                echo >&2 'The environment selected ({{ .target }}) has no known backend configuration.'
+                echo >&2 'Please check and run `task {{ .TASK }}:{{ .target }}` to try again.'
+                exit 1
+              fi
+              ;;
+            *)
+              echo >&2 'Environments must be one of: {{ .environments | splitList "," | join ", " }}.'
+              echo >&2 'Please run `task {{ trimSuffix ":*" .TASK }}:{{ .default }}` to reset.'
+              exit 1
+              ;;
+          esac
+      # We cannot rely on the .environment variable to tell us the true value as
+      # it is right now, so this test must read it from the disk directly to
+      # check, or we may have a race condition between the test thinking what is
+      # set is correct when it is not within the file
+      - cmd: |-
+          if [[ '$(cat .environment 2> /dev/null || true)' != '{{ .target }}' ]]
+          then
+            echo 'environment:'
+            echo -e '  {{ .cw }}{{ .target }}{{ .cc }}'
+            echo -n '{{ .target }}' > .environment
+            rm -rf .terraform
+          fi
+      - task: init
+        vars:
+          # Force the name of the environment to be passed into the init task to
+          # ensure that we initilise against this target, as the above command
+          # setting the .environment file may not be updated within the init
+          # task's variables callout
+          environment:
+            ref: .target
+      - cmd: |-
+          echo 'environment:'
+          echo -e '  {{ .cw }}{{ .target }}{{ .cc }}'
+          echo 'options:'
+          echo -e '  {{ .cw }}-var=environment={{ .target }}{{ .cc }}'
+          if [[ -f "variables/{{ .target }}.tfvars" ]]
+          then
+            echo -e '  {{ .cw }}-var-file=variables/{{ .target }}.tfvars{{ .cc }}'
+          fi
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+      # yamllint enable rule:line-length
+
+  validate:
+    desc: Validate the Terraform configuration
+    summary: |-
+      Initialise (if required) and validate the syntax of this Terraform
+      configuration to ensure that the code is correct and valid for the
+      {{ .environment }} environment.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, selecting
+      one of the environments as listed, to update the configuration and
+      backend:
+
+      $ task {{
+          .TASK | replace "validate" "environment"
+        }}:{{ "{" }}{{ .environments }}{{ "}" }}
+    silent: true
+    sources:
+      - "*.tf"
+      - variables/{{ .environment }}.tfvars
+      - assets/*
+      - templates/*
+    deps:
+      - task: init
+    cmds:
+      - cmd: |-
+          terraform get -no-color
+          terraform validate -no-color
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+
+  plan:
+    desc: Plan the changes for this Terraform configuration
+    summary: |-
+      Initialise and validate (if required) this Terraform configuration, and
+      then plan the changes which need to be deployed, based on what is deployed
+      deployed and what that configuration defines should be deployed for the
+      {{ .environment }} environment.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, selecting
+      one of the environments as listed, to update the configuration and
+      backend:
+
+      $ task {{
+          .TASK | replace "plan" "environment"
+        }}:{{ "{" }}{{ .environments }}{{ "}" }}
+    silent: true
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+      options:
+        sh: |-
+          echo -n '-var=environment={{ .environment }}'
+          if [[ -f 'variables/{{ .environment }}.tfvars' ]]
+          then
+            echo -n ' -var-file=variables/{{ .environment }}.tfvars'
+          fi
+    deps:
+      - task: validate
+    cmds:
+      # yamllint disable rule:line-length
+      - cmd: |-
+          echo 'environment:'
+          echo -e '  {{ .cw }}{{ .environment }}{{ .cc }}'
+          echo 'options:'
+          echo -e '  {{ .cw }}{{ splitList " " .options | join (cat .cc "\n " .cw) }}{{ .cc }}'
+          terraform plan \
+            -no-color \
+            {{ .options }} \
+            -input=false \
+            -out terraform.tfplan \
+            |& tee '.terraform/plan.log'
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+      # yamllint enable rule:line-length
+    status:
+      - test -f terraform.tfplan
+
+  apply:
+    desc: Apply the changes for this Terraform configuration
+    summary: |-
+      Plan any changes (if required) this Terraform configuration, and then
+      apply those changes for the {{ .environment }} environment.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, selecting
+      one of the environments as listed, to update the configuration and
+      backend:
+
+      $ task {{
+          .TASK | replace "apply" "environment"
+        }}:{{ "{" }}{{ .environments }}{{ "}" }}
+    silent: true
+    sources:
+      - terraform.tfplan
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+    deps:
+      - task: plan
+    cmds:
+      # The terraform.tfplan file is rendered obsolete by even a partial apply
+      # of the configuration, so must always be deleted when an apply is run
+      - defer: |-
+          rm -f terraform.tfplan
+      - cmd: |-
+          echo 'environment:'
+          echo -e '  {{ .cw }}{{ .environment }}{{ .cc }}'
+          terraform apply \
+            -no-color \
+            terraform.tfplan \
+            |& tee '.terraform/apply.log'
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+
+  output:
+    desc: Show the outputs for this Terraform configuration
+    summary: |-
+      Initialise (if required) and then show the outputs of this Terraform
+      configuration for the {{ .environment }} environment.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, selecting
+      one of the environments as listed, to update the configuration and
+      backend:
+
+      $ task {{
+          .TASK | replace "output" "environment"
+        }}:{{ "{" }}{{ .environments }}{{ "}" }}
+
+      To view a single output for this environment (for example, because that
+      value is set as sensitive), run the following command, where `{name}` is
+      the name of the output to be viewed:
+
+      $ task --output interleaved {{ .TASK }}:{name}
+    silent: true
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+    deps:
+      - task: init
+    cmds:
+      - cmd: |-
+          echo 'environment:'
+          echo -e '  {{ .cw }}{{ .environment }}{{ .cc }}'
+          terraform output -no-color
+
+  output:*:
+    label: '{{ trimSuffix ":*" .TASK }}:{name}'
+    desc: Show a selected output for this Terraform configuration
+    summary: |-
+      Show the {{ index .MATCH 0 }} output of this Terraform configuration
+      for the {{ .environment }} environment.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, selecting
+      one of the environments as listed, to update the configuration and
+      backend:
+
+      $ task {{
+          .TASK | replace "output:*" "environment"
+        }}:{{ "{" }}{{ .environments }}{{ "}" }}
+    prefix: '{{ trimSuffix ":*" .TASK }}:{{ index .MATCH 0 }}'
+    silent: true
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+    deps:
+      - task: init
+    cmds:
+      - cmd: |-
+          echo -e 'environment:'
+          echo -e '  {{ .cw }}{{ .environment }}{{ .cc }}'
+          echo -n '{{ index .MATCH 0 }} = '
+          terraform output -no-color {{ index .MATCH 0}}
+
+  destroy:
+    desc: Destroy all resources deployed for this Terraform configuration
+    summary: |-
+      Plan for a destruction of this Terraform configuration, and then
+      apply those changes for the {{ .environment }} environment.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, selecting
+      one of the environments as listed, to update the configuration and
+      backend:
+
+      $ task {{
+          .TASK | replace "destroy" "environment"
+        }}:{{ "{" }}{{ .environments }}{{ "}" }}
+    silent: true
+    prompt: |-
+      This task will destory any resources previously created through this
+      configuration for the {{ .environment }} environment.
+
+      Are you really sure you want to do this?
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+      options:
+        sh: |-
+          echo -n '-var=environment={{ .environment }}'
+          if [[ -f 'variables/{{ .environment }}.tfvars' ]]
+          then
+            echo -n ' -var-file=variables/{{ .environment }}.tfvars'
+          fi
+    cmds:
+      # yamllint disable rule:line-length
+      - cmd: |-
+          echo 'environment:'
+          echo -e '  {{ .cw }}{{ .environment }}{{ .cc }}'
+          echo 'options:'
+          echo -e '  {{ .cw }}{{ splitList " " .options | join (cat .cc "\n " .cw) }}{{ .cc }}'
+          terraform destroy \
+            -no-color \
+            {{ .options }} \
+            -auto-approve \
+            |& tee '.terraform/destroy.log'
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+      # yamllint enable rule:line-length
+
+  trivy:
+    internal: true
+    silent: true
+    sources:
+      - "{{ .root }}/.trivyignore"
+      - "*.tf"
+      - variables/{{ .environment }}.tfvars
+      - assets/*
+      - templates/*
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+      options:
+        sh: |-
+          if [[ -f 'variables/{{ .environment }}.tfvars' ]]
+          then
+            echo -n '--tf-vars=variables/{{ .environment }}.tfvars'
+          fi
+    cmds:
+      - cmd: |-
+          echo 'environment:'
+          echo -e '   {{ .cw }}{{ .environment }}{{ .cc }}'
+          echo 'options:'
+          echo -e '   {{ .cw }}{{ default "(none)" .options }}{{ .cc }}'
+          trivy \
+              --quiet \
+            config \
+              --skip-dirs .terraform \
+              --cache-dir '{{ .root }}/.trivy' \
+              --misconfig-scanners terraform \
+              --ignorefile '{{ .root }}/.trivyignore' \
+              --format table \
+              --exit-code 1 \
+              {{ .options }} . \
+            2> >(grep -v INFO)
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+
+  documentation:
+    aliases:
+      - docs
+    desc: Update the README.md file with terraform-docs
+    summary: |-
+      Update the README.md file with a summary of the Terraform configuration,
+      including information about the requirements, variables and outputs, as
+      well as the resources created, using terraform-docs.
+
+      This output from terraform-docs is designed to overwrite previous versions
+      witin the README.md, and not to the conflict with processing by Prettier
+      (which will otherwise reformat the tables) nor markdownlint (which is
+      configured to ignore certain elements, such some line lengths and HTML
+      entities).
+    silent: true
+    sources:
+      - "{{ .root }}/.terraform-docs.yaml"
+      - "*.tf"
+    cmds:
+      # Make sure the lockfile option is explicitly set as configurations should
+      # pull this information directly from the lockfile as a reference for what
+      # is actually being used to plan and deploy the resources
+      - cmd: |-
+          terraform-docs . \
+            --config '{{ .root }}/.terraform-docs.yaml' \
+            --lockfile=true
+          echo -e '{{ .cg }}Completed{{ .cc }}'
+
+  test:
+    desc: Run tests against the Terraform configuration
+    summary: |-
+      Run unit and integration tests against the Terraform configuration (if
+      present) to ensure that any code or deployable resources are valid and
+      correct for the {{ .environment }} environment.
+
+      This Terraform configuration is designed to contain the same code to be
+      deployed to all environments and, through the environments variable, uses
+      either internal logic, or variables sourced through .tfvars files (stored
+      under the variables/ directory), to define the differences between the
+      deployments.
+
+      To change the environment being used, run the following command, selecting
+      one of the environments as listed, to update the configuration and
+      backend:
+
+      $ task {{
+          .TASK | replace "test" "environment"
+        }}:{{ "{" }}{{ .environments }}{{ "}" }}
+    silent: true
+    prefix: test
+    sources:
+      - "*.tf"
+      - variables/{{ .environment }}.tfvars
+      - tests/*.tftest.hcl
+      - assets/*
+      - templates/*
+    vars:
+      environment:
+        sh: |
+          ENV=$(cat .environment 2>/dev/null || true)
+          [[ -n "${ENV}" ]] && echo "${ENV}" || echo "{{ .default }}"
+      options:
+        sh: |-
+          echo -n '-var=environment={{ .environment }}'
+          if [[ -f 'variables/{{ .environment }}.tfvars' ]]
+          then
+            echo -n ' -var-file=variables/{{ .environment }}.tfvars'
+          fi
+    deps:
+      - task: init
+    cmds:
+      - cmd: |-
+          test -d tests || exit 0
+          echo 'environment:'
+          echo -e '   {{ .cw }}{{ .environment }}{{ .cc }}'
+          echo 'options:'
+          echo -e '   {{ .cw }}{{ default "(none)" .options }}{{ .cc }}'
+          terraform test -no-color {{ .options }}
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+
+  clean:
+    desc: Clean temporary directories and files from this configuration
+    summary: |
+      Clean any temporary directories and files created by both this Taskfile,
+      and the tools and applications called from it.
+
+      - Remove any previous Terraform plan files, and Terraform state files
+        reset the current state of the configuration;
+      - Remove any previously fetched Terraform Modules and Providers, forcing a
+        re-initilisation and fetching fresh copies of these;
+      - Remove any cache files for Prettier to ensure that all files are
+        re-evaluated by Prettier for formatting and syntax validity; and
+      - Remove all cache files for Task to ensure that all files are
+        re-evaluated by Task and all tasks are re-run from scratch.
+
+      This step explicitly does not remove the .environment file so that when
+      this Terraform configuration is re-initilisated the connected environment
+      remains, and the connection with the backend is restored.
+    silent: true
+    run: once
+    cmds:
+      - cmd: |-
+          rm -f terraform.tfplan
+          rm -f .prettiercache
+          rm -rf '{{ .root }}/.trivy'
+          rm -rf .terraform
+          rm -rf .task
+          echo -e '{{ .cg }}Completed{{ .cc }}'

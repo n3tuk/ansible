@@ -1,5 +1,7 @@
 ---
 # vars file for sudo
 
-sudo_packages:
+sudo_packages_arch:
+  - sudo
+sudo_packages_debian:
   - sudo

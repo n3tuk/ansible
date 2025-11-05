@@ -2,7 +2,7 @@
 
 UsePAM yes
 LoginGraceTime 15s
-PermitRootLogin no
+PermitRootLogin {{ ssh_server_permit_root_login | default('no') }}
 StrictModes yes
 MaxAuthTries 6
 MaxSessions 10

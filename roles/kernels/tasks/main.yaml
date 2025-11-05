@@ -47,7 +47,7 @@
     - EFI
     - EFI/Linux
   loop_control:
-    label: "/efi/{{ directory }}"
+    label: /efi/{{ directory }}
     loop_var: directory
   tags:
     - kernel
@@ -74,7 +74,7 @@
     name: "{{ kernels_ucode }}"
     state: latest
   # Microcodes can and should only be installed on physical hosts
-  when: |-
+  when: >-
     kernels_mkinitcpio_microcode | default(false) and
     device_type | default("virtual") == "physical" and
     not bootstrap_mount_base | default('') | length

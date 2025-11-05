@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# DO NOT EDIT - Managed by Ansible
+
+set -ueo pipefail
+
+# IFACE will normally be set by ifup, but define it here, just in case, else
+# bash will fail with an unbound variable error
+IFACE=${IFACE:-}
+
+# Only run override if the thunderbolt-net interfaces are brought up
+if [[ "${IFACE}" == "ent0" || "${IFACE}" == "ent1" ]]; then
+  if [[ ! -f /sys/devices/cpu_core/cpus ]]; then
+    echo "CPU core information file not found. Not setting thunderbolt affinities." \
+      | systemd-cat -p err -t "thunderbolt-affinity"
+    exit 0 # This is not a fatal error
+  fi
+
+  echo "Setting CPU affinity for Thunderbolt ports" \
+    | systemd-cat -p info -t "thunderbolt-affinity"
+
+  # Set Thunderbolt affinity to Intel P-cores only
+  grep thunderbolt /proc/interrupts \
+    | cut -d ":" -f 1 \
+    | xargs -I {} sh -c "echo $(cat /sys/devices/cpu_core/cpus) > '/proc/irq/{}/smp_affinity_list'"
+fi

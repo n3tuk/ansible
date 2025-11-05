@@ -1,21 +1,24 @@
 ---
 # tasks file for fish
 
-- name: Install Fish
-  community.general.pacman:
-    name: "{{ fish_packages }}"
-    state: latest
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
   # Work on the assumption that the service will have been pre-installed as part
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
-  when: not bootstrap_mount_base | default('') | length
-  ignore_errors: "{{ ansible_check_mode }}"
-  tags:
-    - fish
-    - packages
+  when: |
+    ansible_distribution == 'Archlinux' and
+    (bootstrap_mount_base | default('') | length) > 0
+
+- name: Install on Debian Linux
+  ansible.builtin.include_tasks:
+    file: debian.yaml
+  when: ansible_distribution == 'Debian'
 
 - name: Prepare the local directories
   ansible.builtin.file:
+    # yamllint disable-line rule:line-length
     path: "{{ bootstrap_mount_base | default('') }}/{{ directory.0 }}/{{ directory.1 }}"
     state: directory
     owner: root
@@ -24,7 +27,7 @@
   loop: "{{ fish_config_dirs | product(['.config', '.config/fish']) }}"
   loop_control:
     loop_var: directory
-    label: "/{{ directory.0 }}/{{ directory.1 }}"
+    label: /{{ directory.0 }}/{{ directory.1 }}
   tags:
     - fish
     - configuration
@@ -32,6 +35,7 @@
 - name: Configure Fish
   ansible.builtin.template:
     src: config.fish.jinja
+    # yamllint disable-line rule:line-length
     dest: "{{ bootstrap_mount_base | default('') }}/{{ directory }}/.config/fish/config.fish"
     owner: root
     group: root
@@ -39,7 +43,7 @@
   loop: "{{ fish_config_dirs }}"
   loop_control:
     loop_var: directory
-    label: "/{{ directory }}/.config/config.fish"
+    label: /{{ directory }}/.config/config.fish
   tags:
     - fish
     - configuration

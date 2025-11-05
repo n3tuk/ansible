@@ -1,0 +1,6 @@
+---
+# vars file for networking
+
+networking_packages_debian:
+  - lldpd
+  - frr

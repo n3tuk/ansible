@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# DO NOT EDIT - Managed by Ansible
+
+IF="ent1"
+
+echo "ifup ${IF} triggered by udev" | systemd-cat -p info -t "thunderbolt-${IF}"
+
+for i in {1..15}; do
+  /usr/sbin/ifup "${IF}" > /dev/null 2>&1 && {
+    echo "${IF} successfully brought up" | systemd-cat -p info -t "thunderbolt-${IF}"
+    break
+  }
+
+  echo "${IF} failed to be brought up (try ${i})" | systemd-cat -p warning -t "thunderbolt-${IF}"
+  sleep 2
+done

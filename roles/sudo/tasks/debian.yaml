@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for sudo on Debian Linux
+
+- name: Install sudo packages
+  ansible.builtin.apt:
+    name: "{{ sudo_packages_debian }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - sudo
+    - packages

@@ -32,6 +32,36 @@ vars:
   root:
     sh: git rev-parse --show-toplevel
 
+# To help improve management of all the tasks supported within this repository,
+# many have been broken out into dedicated files grouped by the sections they
+# operate against, so, here, include them into the main Taskfile workflow
+includes:
+  utils:
+    taskfile: .taskfiles/utils.yaml
+    flatten: true
+  prettier:
+    taskfile: .taskfiles/prettier.yaml
+    flatten: true
+  yamllint:
+    taskfile: .taskfiles/yamllint.yaml
+    flatten: true
+  markdownlint:
+    taskfile: .taskfiles/markdownlint.yaml
+    flatten: true
+  jsonschema:
+    taskfile: .taskfiles/jsonschema.yaml
+    flatten: true
+  # trivy:
+  #   taskfile: .taskfiles/trivy.yaml
+  #   flatten: true
+
+  ping:
+    taskfile: .taskfiles/ping.yaml
+    flatten: true
+  ansible:
+    taskfile: .taskfiles/ansible.yaml
+    flatten: true
+
 tasks:
   default:
     desc: Run the development and integration tasks once
@@ -53,11 +83,53 @@ tasks:
     summary: |-
       The develop task is designed to perform continuous integration on code
       changes within this repository, first by cleaning the repository and then
-      running the following tasks when any relevant files are changed.
+      running the following tasks when any relevant files are changed:
+
+      - Lint all supported files, ensuring their layout and syntax are correct
+        and consistent before staging and commiting changes;
+      - Validate the Ansbile configuration to ensure it is valid and can be
+        run to deploy and configure resources; and
+      - Run static code analysis against the Ansible configuration and any
+        associated resoruces to look for potential security issues or
+        misconfigurations.
     silent: true
     watch: true
     deps:
+      - task: pre-commit
+      - task: pre-checks
       - task: clean
+    cmds:
+      - task: lint
+
+  lint:
+    desc: Lint selected files within this repository
+    summary: |-
+      Run linting checks across the GitHub Workflows, repository configuration
+      files, Terraform (and other) code, and all documentation to find any
+      potential issues within the repository by running the following steps:
+
+      - Parse all JSON, YAML, and Markdown files through Prettier in order to
+        ensure they are syntactically correct, and that they are consistent in
+        their layout and usage;
+      - Parse selected configurations (Task files, GitHub Dependabot
+        configuration, and GitHub Workflows) through JSON Schema to evaluate
+        these free-from configuration types are correctly structured for their
+        intended usage (i.e. keys are in the right place, the values are what is
+        expected or supported, and required settings are present);
+      - Review the format of Markdown files to ensure they are clean and
+        minimise the ability for the page to be incorrectly rendered, such as
+        de-duplicating headers, consistent text width, formatted list items,
+        and code layouts.
+      - Run tflint on the Terraform configuration, making sure that any
+        Terraform code is syntactically correct, properly formatted, and mostly
+        valid for runtime (e.g. using correct instance types, names are not too
+        long, and resource names are correctly formatted).
+    silent: true
+    cmds:
+      - task: prettier
+      - task: markdownlint
+      - task: jsonschema
+      - task: ansible-lint
 
   rename:
     desc: Find and rename all .yml files to .yaml
@@ -72,6 +144,61 @@ tasks:
             git mv -f $file ${file%.yml}.yaml 2>/dev/null \
              || mv -f $file ${file%.yml}.yaml
           done
+
+  play:bootstrap:
+    desc: Deploy the bootstrap configuration
+    silent: true
+    deps:
+      - task: ansible-lint
+    env:
+      ANSIBLE_FORCE_COLOR: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check \
+            plays/bootstrap.yaml
+          echo -e '{{ .cg }}Checked{{ .cc }}'
+      - cmd: |-
+          ansible-playbook \
+            --limit {{ .limit }} \
+            --ask-pass \
+            plays/bootstrap.yaml
+
+  play:baseline:
+    desc: Deploy the baseline configuration
+    silent: true
+    deps:
+      - task: ansible-lint
+    env:
+      ANSIBLE_FORCE_COLOR: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check \
+            plays/baseline.yaml
+          echo -e '{{ .cg }}Checked{{ .cc }}'
+      - cmd: |-
+          ansible-playbook \
+            --limit {{ .limit }} \
+            plays/baseline.yaml
+
+  play:proxmox:
+    desc: Deploy the Proxmox configuration
+    silent: true
+    deps:
+      - task: ansible-lint
+    env:
+      ANSIBLE_FORCE_COLOR: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check \
+            plays/proxmox.yaml
+          echo -e '{{ .cg }}Checked{{ .cc }}'
+      - cmd: |-
+          ansible-playbook \
+            --limit {{ .limit }} \
+            plays/proxmox.yaml
 
   clean:
     desc: Clean temporary files from the repository and configurations
