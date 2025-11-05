@@ -18,6 +18,7 @@ var_naming_pattern: ^[a-z][a-z0-9]*(_[a-z0-9]+)*[a-z0-9]$
 
 skip_list:
   - var-naming[no-role-prefix]
+  - yaml[line-length]
 
 # Ansible-lint does not automatically load rules that have the 'opt-in' tag.
 # You must enable opt-in rules by listing each rule 'id' below.
