@@ -18,17 +18,7 @@ roles/kernels/tasks/main.yaml syntax-check[unknown-module]
 # GitHub Action for ansible-lint, so the checks fail as the community.general
 # package is not installed.
 
-roles/libvirtd/tasks/main.yaml syntax-check[unknown-module]
-# Ignore the unknown-module issue as Ansible Galaxy is not supported in the
-# GitHub Action for ansible-lint, so the checks fail as the community.general
-# package is not installed.
-
 roles/logrotate/tasks/main.yaml syntax-check[unknown-module]
-# Ignore the unknown-module issue as Ansible Galaxy is not supported in the
-# GitHub Action for ansible-lint, so the checks fail as the community.general
-# package is not installed.
-
-roles/machines/tasks/main.yaml syntax-check[unknown-module]
 # Ignore the unknown-module issue as Ansible Galaxy is not supported in the
 # GitHub Action for ansible-lint, so the checks fail as the community.general
 # package is not installed.
@@ -69,11 +59,6 @@ roles/sudo/tasks/main.yaml syntax-check[unknown-module]
 # package is not installed.
 
 roles/secure_boot/tasks/main.yaml syntax-check[unknown-module]
-# Ignore the unknown-module issue as Ansible Galaxy is not supported in the
-# GitHub Action for ansible-lint, so the checks fail as the community.general
-# package is not installed.
-
-roles/k3s/tasks/main.yaml syntax-check[unknown-module]
 # Ignore the unknown-module issue as Ansible Galaxy is not supported in the
 # GitHub Action for ansible-lint, so the checks fail as the community.general
 # package is not installed.

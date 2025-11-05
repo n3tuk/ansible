@@ -1,8 +1,0 @@
----
-# users tasks for users
-
-- name: Create and configure user {{ user }}
-  ansible.builtin.include_tasks: user.yaml
-  loop: "{{ users_users | dict2items(key_name='user', value_name='settings') }}"
-  loop_control:
-    label: "{{ user }}"

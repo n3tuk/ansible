@@ -1,9 +1,0 @@
----
-# Configure the caching service for Arch Linux repositories
-
-- name: Configure the host for a single-node Kubernetes deployment
-  hosts: testing
-  become: true
-  become_user: root
-  roles:
-    - role: k3s
