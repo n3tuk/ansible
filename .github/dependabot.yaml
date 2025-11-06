@@ -7,7 +7,7 @@ updates:
     schedule:
       interval: weekly
       day: friday
-      time: 12:00
+      time: '12:00'
       timezone: Europe/London
     commit-message:
       prefix: actions
