@@ -2,16 +2,13 @@
 version: 2
 
 updates:
-
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: friday
-      time: "12:00"
-      timezone: "Europe/London"
-    reviewers:
-      - n3tuk/admin
+      time: 12:00
+      timezone: Europe/London
     commit-message:
       prefix: actions
       include: scope

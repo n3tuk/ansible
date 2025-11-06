@@ -1,0 +1,42 @@
+---
+version: 3
+
+tasks:
+  ansible-lint:
+    desc: Validation the schema of configuration files in the repository
+    summary: |-
+      Validate the layout and content of the YAML files in this repository
+      using the JSON Schema files, including:
+
+      - Taskfiles (Taskfile.yaml, .taskfiles/*.yaml)
+      - GitHub Dependabot configuration (.github/dependabot.yaml)
+      - GitHub Workflows (.github/workflows/*.yaml)
+      - pre-commit Configuration (.pre-commit-config)
+      - Ansible plays, tasks, and inventory files
+
+      Checks on Kubernetes resources under the flux/ folder will be managed
+      through the conform tasks using kubeconform, as although kubeconform still
+      uses JSON Schemas, it is able to dynamocally find and process the schemas.
+
+      $ task --summary conform
+    silent: true
+    sources:
+      - plays/**.yaml
+      - roles/**.yaml
+      - .ansible-lint.yaml
+      - .ansiblelintignore
+      - exclude: plays/encrypted_vars/*
+    deps:
+      - task: jsonschema
+      - task: yamllint
+    cmds:
+      - cmd: |-
+          ansible-lint \
+            --config-file '{{ .root }}/.ansible-lint.yaml' \
+            --ignore-file '{{ .root }}/.ansiblelintignore' \
+            --exclude plays/encrypted_vars \
+            --format full -v --nocolor \
+            --strict 2>&1 \
+          | grep -Ev '^INFO\s+(Identified|Set|Loading|Excluded)' \
+          | sed -e 's/^INFO\s\+Executing/Executing/'
+          echo -e '{{ .cg }}Passed{{ .cc }}'

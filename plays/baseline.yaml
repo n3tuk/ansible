@@ -1,24 +1,42 @@
 ---
+- name: Baseline all Arch Linux hosts
+  hosts: arch
+  become: true
+  become_user: root
+  roles:
+    # - role: ca
+    - role: pacman
+  tags:
+    - update
+
+- name: Baseline all Debian Linux hosts
+  hosts: debian
+  become: true
+  become_user: root
+  roles: []
+  # - role: ca
+  # - role: apt
+  tags:
+    - update
+
 - name: Baseline all hosts
   hosts: all
   become: true
   become_user: root
   roles:
-    - role: ca
-    - role: pacman
     - role: issue
-    - role: kernels
-    - role: systemd
-    - role: systemd_networkd
-    - role: systemd_resolved
-    - role: ca
-    - role: ssh
+    # - role: kernels
+    # - role: systemd
+    # - role: systemd_networkd
+    # - role: systemd_resolved
+    # - role: ca
     - role: starship
     - role: fish
     - role: bash
     - role: sudo
     - role: users
-    - role: logrotate
-    - role: netdata
+    - role: ssh
+    # - role: logrotate
+    # - role: netdata
   tags:
     - update

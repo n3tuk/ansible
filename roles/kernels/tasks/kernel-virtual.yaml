@@ -4,6 +4,7 @@
 - name: Configure systemd-boot entry for {{ kernel }}
   ansible.builtin.template:
     src: entry.conf.jinja
+    # yamllint disable-line rule:line-length
     dest: "{{ bootstrap_mount_base | default('') }}/efi/loader/entries/{{ kernel }}.conf"
     owner: root
     group: root

@@ -18,7 +18,9 @@
   ansible.builtin.shell: # noqa no-changed-when
     cmd: |-
       /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
-        /usr/bin/fish -c 'groupadd{% if user.system is defined and user.system %} -r{% endif %} {{ user.name }}'
+        /usr/bin/fish -c 'groupadd{%
+            if user.system is defined and user.system %} -r{% endif
+          %} {{ user.name }}'
   # Only create the user when the user was found not to exist based on above
   when: not ansible_check_mode and userdbctl.rc == 1
   tags:
@@ -45,6 +47,7 @@
   # user to a separate command so it will be possible to change some attributes,
   # when required, during bootstrapping
   ansible.builtin.shell: # noqa no-changed-when
+    # yamllint disable rule:line-length
     cmd: |-
       /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
         /usr/bin/fish -c '
@@ -52,6 +55,7 @@
             {% if user.settings.groups is defined %} -G {{ user.settings.groups | join(',') }}{% endif %} \
             -s {{ user.settings.shell | default(users_default_shell) }} {{ user.name }}
           '
+    # yamllint enable rule:line-length
   when: not ansible_check_mode
   tags:
     - users
@@ -63,8 +67,11 @@
   # under shell attempt to be interpreted in the string, whereas command does
   # not, so is safer for managing this task
   ansible.builtin.command: # noqa no-changed-when
+    # yamllint disable rule:line-length
     cmd: |-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/fish -c "usermod -p '{{ user.settings.password }}' {{ user.name }}"
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+        /usr/bin/fish -c "usermod -p '{{ user.settings.password }}' {{ user.name }}"
+    # yamllint enable rule:line-length
   when: not ansible_check_mode
   tags:
     - users
@@ -93,8 +100,10 @@
   # user attribute to manage the file, and as that user exists only inside the
   # chroot environment, it will always fail trying to add the key to the file
   ansible.builtin.lineinfile:
+    # yamllint disable-line rule:line-length
     path: "{{ bootstrap_mount_base | default('') }}/home/{{ user.name }}/.ssh/authorized_keys"
     create: false
+    # yamllint disable-line rule:line-length
     line: "{{ key.type | default(users_default_key_type) }} {{ key.key | replace('\n', '') }} {{ key.comment | default(user.name)}}"
     insertafter: EOF
     state: present

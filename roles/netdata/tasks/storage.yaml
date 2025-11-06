@@ -13,7 +13,7 @@
 
 - name: Create the Netdata volume filesystem
   community.general.filesystem:
-    device: "/dev/{{ netdata_volume_group }}/{{ netdata_volume_name }}"
+    device: /dev/{{ netdata_volume_group }}/{{ netdata_volume_name }}
     fstype: ext4
     opts: "{{ netdata_volume_options | default(omit) }}"
     state: present
@@ -24,7 +24,7 @@
 
 - name: Register and mount the Netdata volume
   ansible.posix.mount:
-    src: "/dev/{{ netdata_volume_group }}/{{ netdata_volume_name }}"
+    src: /dev/{{ netdata_volume_group }}/{{ netdata_volume_name }}
     path: "{{ netdata_volume_path }}"
     fstype: ext4
     opts: defaults,rw,noatime,nosuid,noexec,nodev

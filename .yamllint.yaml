@@ -7,41 +7,58 @@ rules:
   document-end:
     present: false
 
-  line-length:
-    max: 200
-    allow-non-breakable-words: true
-  trailing-spaces: {} # Enabled
   empty-lines:
     max: 1
-    max-start: 1
+    max-start: 0
     max-end: 0
-
-  indentation:
-    spaces: 2
-    # Allow 0 indentations in files provided the file is consistent
-    indent-sequences: consistent
-
-  truthy:
-    check-keys: false
-
-  colons:
-    max-spaces-before: 0
-    max-spaces-after: 1
-
-  commas:
-    max-spaces-before: 0
-    min-spaces-after: 1
-    max-spaces-after: 1
-
-  # quoted-strings:
-  #   quote-type: single
-  #   required: only-when-needed
-
-  octal-values:
-    forbid-implicit-octal: true
-    forbid-explicit-octal: true
 
   comments:
     require-starting-space: true
     ignore-shebangs: true
     min-spaces-from-content: 1
+
+  # This is required for ansible-lint
+  comments-indentation: false
+
+  indentation:
+    spaces: consistent
+    indent-sequences: true
+    # Taskfiles use variable indentations on multi-line strings for the
+    # documentation and in-line scripting
+    check-multi-line-strings: false
+
+  line-length:
+    max: 80
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+
+  brackets:
+    forbid: non-empty
+
+  braces:
+    forbid: non-empty
+    # This is required for ansible-lint
+    max-spaces-inside: 1
+    max-spaces-inside-empty: 0
+
+  float-values:
+    forbid-nan: true
+    require-numeral-before-decimal: true
+
+  # quoted-strings:
+  #   quote-type: single
+  #   required: only-when-needed
+  #   allow-quoted-quotes: true
+
+  trailing-spaces: {}
+
+  truthy:
+    allowed-values:
+      - "true"
+      - "false"
+    check-keys: false
+
+  # This is required for ansible-lint
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true

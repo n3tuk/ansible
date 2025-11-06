@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for ssh on Arch Linux
+
+- name: Install SSH
+  community.general.pacman:
+    name: "{{ ssh_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - sshd
+    - packages

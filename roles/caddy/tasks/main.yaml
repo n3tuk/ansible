@@ -1,0 +1,147 @@
+---
+# tasks file for caddy
+
+- name: Create Group for Caddy
+  ansible.builtin.group:
+    name: "{{ caddy_group }}"
+    system: true
+  tags:
+    - caddy
+    - user
+
+- name: Create User for Caddy
+  ansible.builtin.user:
+    name: "{{ caddy_user }}"
+    system: true
+    group: "{{ caddy_group }}"
+    home: "{{ caddy_lib_path }}"
+    shell: /usr/sbin/nologin
+    create_home: true
+  tags:
+    - caddy
+    - user
+
+- name: Check if Caddy features file is present
+  ansible.builtin.stat:
+    path: "{{ caddy_lib_path }}/features"
+  register: caddy_features_file
+  tags:
+    - caddy
+    - packages
+
+- name: Set Caddy features
+  ansible.builtin.copy:
+    content: "{{ '\n'.join(caddy_packages) }}"
+    dest: "{{ caddy_lib_path }}/features"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rwx,g=rx,o=rx
+  when: (caddy_update or not caddy_features_file.stat.exists)
+  register: caddy_features_cache
+  tags:
+    - caddy
+    - packages
+
+- name: Check if Caddy binary is present
+  ansible.builtin.stat:
+    path: "{{ caddy_lib_path }}/caddy"
+  register: caddy_binary_file
+  tags:
+    - caddy
+    - packages
+
+- name: Download Caddy binary
+  ansible.builtin.get_url:
+    url: "{{ caddy_url }}"
+    dest: "{{ caddy_lib_path }}/caddy"
+    timeout: "{{ caddy_download_timeout }}"
+    force: true
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rw,g=r,o=r
+  retries: 3
+  delay: 2
+  when: >-
+    (
+      not ansible_check_mode and
+      (
+        caddy_features_cache.changed or
+        not caddy_binary_file.stat.exists
+      )
+    )
+  ignore_errors: "{{ ansible_check_mode }}"
+  register: caddy_binary_cache
+  tags:
+    - caddy
+    - packages
+
+- name: Copy Caddy binary
+  ansible.builtin.copy:
+    src: "{{ caddy_lib_path }}/caddy"
+    dest: "{{ caddy_bin_path }}/{{ caddy_bin_file }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+    remote_src: true
+  when: (not ansible_check_mode and caddy_binary_cache.changed)
+  ignore_errors: "{{ ansible_check_mode }}"
+  notify:
+    - Restart Caddy
+  tags:
+    - caddy
+    - packages
+
+- name: Ensure Caddy configuration paths exist
+  ansible.builtin.file:
+    path: "{{ path }}"
+    state: directory
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rwx,g=rx,o=rx
+  loop:
+    - "{{ caddy_config_path }}"
+    - "{{ caddy_config_path }}/conf.d"
+  loop_control:
+    label: "{{ path }}"
+    loop_var: path
+  tags:
+    - caddy
+    - configuration
+
+- name: Create or update the {{ caddy_config_file }}
+  ansible.builtin.template:
+    src: Caddyfile.jinja
+    dest: "{{ caddy_config_path }}/{{ caddy_config_file }}"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rw,g=r,o=r
+  notify:
+    - Reload Caddy
+  tags:
+    - caddy
+    - configuration
+
+- name: Install the Caddy systemd service file
+  ansible.builtin.template:
+    src: caddy.service.jinja
+    dest: "{{ caddy_service_path }}/{{ caddy_service_name }}.service"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  ignore_errors: "{{ ansible_check_mode }}"
+  notify:
+    - Reload Caddy
+  tags:
+    - caddy
+    - service
+
+- name: Start and enable Caddy service
+  ansible.builtin.systemd:
+    name: "{{ caddy_service_name }}.service"
+    daemon_reload: true
+    enabled: true
+    state: started
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - caddy
+    - service

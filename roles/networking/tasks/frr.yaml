@@ -1,0 +1,43 @@
+---
+# frr-specific tasks for networking role
+
+# Enable FRR daemons
+
+- name: Enable OpenFabric router
+  ansible.builtin.lineinfile:
+    path: /etc/frr/daemons
+    regexp: "^fabricd=no"
+    line: "fabricd=yes"
+  notify:
+    - Reload FRR
+  tags:
+    - networking
+    - configuration
+
+- name: Configure FRR
+  ansible.builtin.template:
+    src: frr.conf.jinja
+    dest: /etc/frr/{{ config }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - frr.conf
+    - frr.conf.local
+  loop_control:
+    label: /etc/frr/{{ config }}
+    loop_var: config
+  notify:
+    - Reload FRR
+  tags:
+    - networking
+    - configuration
+
+- name: Start and enable FRR service
+  ansible.builtin.systemd:
+    name: frr.service
+    enabled: true
+    state: started
+  tags:
+    - networking
+    - configuration

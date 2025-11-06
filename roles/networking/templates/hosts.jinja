@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+
+127.0.0.1 localhost
+::1 localhost
+
+{% for host in groups[env_name] | sort %}
+{%   if host in groups['proxmox'] %}
+{{ hostvars[host].ansible_default_ipv4.address }} {{ hostvars[host].ansible_fqdn }} {{ hostvars[host].ansible_hostname }}
+{{ hostvars[host].ansible_default_ipv6.address }} {{ hostvars[host].ansible_fqdn }} {{ hostvars[host].ansible_hostname }}
+{%   endif %}
+{% endfor %}

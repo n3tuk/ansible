@@ -1,5 +1,7 @@
 ---
 # vars file for fish
 
-fish_packages:
+fish_packages_arch:
+  - fish
+fish_packages_debian:
   - fish

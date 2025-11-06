@@ -1,0 +1,15 @@
+---
+# tasks file for tailscale
+
+- name: Run pre-flight checks
+  ansible.builtin.include_tasks:
+    file: pre-flight.yaml
+
+- name: Install on Debian
+  ansible.builtin.include_tasks:
+    file: debian.yaml
+  when: ansible_distribution == 'Debian'
+
+- name: Set up Tailscale
+  ansible.builtin.include_tasks:
+    file: setup.yaml

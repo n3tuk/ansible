@@ -10,6 +10,9 @@ galaxy_info:
     - name: ArchLinux
       versions:
         - all
+    - name: Debian
+      versions:
+        - trixie
 
   galaxy_tags:
     - bash

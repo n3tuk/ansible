@@ -1,59 +1,140 @@
 ---
 version: 3
+output: prefixed
+
+# This Taskfile is configured to minimise dependencies and run most tasks in a
+# semi-sequential way, which reduces issues with parallel task contexts being
+# cancelled following failures. This helps the interval stay low. However, if
+# there are issues with tasks running continuously, or being re-added to the
+# queue multiple times due to regular changes, increase the value for the watch
+# interval to take into account the typical longest running task in the set.
+interval: 2s
+
+# Enforce the pipefail option in the Bash library to ensure that where commands
+# are run through pipes, the failure of any one step in the pipeline fails the
+# whole pipe. For example, terraform |& tee will not normally fail if Terraform
+# fails as tee almost always will exit cleanly, unless pipefail is set.
+set:
+  - pipefail
 
 env:
   limit: '{{ .limit | default "all" }}'
 
+vars:
+  # ANSI Colours
+  cg: \e[0;31m
+  cw: \e[1;37m
+  cc: \e[0m
+
+  # Work out the full path to the root of this repository to allow us to create
+  # absolute paths to configuration files, caches, etc., rather than attempt to
+  # generate relative links programmatically
+  root:
+    sh: git rev-parse --show-toplevel
+
+# To help improve management of all the tasks supported within this repository,
+# many have been broken out into dedicated files grouped by the sections they
+# operate against, so, here, include them into the main Taskfile workflow
+includes:
+  utils:
+    taskfile: .taskfiles/utils.yaml
+    flatten: true
+  prettier:
+    taskfile: .taskfiles/prettier.yaml
+    flatten: true
+  yamllint:
+    taskfile: .taskfiles/yamllint.yaml
+    flatten: true
+  markdownlint:
+    taskfile: .taskfiles/markdownlint.yaml
+    flatten: true
+  jsonschema:
+    taskfile: .taskfiles/jsonschema.yaml
+    flatten: true
+  # trivy:
+  #   taskfile: .taskfiles/trivy.yaml
+  #   flatten: true
+
+  ping:
+    taskfile: .taskfiles/ping.yaml
+    flatten: true
+  ansible:
+    taskfile: .taskfiles/ansible.yaml
+    flatten: true
+
 tasks:
-  pre-checks:
-    desc: Check the environment before running
-    internal: true
+  default:
+    desc: Run the development and integration tasks once
+    summary: |-
+      Clean the environment and then run the development and integration tasks
+      for all resources by testing and checking the code and files, but only
+      once rather than continuously.
+
+      Use the following command for additional information on the steps
+      involved:
+
+      $ task --summary develop
     silent: true
-    run: once
     cmds:
-      - cmd: |-
-          test -x "$(which python 2>/dev/null)" \
-            || (echo "Cannot find 'python'. Please install before trying again."; exit 1)
-      - cmd: |-
-          test -x "$(which pip 2>/dev/null)" \
-            || (echo "Cannot find 'pip'. Please install before trying again."; exit 1)
-      - cmd: |-
-          test -x "$(which pre-commit 2>/dev/null)" \
-            || (echo "Cannot find 'pre-commit'. Please install before trying again."; exit 1)
-      - cmd: |-
-          test -x "$(which ansible 2>/dev/null)" \
-            || (echo "Cannot find 'ansible'. Please install before trying again."; exit 1)
-      - cmd: |-
-          test -x "$(which ansible-playbook 2>/dev/null)" \
-            || (echo "Cannot find 'ansible-playbook'. Please install before trying again."; exit 1)
-      - cmd: |-
-          test -x "$(which sshpass 2>/dev/null)" \
-            || (echo "Cannot find 'sshpass'. Please install before trying again."; exit 1)
-    status:
-      # Setting this file will bypass pre-checks (only use if you are sure)
-      - test -f .skip-pre-checks
+      - task: develop
 
-  deps:
-    desc: Install the required dependencies for the repository
-    cmds:
-      - task: pre-commit
+  develop:
+    desc: Continuously run the development and integration tasks
+    summary: |-
+      The develop task is designed to perform continuous integration on code
+      changes within this repository, first by cleaning the repository and then
+      running the following tasks when any relevant files are changed:
 
-  pre-commit:
-    desc: Add the `pre-commit` hook to this repository
+      - Lint all supported files, ensuring their layout and syntax are correct
+        and consistent before staging and commiting changes;
+      - Validate the Ansbile configuration to ensure it is valid and can be
+        run to deploy and configure resources; and
+      - Run static code analysis against the Ansible configuration and any
+        associated resoruces to look for potential security issues or
+        misconfigurations.
+    silent: true
+    watch: true
     deps:
+      - task: pre-commit
       - task: pre-checks
+      - task: clean
     cmds:
-      - cmd: pre-commit install
-    generates:
-      - .git/hooks/pre-commit
+      - task: lint
+
+  lint:
+    desc: Lint selected files within this repository
+    summary: |-
+      Run linting checks across the GitHub Workflows, repository configuration
+      files, Terraform (and other) code, and all documentation to find any
+      potential issues within the repository by running the following steps:
+
+      - Parse all JSON, YAML, and Markdown files through Prettier in order to
+        ensure they are syntactically correct, and that they are consistent in
+        their layout and usage;
+      - Parse selected configurations (Task files, GitHub Dependabot
+        configuration, and GitHub Workflows) through JSON Schema to evaluate
+        these free-from configuration types are correctly structured for their
+        intended usage (i.e. keys are in the right place, the values are what is
+        expected or supported, and required settings are present);
+      - Review the format of Markdown files to ensure they are clean and
+        minimise the ability for the page to be incorrectly rendered, such as
+        de-duplicating headers, consistent text width, formatted list items,
+        and code layouts.
+      - Run tflint on the Terraform configuration, making sure that any
+        Terraform code is syntactically correct, properly formatted, and mostly
+        valid for runtime (e.g. using correct instance types, names are not too
+        long, and resource names are correctly formatted).
+    silent: true
+    cmds:
+      - task: prettier
+      - task: markdownlint
+      - task: jsonschema
+      - task: ansible-lint
 
   rename:
     desc: Find and rename all .yml files to .yaml
     sources:
-      - "plays/*.yml"
-      - "plays/host_vars/*.yml"
-      - "plays/group_vars/*.yml"
-      - "roles/*/*/*.yml"
+      - "**.yml"
     silent: true
     cmds:
       - cmd: |-
@@ -64,206 +145,70 @@ tasks:
              || mv -f $file ${file%.yml}.yaml
           done
 
-  lint:
-    desc: Run linting tools against the Ansible files
-    summary: |
-      Run linting tools against the Ansible files inside this repository for
-      validity and correctness.
-    run: once
+  play:bootstrap:
+    desc: Deploy the bootstrap configuration
+    silent: true
     deps:
-      - task: pre-checks
-      - task: rename
-    sources:
-      - ".yamllint.yaml"
-      - "plays/*.yaml"
-      - "plays/host_vars/*.yaml"
-      - "plays/group_vars/*.yaml"
-      - "roles/*/*/*.yaml"
-    cmds:
-      - cmd: yamllint --config-file .yamllint.yaml plays/ roles/
-      - cmd: ansible-lint -c .config/ansible-lint.yaml
-
-  ping:
-    desc: Attempt to ping all nodes through Ansible
-    silent: true
-    cmds:
-      - cmd: |-
-          echo -e "Keys:\n" \
-            "  \033[32m   OK       \033[34m   DNS\n" \
-            "  \033[33m   No Route \033[33m   Timeout\n" \
-            "  \033[31m   Refused) \033[31m   Denied" \
-            "\033[0m"
-          echo
-          echo "Pinging all known hosts in the inventory to test for access..."
-      - cmd: |-
-          ansible \
-            --inventory inventory.yaml \
-            --forks 75 \
-            --ask-become-pass \
-            --module-name ansible.builtin.ping \
-            --one-line {{ .limit }} \
-          | awk '
-              /SUCCESS/                    { printf "\033[32m   %s\033[0m\n", $1 }
-              /Could not resolve hostname/ { printf "\033[34m   %s\033[0m\n", $1 }
-              /No route to host/           { printf "\033[33m   %s\033[0m\n", $1 }
-              /Connection refused/         { printf "\033[31m   %s\033[0m\n", $1 }
-              /Connection timed out/       { printf "\033[33m   %s\033[0m\n", $1 }
-              /Permanently added/          { node=$1 }
-              /Permission denied/          { printf "\033[31m   %s\033[0m\n", node }
-          '
-
-  bootstrap:
-    desc: Bootstrap new servers using the bootstrap Ansible Play
-    silent: true
+      - task: ansible-lint
+    env:
+      ANSIBLE_FORCE_COLOR: true
     cmds:
       - cmd: |-
           ansible-playbook \
-            --syntax-check plays/bootstrap.yaml
+            --syntax-check \
+            plays/bootstrap.yaml
+          echo -e '{{ .cg }}Checked{{ .cc }}'
       - cmd: |-
           ansible-playbook \
-            --user root \
-            --ask-pass plays/bootstrap.yaml \
-            --extra-vars bootstrap_chroot_dir=/mnt \
-            --force-handlers \
             --limit {{ .limit }} \
-            --forks 10
-      # Remove any cached facts after running a bootstrap as the configuration
-      # of the host will change significantly, and a baseline needs a refresh
-      - cmd: rm -rf .cache
+            --ask-pass \
+            plays/bootstrap.yaml
 
-  update:
-    desc: Update the pacman package databases on systems
+  play:baseline:
+    desc: Deploy the baseline configuration
     silent: true
+    deps:
+      - task: ansible-lint
+    env:
+      ANSIBLE_FORCE_COLOR: true
     cmds:
       - cmd: |-
           ansible-playbook \
-            --syntax-check plays/update.yaml
+            --syntax-check \
+            plays/baseline.yaml
+          echo -e '{{ .cg }}Checked{{ .cc }}'
       - cmd: |-
           ansible-playbook \
-            --ask-become-pass plays/update.yaml \
-            --force-handlers \
             --limit {{ .limit }} \
-            --forks 10
+            plays/baseline.yaml
 
-  upgrade:
-    desc: Update and upgrade the packages on systems
+  play:proxmox:
+    desc: Deploy the Proxmox configuration
     silent: true
+    deps:
+      - task: ansible-lint
+    env:
+      ANSIBLE_FORCE_COLOR: true
     cmds:
       - cmd: |-
           ansible-playbook \
-            --syntax-check plays/upgrade.yaml
+            --syntax-check \
+            plays/proxmox.yaml
+          echo -e '{{ .cg }}Checked{{ .cc }}'
       - cmd: |-
           ansible-playbook \
-            --ask-become-pass plays/upgrade.yaml \
-            --force-handlers \
             --limit {{ .limit }} \
-            --forks 10
-
-  reboot:
-    desc: Update and upgrade the packages on systems
-    silent: true
-    cmds:
-      - cmd: |-
-          echo "This command will initiate a sequential reboot of the following hosts:"
-          ansible --inventory inventory.yaml --list-hosts {{ .limit }} | grep -v '\s\+hosts' | sort
-          read -p "Are you sure? (y/n) " -r
-          echo # Force a new line
-          if [[ ! ${REPLY} =~ ^[Yy] ]]; then
-            exit 1
-          fi
-      - cmd: |-
-          ansible \
-            --inventory inventory.yaml \
-            --forks 1 \
-            --ask-become-pass \
-            --module-name ansible.builtin.reboot \
-            --one-line {{ .limit }}
-
-  baseline:
-    desc: Baseline servers using the baseline Ansible Play
-    silent: true
-    cmds:
-      - cmd: |-
-          ansible-playbook \
-            --syntax-check plays/baseline.yaml
-      - cmd: |-
-          ansible-playbook \
-            --ask-become-pass plays/baseline.yaml \
-            --force-handlers \
-            --limit {{ .limit }} \
-            --forks 10
-
-  users:
-    desc: Update the users and sudo configuration on servers using the users Ansible Play
-    silent: true
-    cmds:
-      - cmd: |-
-          ansible-playbook \
-            --syntax-check plays/users.yaml
-      - cmd: |-
-          ansible-playbook \
-            --ask-become-pass plays/users.yaml \
-            --limit {{ .limit }} \
-            --forks 10
-
-  libvirtd:
-    desc: Configure libvirtd and deploy Virtual Machines
-    silent: true
-    cmds:
-      - cmd: |-
-          ansible-playbook \
-            --syntax-check plays/libvirtd.yaml
-      - cmd: |-
-          ansible-playbook \
-            --ask-become-pass plays/libvirtd.yaml \
-            --limit {{ .limit }} \
-            --forks 10
-
-  kubernetes:
-    desc: Deploy configurations for Kubernetes clusters
-    silent: true
-    cmds:
-      - cmd: |-
-          ansible-playbook \
-            --syntax-check plays/kubernetes.yaml
-      - cmd: |-
-          ansible-playbook \
-            --ask-become-pass plays/kubernetes.yaml \
-            --limit {{ .limit }} \
-            --forks 3
-
-  cache:
-    desc: Deploy configurations for caching proxy
-    silent: true
-    cmds:
-      - cmd: |-
-          ansible-playbook \
-            --syntax-check plays/cache.yaml
-      - cmd: |-
-          ansible-playbook \
-            --ask-become-pass plays/cache.yaml \
-            --limit {{ .limit }} \
-            --forks 3
-
-  netdata:
-    desc: Deploy the Netdata configurations for parents and children
-    silent: true
-    cmds:
-      - cmd: |-
-          ansible-playbook \
-            --syntax-check plays/netdata.yaml
-      - cmd: |-
-          ansible-playbook \
-            --ask-become-pass plays/netdata.yaml \
-            --limit {{ .limit }} \
-            --forks 5
+            plays/proxmox.yaml
 
   clean:
-    desc: Clean up the temporary files from the repository
-    summary: |
-      Remove any generated configuration files and temporary files from the repository.
-    run: once
+    desc: Clean temporary files from the repository and configurations
     silent: true
+    summary: |-
+      Clean any temporary directories and files created by both this Taskfile,
+      and the tools and applications called from it, and from within the
+      configurations.
+    run: once
     cmds:
-      - cmd: rm -rf .cache
+      - cmd: rm -f .prettiercache
       - cmd: rm -rf .task
+      - cmd: echo -e '{{ .cg }}Completed{{ .cc }}'

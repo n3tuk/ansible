@@ -20,7 +20,7 @@
     - vconsole.conf
     - hostname
   loop_control:
-    label: "/etc/{{ file }}"
+    label: /etc/{{ file }}
     loop_var: file
 
 - name: Configure locale configuration files in the chroot
@@ -34,7 +34,7 @@
     - locale.gen
     - locale.conf
   loop_control:
-    label: "/etc/{{ file }}"
+    label: /etc/{{ file }}
     loop_var: file
   notify:
     - Run locale-gen in chroot

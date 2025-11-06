@@ -2,62 +2,41 @@
 
 add_newline = true
 format = """
-╭╴$time   $shell   $directory
-│ [ ](fg:blue)   [{{ env_name | default('unknown') }}](fg:{{ env_colour | default('white') }})[/](fg:bright black){{ env_purpose | default('unknown') }}
-│ [ ](fg:blue)   {{ env_location | default('unknown') }}
-╰╴$username$hostname $character
+$time$shell [](fg:{{ env_colour | default('blue') }} bg:none)[ {{ env_name }}](fg:black bg:{{ env_colour | default('blue') }})[](fg:{{ env_colour | default('blue') }} bg:black)[  {{ env_purpose | default('unknown') }}](fg:bright-white bg:black)[](fg:black bg:none)
+$hostname $directory
+$username $character
 """
-{% if directory == "root" %}
-right_format = " $cmd_duration$sudo"
-{% else %}
-right_format = " $cmd_duration"
-{% endif %}
 
 [time]
 disabled = false
-format = "$time"
+format = "[](fg:black bg:none)[$time](fg:white bg:black)"
 
 [shell]
 disabled = false
-format = "$indicator"
-fish_indicator = "[fish](fg:blue)"
-bash_indicator = "[bash](fg:red)"
-unknown_indicator = "[unknown](fg:red)"
+format = "$indicator[](fg:black bg:none)"
+fish_indicator = "[  ](fg:bold white bg:black)"
+bash_indicator = "[  ](fg:bold white bg:black)"
+unknown_indicator = "[  ](fg:bright-yellow bg:black)"
 
 [directory]
 disabled = false
-format = "[ ]($style) $path"
-{% if directory == "root" %}
-style = "fg:red"
-{% else %}
-style = "fg:blue"
-{% endif %}
+format = "[](fg:black bg:none)[  $path](fg:white bg:black)[](fg:black bg:none)"
 home_symbol = "~"
 
 [username]
 show_always = true
-format = "[$user]($style)"
-style_user = "fg:blue"
-style_root = "fg:red"
+format = "[](fg:black bg:none)[$user]($style)[](fg:black bg:none)"
+style_root = "fg:red bg:black"
+style_user = "fg:white bg:black"
 
 [hostname]
 disabled = false
-format = " on [$hostname]($style)"
-{% if directory == "root" %}
-style = "fg:red"
-{% else %}
-style = "fg:blue"
-{% endif %}
-trim_at = ""
+format = "[](fg:black bg:none)[{{ ansible_fqdn }}]($style)[](fg:black bg:none)"
+style = "fg:white bg:black"
+trim_at = "."
 ssh_only = false
 
 [character]
 disabled = false
-success_symbol = ""
-error_symbol = "[](fg:red)"
-{% if directory != "root" %}
-
-[sudo]
-disabled = false
-format = "  [ ](fg:red)"
-{% endif %}
+success_symbol = " "
+error_symbol = "[ ](fg:red)"

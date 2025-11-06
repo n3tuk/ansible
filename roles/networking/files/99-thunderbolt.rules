@@ -1,0 +1,4 @@
+# DO NOT EDIT - Managed by Ansible
+
+ACTION=="move", SUBSYSTEM=="net", KERNEL=="ent0", RUN+="/usr/local/sbin/thunderbolt-ent0"
+ACTION=="move", SUBSYSTEM=="net", KERNEL=="ent1", RUN+="/usr/local/sbin/thunderbolt-ent1"

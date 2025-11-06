@@ -3,7 +3,8 @@
 
 - name: Check this role is not being run under bootstrap conditions
   ansible.builtin.fail:
-    msg: This role does not support being run when bootstrapping hosts. Failing.
+    msg: |
+      This role does not support being run when bootstrapping hosts. Failing.
   when: bootstrap_mount_base | default('') | length
 
 - name: Install nginx
@@ -16,7 +17,7 @@
 
 - name: Configure the nginx drop-in directories
   ansible.builtin.file:
-    path: "/etc/nginx/{{ directory }}"
+    path: /etc/nginx/{{ directory }}
     owner: root
     group: root
     mode: u=rwx,g=rx,o=rx
@@ -25,7 +26,7 @@
     - conf.d
     - vhosts.d
   loop_control:
-    label: "/etc/nginx/{{ directory }}"
+    label: /etc/nginx/{{ directory }}
     loop_var: directory
   tags:
     - nginx
@@ -33,7 +34,7 @@
 
 - name: Configure the nginx logging directories
   ansible.builtin.file:
-    path: "/var/log/{{ directory }}"
+    path: /var/log/{{ directory }}
     owner: root
     group: root
     mode: u=rwx,g=rx,o=rx
@@ -42,7 +43,7 @@
     - nginx
     - nginx/localhost
   loop_control:
-    label: "/var/log/{{ directory }}"
+    label: /var/log/{{ directory }}
     loop_var: directory
   tags:
     - nginx

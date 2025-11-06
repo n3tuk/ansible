@@ -1,5 +1,0 @@
-# {{ ansible_managed }}
-
-{% for entry in k3s_sysctl_settings %}
-{{ entry.key }} = {{ entry.value }}
-{% endfor %}

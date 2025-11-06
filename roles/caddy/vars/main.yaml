@@ -1,0 +1,20 @@
+---
+# vars file for caddy
+
+caddy_lib_path: /var/lib/caddy
+caddy_bin_path: /usr/local/bin
+caddy_bin_file: caddy
+caddy_config_path: /etc/caddy
+caddy_config_file: Caddyfile
+caddy_service_path: /etc/systemd/system
+caddy_service_name: caddy
+caddy_admin_socket_path: /run/caddy
+caddy_admin_socket_name: admin.sock
+caddy_cache_path: /var/cache/caddy
+
+caddy_url: >-
+  {{ caddy_url_base }}?os=linux&amd64{%
+     for pkg in caddy_packages %}&p={{ pkg | urlencode() }}{% endfor
+  %}&idempotency={{ 99999999999999 | random(start=10000000000000) }}
+
+caddy_download_timeout: 90

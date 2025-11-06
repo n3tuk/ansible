@@ -22,7 +22,8 @@
     lv: "{{ item.name }}"
     size: "{{ item.size }}"
   ignore_errors: "{{ ansible_check_mode }}"
-  loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
+  loop: |
+    {{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}
   loop_control:
     label: "{{ item.group }}/{{ item.name }}"
   tags:
@@ -32,13 +33,15 @@
 
 - name: Create the logical volume filesystems
   community.general.filesystem:
-    device: "/dev/{{ item.group }}/{{ item.name }}"
+    device: /dev/{{ item.group }}/{{ item.name }}
     fstype: "{{ item.fs_type }}"
     opts: "{{ item.fs_opts | default(omit) }}"
     state: present
+    force: true
   when: item.fs_type is defined
   ignore_errors: "{{ ansible_check_mode }}"
-  loop: "{{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}"
+  loop: |
+    {{ filesystems_logical_volumes + filesystems_extra_volumes | default([]) }}
   loop_control:
     label: "{{ item.group }}/{{ item.name }}"
   tags:

@@ -1,17 +1,19 @@
 ---
 # tasks file for starship
 
-- name: Install Starship
-  community.general.pacman:
-    name: "{{ starship_packages }}"
-    state: latest
-  ignore_errors: "{{ ansible_check_mode }}"
-  tags:
-    - starship
-    - package
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
+  when: ansible_distribution == 'ArchLinux'
+
+- name: Install on Debian Linux
+  ansible.builtin.include_tasks:
+    file: debian.yaml
+  when: ansible_distribution == 'Debian'
 
 - name: Prepare the local directories
   ansible.builtin.file:
+    # yamllint disable-line rule:line-length
     path: "{{ bootstrap_mount_base | default('') }}/{{ directory }}/.config"
     state: directory
     owner: root
@@ -20,7 +22,7 @@
   loop: "{{ starship_config_dirs }}"
   loop_control:
     loop_var: directory
-    label: "/{{ directory }}/.config"
+    label: /{{ directory }}/.config
   tags:
     - starship
     - configuration
@@ -28,6 +30,7 @@
 - name: Configure Starship
   ansible.builtin.template:
     src: starship.toml.jinja
+    # yamllint disable-line rule:line-length
     dest: "{{ bootstrap_mount_base | default('') }}/{{ directory }}/.config/starship.toml"
     owner: root
     group: root
@@ -35,7 +38,7 @@
   loop: "{{ starship_config_dirs }}"
   loop_control:
     loop_var: directory
-    label: "/{{ directory }}/.config/starship.toml"
+    label: /{{ directory }}/.config/starship.toml
   tags:
     - starship
     - configuration

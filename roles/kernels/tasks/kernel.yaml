@@ -6,6 +6,7 @@
 - name: Configure presets for {{ kernel }}
   ansible.builtin.template:
     src: linux.preset.jinja
+    # yamllint disable-line rule:line-length
     dest: "{{ bootstrap_mount_base | default('') }}/etc/mkinitcpio.d/{{ kernel }}.preset"
     owner: root
     group: root
@@ -33,10 +34,11 @@
     - configuration
 
 - name: Force running mkinitcpio in the chroot for {{ kernel }}
-  # This handler is building boot files specifically inside chroot'd environments
+  # This handler is building files specifically inside chroot'd environments
   ansible.builtin.command: # noqa no-changed-when
-    cmd: |-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/fish -c 'mkinitcpio -p {{ kernel }}'
+    cmd: >-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }}
+        /usr/bin/fish -c 'mkinitcpio -p {{ kernel }}'
   # If the kernel has been installed via pacstrap, rather than pacman above,
   # then the installation of the presets will be after installation, so force
   # the run when bootstrap_mount_base is configured to handle this

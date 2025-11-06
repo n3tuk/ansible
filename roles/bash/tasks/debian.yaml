@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for bash on Debian Linux
+
+- name: Install Bash
+  ansible.builtin.apt:
+    name: "{{ bash_packages }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - bash
+    - packages

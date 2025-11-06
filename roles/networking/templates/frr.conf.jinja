@@ -1,0 +1,39 @@
+# {{ ansible_managed }}
+
+frr version 10.3.1
+frr defaults traditional
+hostname {{ ansible_hostname }}
+log syslog informational
+service integrated-vtysh-config
+!
+interface ent0
+ ip router openfabric 1
+ ipv6 router openfabric 1
+ openfabric csnp-interval 5
+ openfabric hello-interval 1
+ openfabric hello-multiplier 3
+exit
+!
+interface ent1
+ ip router openfabric 1
+ ipv6 router openfabric 1
+ openfabric csnp-interval 5
+ openfabric hello-interval 1
+ openfabric hello-multiplier 3
+exit
+!
+interface end0
+ ip router openfabric 1
+ ipv6 router openfabric 1
+ openfabric csnp-interval 5
+ openfabric hello-interval 1
+ openfabric hello-multiplier 3
+ openfabric passive
+exit
+!
+router openfabric 1
+ fabric-tier 0
+ net {{ networking_openfabric_router_id }}
+ lsp-gen-interval 5
+exit
+!

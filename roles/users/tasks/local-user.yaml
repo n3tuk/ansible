@@ -13,6 +13,7 @@
   ansible.builtin.user:
     name: "{{ user.name }}"
     shell: "{{ user.settings.shell | default(users_default_shell) }}"
+    # yamllint disable-line rule:line-length
     groups: "{{ [user.name] + (user.settings.groups | default(users_default_groups)) }}"
     append: false
   tags:
@@ -37,6 +38,7 @@
   # such all SSH keys should be deleted to act as a further backup
   ansible.posix.authorized_key:
     user: "{{ user.name }}"
+    # yamllint disable-line rule:line-length
     key: "{{ key.type | default(users_default_key_type) }} {{ key.key | replace('\n', '') }} {{ key.comment | default(user.name)}}"
     state: present
     manage_dir: true

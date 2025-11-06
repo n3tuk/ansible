@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for fish on Debian Linux
+
+- name: Install fish packages
+  ansible.builtin.apt:
+    name: "{{ fish_packages_debian }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - fish
+    - packages

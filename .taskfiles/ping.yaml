@@ -1,0 +1,39 @@
+---
+version: 3
+
+tasks:
+  ping:
+    desc: Initiate a ping through Ansible to check connectivity
+    summary: |
+      Using Ansible, initiate a ping request against all known hosts (or a
+      sub-set of hosts as provided by the limit variable, if passed), checking
+      both connctivity to the host, and access to the root user (either direct,
+      or through elevation) to run commands.
+
+      $ task ping
+        OR
+      $ task ping limit=proxmox # Only ping hosts in the proxmox group
+    silent: true
+    cmds:
+      - cmd: |-
+          echo "Pinging all known hosts in the inventory to test for access..."
+          echo
+          echo -e "\033[32m   OK       \033[34m   DNS\033[0m"
+          echo -e "\033[33m   No Route \033[33m   Timeout\033[0m"
+          echo -e "\033[31m   Refused  \033[31m   Denied\033[0m"
+          echo
+          ansible \
+            --inventory inventory.yaml \
+            --forks 75 \
+            --ask-become-pass \
+            --module-name ansible.builtin.ping \
+            --one-line {{ .limit }} \
+          | awk '
+              /SUCCESS/              { printf "\033[32m   %s\033[0m\n", $1 }
+              /Could not resolve/    { printf "\033[34m   %s\033[0m\n", $1 }
+              /No route to host/     { printf "\033[33m   %s\033[0m\n", $1 }
+              /Connection refused/   { printf "\033[31m   %s\033[0m\n", $1 }
+              /Connection timed out/ { printf "\033[33m   %s\033[0m\n", $1 }
+              /Permanently added/    { node=$1 }
+              /Permission denied/    { printf "\033[31m   %s\033[0m\n", node }
+          '

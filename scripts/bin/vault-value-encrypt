@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ ${#} -ne 2 ]]; then
+  (>&2 echo "FATAL: vault-value-encrypt requires two arguments (name and value)")
+  exit 1
+fi
+
+if [[ "${1}" == "" || "${2}" == "" ]]; then
+  (>&2 echo "FATAL: vault-value-encrypt arguments (name and value) cannot be empty")
+  exit 1
+fi
+
+ansible-vault \
+  encrypt_string \
+  --name "${1}" "${2}"

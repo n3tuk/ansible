@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for starship on Arch Linux
+
+- name: Install Starship
+  community.general.pacman:
+    name: "{{ starship_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - starship
+    - package

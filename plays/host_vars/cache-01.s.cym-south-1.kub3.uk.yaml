@@ -1,6 +1,0 @@
----
-# Node-specific configuration for cache-01.s.cym-south-1.kub3.uk
-
-systemd_networkd_ipv4_address: 172.23.31.3/24
-systemd_networkd_ipv4_gateway: 172.23.31.1
-systemd_networkd_ipv6_address: 2a02:8010:8006:3a31:6d:5eff:fe55:5d8a/64

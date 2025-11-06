@@ -3,5 +3,6 @@
 
 - name: Run locale-gen in chroot
   ansible.builtin.command: # noqa no-changed-when
-    cmd: |-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/fish -c locale-gen
+    cmd: >-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }}
+        /usr/bin/fish -c locale-gen

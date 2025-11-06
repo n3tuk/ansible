@@ -7,4 +7,4 @@
     daemon_reload: false
     state: restarted
   # Only allow a handler to run when we're not inside a chroot environment
-  when: not bootstrap_mount_base | default('') | length
+  when: (bootstrap_mount_base | default('') | length) == 0

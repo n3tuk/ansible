@@ -1,0 +1,11 @@
+---
+# debian-specific tasks file for starship
+
+- name: Install Starship
+  ansible.builtin.apt:
+    name: "{{ starship_packages_debian }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - starship
+    - package

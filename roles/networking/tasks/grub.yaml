@@ -1,0 +1,14 @@
+---
+# grub-specific tasks for networking role
+
+- name: Enable IOMMU via Grub
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    # yamllint disable-line rule:line-length
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*?)(intel_iommu=on iommu=pt )?quiet(.*)"$'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1intel_iommu=on iommu=pt quiet\3"'
+    backrefs: true
+  notify: Update Grub configuration
+  tags:
+    - networking
+    - grub

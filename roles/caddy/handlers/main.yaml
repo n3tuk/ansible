@@ -1,0 +1,20 @@
+---
+# handlers file for caddy
+
+- name: Reload Caddy
+  ansible.builtin.systemd:
+    name: "{{ caddy_service_name }}.service"
+    # This is a self-installed service; we need to reload systemd to ensure it's
+    # (re)loaded prior to this command to ensure any changes are processed
+    daemon_reload: true
+    state: reloaded
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Restart Caddy
+  ansible.builtin.systemd:
+    name: "{{ caddy_service_name }}.service"
+    # This is a self-installed service; we need to reload systemd to ensure it's
+    # (re)loaded prior to this command to ensure any changes are processed
+    daemon_reload: true
+    state: restarted
+  ignore_errors: "{{ ansible_check_mode }}"

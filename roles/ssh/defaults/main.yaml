@@ -4,6 +4,8 @@
 ssh_server_max_startups: 10:30:100
 ssh_server_tcp_port: 22
 
+ssh_server_permit_root_login: "no"
+
 ssh_server_kex_algorithms:
   - curve25519-sha256
   - curve25519-sha256@libssh.org

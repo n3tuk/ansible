@@ -1,0 +1,9 @@
+---
+- name: Configure Proxmox Hosts
+  hosts: proxmox
+  become: true
+  become_user: root
+  roles:
+    - role: networking
+    - role: caddy
+    - role: tailscale
