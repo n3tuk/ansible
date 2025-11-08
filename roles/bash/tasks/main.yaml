@@ -8,22 +8,22 @@
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
   when: >-
-    ansible_facts.distribution == 'Archlinux' and
+    ansible_facts.distribution == 'ArchLinux' and
     (bootstrap_mount_base | default('') | length == 0)
 
 - name: Install on Debian Linux
   ansible.builtin.include_tasks:
     file: debian.yaml
-  when: ansible_distribution == 'Debian'
+  when: ansible_facts.distribution == 'Debian'
 
 - name: Configure Bash
   ansible.builtin.template:
-    src: '{{ path.1 }}.jinja'
+    src: "{{ path.1 }}.jinja"
     dest: "{{ bootstrap_mount_base | default('') }}/{{ path.0 }}/.{{ path.1 }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=
-  loop: '{{ bash_config_dirs | product(bash_config_files) }}'
+  loop: "{{ bash_config_dirs | product(bash_config_files) }}"
   loop_control:
     loop_var: path
     label: /{{ path.0 }}/.{{ path.1 }}

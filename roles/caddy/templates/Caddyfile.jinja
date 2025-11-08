@@ -16,7 +16,7 @@ proxmox.{{ env_name }}.kub3.uk {
   reverse_proxy
 {%- for host in groups[env_name] %}
 {%-   if host in groups['proxmox'] %}
- [{{ hostvars[host].ansible_default_ipv6.address }}]:8006
+ [{{ hostvars[host].ansible_facts.default_ipv6.address }}]:8006
 {%-   endif %}
 {%- endfor %} {
     transport http {
@@ -39,7 +39,7 @@ proxmox.{{ env_name }}.kub3.uk {
   }
 }
 
-{{ ansible_fqdn }} {
+{{ ansible_facts.fqdn }} {
 {% if caddy_acme_cloudflare_enabled %}
   tls {
     dns cloudflare {{ caddy_acme_cloudflare_api_token }}
@@ -47,7 +47,7 @@ proxmox.{{ env_name }}.kub3.uk {
   }
 
 {% endif %}
-  reverse_proxy [{{ ansible_default_ipv6.address }}]:8006 {
+  reverse_proxy [{{ ansible_facts.default_ipv6.address }}]:8006 {
     transport http {
       tls_insecure_skip_verify
     }

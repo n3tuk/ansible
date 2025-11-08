@@ -33,7 +33,9 @@
     cmd: |-
       /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
         /usr/bin/fish -c 'systemctl enable systemd-resolved.service'
-  when: not ansible_check_mode and bootstrap_mount_base | default('') | length
+  when: >-
+    not ansible_check_mode and
+    bootstrap_mount_base | default('') | length > 0
   tags:
     - systemd
     - systemd-resolved
@@ -44,7 +46,7 @@
     name: systemd-resolved.service
     enabled: true
     state: started
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
   tags:
     - systemd
     - systemd-resolved

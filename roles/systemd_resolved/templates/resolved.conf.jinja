@@ -9,8 +9,8 @@ DNSOverTLS=yes
 DNSSEC=yes
 
 # Allow the above DNS endpoints to resolve all domain names, with single
-# addresses appended with {{ ansible_domain }} before requesting
-Domains={{ ansible_domain }} ~.
+# addresses appended with {{ ansible_facts.domain }} before requesting
+Domains={{ ansible_facts.domain }} ~.
 
 MulticastDNS=no
 LLMNR=no

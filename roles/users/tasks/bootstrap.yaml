@@ -11,10 +11,10 @@
 - name: Create and configure groups in the chroot
   ansible.builtin.include_tasks:
     file: bootstrap-group.yaml
-  when: |-
+  when: >-
     group.settings.bootstrap is defined and
     group.settings.bootstrap
-  loop: |-
+  loop: >-
     {{ users_groups | dict2items(key_name='name', value_name='settings') }}
   loop_control:
     label: "{{ group.name }}"
@@ -26,10 +26,11 @@
 - name: Create and configure users in the chroot
   ansible.builtin.include_tasks:
     file: bootstrap-user.yaml
-  when: |-
+  when: >-
     user.settings.bootstrap is defined and
     user.settings.bootstrap
-  loop: "{{ users_users | dict2items(key_name='name', value_name='settings') }}"
+  loop: >-
+    {{ users_users | dict2items(key_name='name', value_name='settings') }}
   loop_control:
     label: "{{ user.name }}"
     loop_var: user

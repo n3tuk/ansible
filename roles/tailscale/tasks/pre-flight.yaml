@@ -9,7 +9,7 @@
   when: >-
     not (
       ansible_facts.distribution == 'Debian' or
-      ansible_facts.distribution == 'Archlinux'
+      ansible_facts.distribution == 'ArchLinux'
     )
   tags:
     - tailscale

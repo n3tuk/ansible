@@ -6,7 +6,7 @@
     name: tailscale
     types: deb
     uris: "{{ tailscale_apt_repository }}"
-    suites: "{{ ansible_distribution_release }}"
+    suites: "{{ ansible_facts.distribution_release }}"
     components: main
     signed_by: "{{ tailscale_apt_signkey }}"
     state: present
