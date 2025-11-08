@@ -70,6 +70,8 @@ repos:
     hooks:
       - id: ansible-lint
         name: Lint Ansible files for correctness and formatting
+        files: ^(plays/(encrypted|group|host)_vars/[a-z0-9-\.]+\.yaml|roles/[a-z0-9_]+/(defaults|handlers|meta|tasks|vars)/[a-z0-9-\.]+\.yaml)$
+        always_run: false
         additional_dependencies:
           - ansible
 
