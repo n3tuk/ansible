@@ -1,5 +1,5 @@
 ---
-# arch-specific tasks file for bash on Debian Linux
+# debian-specific tasks file for bash
 
 - name: Install Bash
   ansible.builtin.apt:

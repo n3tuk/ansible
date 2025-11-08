@@ -1,5 +1,5 @@
 ---
-# arch-specific tasks file for ssh on Arch Linux
+# debian-specific tasks file for ssh
 
 - name: Install SSH
   ansible.builtin.apt:

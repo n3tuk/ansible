@@ -1,14 +1,10 @@
 ---
-# arch-specific tasks file for bash on Arch Linux
+# arch-specific tasks file for bash
 
 - name: Install Bash
   community.general.pacman:
     name: "{{ bash_packages }}"
     state: present
-  # Work on the assumption that the service will have been pre-installed as part
-  # of the bootstrap role when initialising the initial system, so only attempt
-  # installation or update when bootstrap_mount_base is not set.
-  when: not bootstrap_mount_base | default('') | length
   ignore_errors: "{{ ansible_check_mode }}"
   tags:
     - bash

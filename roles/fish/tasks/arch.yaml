@@ -1,5 +1,5 @@
 ---
-# arch-specific tasks file for fish on Arch Linux
+# arch-specific tasks file for fish
 
 - name: Install Fish
   community.general.pacman:

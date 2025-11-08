@@ -1,5 +1,5 @@
 ---
-# arch-specific tasks file for sudo on Arch Linux
+# arch-specific tasks file for sudo
 
 - name: Install sudo packages
   community.general.pacman:
