@@ -1,9 +1,5 @@
 #  DO NOT EDIT - Managed by Ansible
 
-CacheServer = http://1.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
-CacheServer = http://2.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
-CacheServer = http://3.cache.s.cym-south-1.kub3.uk/$repo/os/$arch
-
 Server = https://mirrors.ukfast.co.uk/sites/archlinux.org/$repo/os/$arch
 Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch
 Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch
