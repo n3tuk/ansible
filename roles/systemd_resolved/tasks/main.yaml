@@ -15,7 +15,7 @@
     - configuration
 
 - name: Configure the stub resolver
-  ansible.builtin.file:
+  ansible.builtin.file: # noqa ignore-errors
     src: ../run/systemd/resolve/stub-resolv.conf
     dest: "{{ bootstrap_mount_base | default('') }}/etc/resolv.conf"
     state: link
@@ -23,6 +23,10 @@
     # Create the symlink even when the source does not exist, as
     # systemd-resolved may not be running when the link is created
     force: true
+  # This may fail if running inside the chroot environment as the resolv.conf
+  # file inside the chroot is mounted from the host, so ignore errors
+  ignore_errors: >-
+    {{ bootstrap_mount_base | default('') | length > 0 }}
   tags:
     - systemd-resolved
 
