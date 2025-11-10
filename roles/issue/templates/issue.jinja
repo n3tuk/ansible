@@ -18,14 +18,14 @@
         {{ ansible_facts.system_vendor }} {{ ansible_facts.product_name }}{% if ansible_facts.product_serial and ansible_facts.product_serial != "NA" %} ({{ ansible_facts.product_serial }}){% endif %}
 
   \e{halfbright}          {{ ansible_facts.processor_vcpus }}x {{ ansible_facts.processor[2] }}\e{reset}
-  \e{halfbright}          {{ '%02.1f' | format(( ansible_facts.memory_mb.real.total / 1024)) }} GB RAM\e{reset} plus \e{halfbright}{{ '%02.1f' | format(( ansible_facts.memory_mb.swap.total / 1024)) }} GB Swap\e{reset}
+  \e{halfbright}          {{ '%d' | format(( ansible_facts.memory_mb.real.total / 1024 ) | round(0, 'ceil') ) }} GiB RAM\e{reset} plus \e{halfbright}{{ '%d' | format(( ansible_facts.memory_mb.swap.total / 1024 ) | round(0, 'ceil')) }} GiB Swap\e{reset}
 {% for name in filesystems_physical_drives %}
 {%   if name in ansible_facts.devices %}
 {%     if ansible_facts.devices[name].model is defined
           and ansible_facts.devices[name].model %}
-  \e{halfbright}          {{ ansible_facts.devices[name].size }} {{ ansible_facts.devices[name].model }} ({{ ansible_facts.devices[name].serial }})\e{reset}
+  \e{halfbright}          {{ ansible_facts.devices[name].size | replace('.00', '') | replace('GB', 'GiB') }} {{ ansible_facts.devices[name].model }} ({{ ansible_facts.devices[name].serial }})\e{reset}
 {%     else %}
-  \e{halfbright}          {{ ansible_facts.devices[name].size }} Drive (/dev/{{ name }})\e{reset}
+  \e{halfbright}          {{ ansible_facts.devices[name].size | replace('.00', '') | replace('GB', 'GiB') }} Drive (/dev/{{ name }})\e{reset}
 {%     endif %}
 {%   endif %}
 {% endfor %}
@@ -36,7 +36,12 @@
   \e{halfbright}     Environment\e{reset}: \e{yellow}{{ env_name }}\e{reset}
   \e{halfbright}         Purpose\e{reset}: {{ env_purpose }}
 
-  \e{halfbright}Operating System\e{reset}: {{ ansible_facts.distribution }}{% if ansible_facts.distribution_version != "rolling" %} {{ ansible_facts.distribution_version }}{% endif %}
+  \e{halfbright}Operating System\e{reset}:
+{%- if ansible_facts.distribution == "Archlinux" %} Arch Linux
+{%- elif ansible_facts.distribution == "Debian" %} Debian Linux
+{%- elif ansible_facts.distribution == "Ubuntu" %} Ubuntu Linux
+{%- else %} {{ ansible_facts.distribution }} Linux{% endif %}
+{%- if ansible_facts.distribution != "Archlinux" %} ({{ ansible_facts.distribution_version }}){% endif %}
 
   \e{halfbright}          Kernel\e{reset}: \r
 
@@ -44,3 +49,4 @@
   \e{halfbright}    IPv4 Address\e{reset}: {{ ansible_facts.default_ipv4.address | split('/') | first }}
 
 \e{halfbright}──> \e{reset}Login
+{{ '\n' }}

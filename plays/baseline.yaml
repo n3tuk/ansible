@@ -1,15 +1,15 @@
 ---
-- name: Baseline all Arch Linux hosts
+- name: Update all Arch Linux hosts
   hosts: arch
   become: true
   become_user: root
-  roles:
+  roles: []
     # - role: ca
-    - role: pacman
+    # - role: pacman
   tags:
     - update
 
-- name: Baseline all Debian Linux hosts
+- name: Update all Debian Linux hosts
   hosts: debian
   become: true
   become_user: root
@@ -19,24 +19,29 @@
   tags:
     - update
 
+- name: Baseline all Arch Linux Hosts
+  hosts: arch
+  become: true
+  become_user: root
+  roles:
+    - role: kernels
+    - role: systemd
+    - role: systemd_networkd
+    - role: systemd_resolved
+  tags:
+    - baseline
+
 - name: Baseline all hosts
   hosts: all
   become: true
   become_user: root
   roles:
-    - role: issue
-    # - role: kernels
-    # - role: systemd
-    # - role: systemd_networkd
-    # - role: systemd_resolved
-    # - role: ca
     - role: starship
     - role: fish
     - role: bash
     - role: sudo
     - role: users
+    - role: issue
     - role: ssh
-    # - role: logrotate
-    # - role: netdata
   tags:
-    - update
+    - baseline
