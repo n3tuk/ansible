@@ -32,7 +32,7 @@
     - logical
 
 - name: Read current volume groups
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.shell: # noqa no-changed-when
     cmd: |-
       set -o pipefail
       vgdisplay --colon 2>/dev/null | cut -d : -f 1
