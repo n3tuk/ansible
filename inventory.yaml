@@ -21,5 +21,18 @@ debian:
     proxmox:
 
 bootstrap:
+  # WARNING: Do not keep any hosts in this group except during initial
+  #          installation (or re-installation), whem the host requires
+  #          bootstrapping. The Ansible Play for this group contains
+  #          non-idempotent tasks that will break existing systems, including
+  #          the wiping of all filesystems and re-installation of the operating
+  #          system from scratch. All existing data will be removed without
+  #          warning.
+  children:
+
+virtual:
+  children:
+
+physical:
   children:
     proxmox:
