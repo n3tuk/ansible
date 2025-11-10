@@ -9,7 +9,7 @@
   # installation or update when bootstrap_mount_base is not set.
   when: |
     ansible_facts.distribution == 'ArchLinux' and
-    (bootstrap_mount_base | default('') | length > 0)
+    (bootstrap_mount_base | default('') | length == 0)
 
 - name: Install on Debian Linux
   ansible.builtin.include_tasks:
@@ -70,12 +70,40 @@
     - sshd
     - configuration
 
+- name: Copy SSH server keys in to chroot
+  ansible.builtin.copy: # noqa jinja
+    src: /etc/ssh/{{ key }}
+    remote_src: true
+    dest: "{{ bootstrap_mount_base }}/etc/ssh/{{ key }}"
+    owner: root
+    group: root
+    mode: >-
+      {%- if key.endswith('.pub') -%}
+        u=rw,g=r,o=r
+      {%- else -%}
+        u=rw,g=r,o=
+      {%- endif %}
+  loop:
+    - ssh_host_ecdsa_key
+    - ssh_host_ecdsa_key.pub
+    - ssh_host_ed25519_key
+    - ssh_host_ed25519_key.pub
+    - ssh_host_rsa_key
+    - ssh_host_rsa_key.pub
+  loop_control:
+    label: /etc/ssh/{{ key }}
+    loop_var: key
+  when: bootstrap_mount_base | default('') | length > 0
+  tags:
+    - sshd
+    - configuration
+
 - name: Ensure sshd is enabled in the chroot
   # If installing into the chroot'd environment, call systemd directly via
   # arch-chroot instead of using the systemd module
   ansible.builtin.shell: # noqa no-changed-when
     cmd: |-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
+      /usr/bin/arch-chroot {{ bootstrap_mount_base }} \
         /usr/bin/fish -c 'systemctl enable sshd.service'
   when: |-
     (not ansible_check_mode) and
