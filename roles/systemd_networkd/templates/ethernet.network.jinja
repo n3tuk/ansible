@@ -1,37 +1,27 @@
 # {{ ansible_managed }}
 
 [Match]
-Name={{ systemd_networkd_ethernet_name }}
+MACAddress={{ ansible_facts.default_ipv4.macaddress }}
 
 [Link]
-MTUBytes={{ systemd_networkd_ethernet_mtu }}
+MTUBytes={{ ansible_facts.default_ipv4.mtu }}
 
 [Network]
 DHCP=no
-{% if systemd_networkd_vlans|length %}
-IPForward=yes
-{% else %}
-IPForward=no
-{% endif %}
-{% if systemd_networkd_access_vlan == 0 %}
-
-Address={{ systemd_networkd_ipv4_address }}
-Gateway={{ systemd_networkd_ipv4_gateway }}
-
-Address={{ systemd_networkd_ipv6_address }}
-# Router for IPv6 found through Router Advertisements
-IPv6AcceptRA=yes
-
-{% else %}
-LinkLocalAddressing=no
-IPv6AcceptRA=no
-{% endif %}
-IPv6PrivacyExtensions=no
-MulticastDNS=no
 LLMNR=no
-{% if systemd_networkd_vlans|length %}
+MulticastDNS=no
+IPForward=no
+IPv6PrivacyExtensions=no
 
-{%   for vlan in systemd_networkd_vlans %}
-VLAN={{ systemd_networkd_ethernet_name }}.{{ '%02d' | format(vlan) }}
-{%   endfor %}
-{% endif %}
+[Address]
+Address={{ ansible_facts.default_ipv4.address }}/{{ ansible_facts.default_ipv4.prefix }}
+
+[Route]
+Gateway={{ ansible_facts.default_ipv4.gateway }}
+
+[Address]
+Address={{ ansible_facts.default_ipv6.address }}/{{ ansible_facts.default_ipv6.prefix }}
+
+[Route]
+Gateway={{ ansible_facts.default_ipv6.gateway }}
+GatewayOnLink=yes

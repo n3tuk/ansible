@@ -83,7 +83,5 @@ kernels_cmdline_extras:
   - console=tty0
   - console=ttyS0,115200n8
 
-systemd_networkd_ethernet_name: enp3s0
-
 systemd_system_watchdog_enabled: true
 systemd_journald_max_use: 165M
