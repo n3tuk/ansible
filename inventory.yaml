@@ -2,6 +2,7 @@
 all:
   children:
     proxmox:
+    authentik:
 
 development:
   hosts:
@@ -10,11 +11,21 @@ development:
 services:
   hosts:
     proxmox-[01:02].services.kub3.uk:
+  children:
+    authentik:
 
 proxmox:
   hosts:
     proxmox-[01:03].development.kub3.uk:
     proxmox-[01:02].services.kub3.uk:
+
+authentik:
+  hosts:
+    authentik-[01:02].services.kub3.uk:
+
+arch:
+  children:
+    authentik:
 
 debian:
   children:
@@ -32,6 +43,7 @@ bootstrap:
 
 virtual:
   children:
+    authentik:
 
 physical:
   children:
