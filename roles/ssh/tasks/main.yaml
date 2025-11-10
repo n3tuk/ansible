@@ -81,7 +81,7 @@
       {%- if key.endswith('.pub') -%}
         u=rw,g=r,o=r
       {%- else -%}
-        u=rw,g=r,o=
+        u=rw,g=,o=
       {%- endif %}
   loop:
     - ssh_host_ecdsa_key
