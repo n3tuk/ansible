@@ -6,6 +6,7 @@ all:
     dns:
     ca:
     cache:
+    netdata:
 
 development:
   hosts:
@@ -19,6 +20,7 @@ services:
     dns:
     ca:
     cache:
+    netdata:
 
 proxmox:
   hosts:
@@ -41,12 +43,17 @@ cache:
   hosts:
     cache-[01:02].services.kub3.uk:
 
+netdata:
+  hosts:
+    netdata-[01:02].services.kub3.uk:
+
 arch:
   children:
     authentik:
     dns:
     ca:
     cache:
+    netdata:
 
 debian:
   children:
@@ -68,6 +75,7 @@ virtual:
     dns:
     ca:
     cache:
+    netdata:
 
 physical:
   children:
