@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for ufw
+
+- name: Install UFW
+  community.general.pacman:
+    name: "{{ ufw_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - ufw
+    - packages

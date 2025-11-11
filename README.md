@@ -14,6 +14,7 @@ n3tuk.
 | [`users.yaml`][play-users]         | [`play:users`][taskfile]     | A play which will create or update of all the users and groups on a system.                                                                      |
 | [`update.yaml`][play-update]       | [`update`][taskfile]         | A play which will update all Arch Linux repositories of using `pacman` (but not upgrade the packages).                                           |
 | [`upgrade.yaml`][play-upgrade]     | [`upgrade`][taskfile]        | A play which will update and upgrade all Arch Linux packages of using `pacman`.                                                                  |
+| [`authentik.yaml`][play-authentik] | [`play:authentik`][taskfile] | A play which will deploy and configure the Authentik identity provider alongside PostgreSQL, Redis, and `cloudflared`.                           |
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -63,6 +64,7 @@ task: [bootstrap] ansible-playbook \
 | [`netdata`][role-netdata]                   | A role to configure netdata either as a parent node for centralised storage and processing, or a child to collect data and stream it to a parent node.                                                        |
 | [`vault`][role-vault]                       | A role to install and configure Hashicorp Vault along with associated proxies, certificates, and firewall rules.                                                                                              |
 | [`tailscale`][role-tailscale]               | A role to install and configure Tailscale on a system to allow it to connect to the n3t.uk Tailscale network for secure remote access.                                                                        |
+| [`ufw`][role-ufw]                           | A role to install and configure UFW (Uncomplicated Firewall) on a virtual machine to manage the firewall rules and enhance security.                                                                          |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -90,3 +92,4 @@ task: [bootstrap] ansible-playbook \
 [role-netdata]: https://github.com/n3tuk/ansible/tree/main/roles/netdata
 [role-vault]: https://github.com/n3tuk/ansible/tree/main/roles/vault
 [role-tailscale]: https://github.com/n3tuk/ansible/tree/main/roles/tailscale
+[role-ufw]: https://github.com/n3tuk/ansible/tree/main/roles/ufw
