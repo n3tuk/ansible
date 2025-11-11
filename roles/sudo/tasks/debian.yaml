@@ -1,5 +1,5 @@
 ---
-# arch-specific tasks file for sudo on Debian Linux
+# debian-specific tasks file for sudo
 
 - name: Install sudo packages
   ansible.builtin.apt:

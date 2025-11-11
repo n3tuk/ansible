@@ -8,7 +8,7 @@
 - name: Install on Debian
   ansible.builtin.include_tasks:
     file: debian.yaml
-  when: ansible_distribution == 'Debian'
+  when: ansible_facts.distribution == 'Debian'
 
 - name: Set up Tailscale
   ansible.builtin.include_tasks:

@@ -1,0 +1,89 @@
+---
+env_purpose: bind-node (dns)
+
+filesystems_physical_drives:
+  - vda
+  - vdb
+
+filesystems_volume_groups:
+  - name: storage
+    partitions:
+      - /dev/vda2
+  - name: data
+    partitions:
+      - /dev/vdb1
+
+filesystems_physical_partitions:
+  - name: ESP
+    device: vda
+    number: 1
+    path: /efi
+    start: 1MiB
+    end: 256MiB
+    flags:
+      - esp
+    pv_type: fat32
+    fs_type: vfat
+    fs_opts: -F 32 -n ESP
+  - name: LVM
+    device: vda
+    number: 2
+    start: 256MiB
+    end: 100%
+    flags:
+      - lvm
+  - name: LVM
+    device: vdb
+    number: 1
+    start: 1MiB
+    end: 100%
+    flags:
+      - lvm
+
+filesystems_logical_volumes:
+  - name: system
+    group: storage
+    path: /
+    size: 8G
+    fs_type: ext4
+    fs_opts: -L SYSTEM
+  - name: swap
+    group: storage
+    size: 1G
+    fs_type: swap
+    fs_opts: -L SWAP
+  - name: journald
+    group: storage
+    path: /var/log/journal
+    size: 256M
+    fs_type: ext4
+    fs_opts: -L JOURNALD
+    mount_opts:
+      - nosuid
+  - name: pacman
+    group: storage
+    path: /var/cache/pacman
+    size: 2G
+    fs_type: ext4
+    fs_opts: -L PACMAN
+    mount_opts:
+      - nosuid
+      - nodev
+      - noexec
+  - name: home
+    group: storage
+    path: /home
+    size: 256M
+    fs_type: ext4
+    fs_opts: -L HOME
+    mount_opts:
+      - nosuid
+      - nodev
+  - name: bind
+    group: data
+    path: /var/lib/bind
+    size: 1G
+    fs_type: ext4
+    fs_opts: -L BIND
+    mount_opts:
+      - nosuid

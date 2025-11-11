@@ -1,7 +1,0 @@
-# {{ ansible_managed }}
-
-[NetDev]
-Name=bri{{ '%02d' | format(item.0) }}
-Kind=bridge
-
-MACAddress={{ ('02' + ((env_name + "-" + ansible_hostname + "-bri" + ('%02d' | format(item.0))) | hash("sha256") | truncate(10, true, ""))) | ansible.utils.hwaddr('unix') }}

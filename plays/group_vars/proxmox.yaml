@@ -1,5 +1,4 @@
 ---
-device_type: Physical
 env_purpose: proxmox-node
 
 users_root:

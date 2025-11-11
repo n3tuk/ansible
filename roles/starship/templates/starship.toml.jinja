@@ -31,7 +31,7 @@ style_user = "fg:white bg:black"
 
 [hostname]
 disabled = false
-format = "[](fg:black bg:none)[{{ ansible_fqdn }}]($style)[](fg:black bg:none)"
+format = "[](fg:black bg:none)[{{ ansible_facts.fqdn }}]($style)[](fg:black bg:none)"
 style = "fg:white bg:black"
 trim_at = "."
 ssh_only = false

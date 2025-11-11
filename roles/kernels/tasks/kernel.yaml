@@ -27,7 +27,7 @@
   # Work on the assumption that the kernel will have been pre-installed as part
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
   tags:
     - kernel
     - packages
@@ -42,7 +42,7 @@
   # If the kernel has been installed via pacstrap, rather than pacman above,
   # then the installation of the presets will be after installation, so force
   # the run when bootstrap_mount_base is configured to handle this
-  when: bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length > 0
   tags:
     - kernel
     - mkinitcpio

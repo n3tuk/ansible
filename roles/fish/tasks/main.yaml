@@ -7,14 +7,14 @@
   # Work on the assumption that the service will have been pre-installed as part
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
-  when: |
-    ansible_distribution == 'Archlinux' and
-    (bootstrap_mount_base | default('') | length) > 0
+  when: >-
+    ansible_facts.distribution == 'ArchLinux' and
+    (bootstrap_mount_base | default('') | length == 0)
 
 - name: Install on Debian Linux
   ansible.builtin.include_tasks:
     file: debian.yaml
-  when: ansible_distribution == 'Debian'
+  when: ansible_facts.distribution == 'Debian'
 
 - name: Prepare the local directories
   ansible.builtin.file:

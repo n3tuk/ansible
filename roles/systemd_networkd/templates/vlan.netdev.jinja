@@ -1,8 +1,0 @@
-# {{ ansible_managed }}
-
-[NetDev]
-Name={{ systemd_networkd_ethernet_name }}.{{ '%02d' | format(item.0) }}
-Kind=vlan
-
-[VLAN]
-Id={{ item.0 }}

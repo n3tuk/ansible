@@ -1,6 +1,46 @@
 ---
-- name: Bootstrap new Machines
-  hosts: bootstrap
+# Perform the bootstrap steps for all supported nodes, installing and
+# configuring Arch Linux on the hosts and rebooting to a minimum installed
+# standard, which can then be fully configured with other Ansible plays, as
+# required and supported.
+
+- name: Bootstrap new virtual machines with Arch Linux
+  hosts: bootstrap:&arch
+  remote_user: root
+  vars:
+    bootstrap_mount_base: /mnt
+    filesystems_wipe_enable: true
+  pre_tasks:
+    # This is a temporary workaround to ensure the COW space is expanded before
+    # starting installation, else it will fail at some point due to being unable
+    # to write temporary files
+    #  mount -o remount,size=2G /run/archiso/cowspace
+    - name: Ensure COW space is expanded for installation
+      ansible.posix.mount:
+        path: /run/archiso/cowspace
+        opts: size=2G
+        state: remounted
+  roles:
+    - role: filesystems
+    - role: bootstrap
+    - role: kernels
+    - role: systemd
+    - role: systemd_networkd
+    - role: systemd_resolved
+    # These Ansible Roles must be duplicated from the Common Configuration play
+    # below as they must have access to the bootstrap_mount_base variable above
+    # to correctly install the files and settings into the chroot during Arch
+    # Linux bootstrapping
+    - role: starship
+    - role: fish
+    - role: bash
+    - role: sudo
+    - role: users
+    - role: issue
+    - role: ssh
+
+- name: Bootstrap Common Configuration for all new Machines
+  hosts: bootstrap:!arch
   remote_user: root
   roles:
     - role: starship
@@ -9,6 +49,4 @@
     - role: sudo
     - role: users
     - role: issue
-    # Only update SSH after users have been created and sudo configured as this
-    # will disable password authentication for the root user, breaking login
     - role: ssh

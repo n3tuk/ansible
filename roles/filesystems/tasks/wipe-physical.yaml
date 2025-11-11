@@ -10,7 +10,7 @@
     - wipe
     - physical
 
-- name: Remove existing partitions for /dev/{{ drive }}
+- name: Remove existing physical partitions for /dev/{{ drive }}
   community.general.parted:
     device: "{{ gpt.disk.dev }}"
     number: "{{ partition.num }}"

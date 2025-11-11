@@ -1,5 +1,5 @@
 ---
-# arch-specific tasks file for ssh on Arch Linux
+# arch-specific tasks file for ssh
 
 - name: Install SSH
   community.general.pacman:

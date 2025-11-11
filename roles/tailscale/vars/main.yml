@@ -8,7 +8,7 @@ tailscale_packages_debian:
 tailscale_service: tailscaled
 
 tailscale_apt_repository: >-
-  https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}
+  https://pkgs.tailscale.com/stable/{{ ansible_facts.distribution | lower }}
 # yamllint disable rule:line-length
 tailscale_apt_signkey: >-
-  https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}.noarmor.gpg
+  https://pkgs.tailscale.com/stable/{{ ansible_facts.distribution | lower }}/{{ ansible_facts.distribution_release | lower }}.noarmor.gpg

@@ -1,5 +1,5 @@
 ---
-# arch-specific tasks file for starship on Arch Linux
+# arch-specific tasks file for starship
 
 - name: Install Starship
   community.general.pacman:

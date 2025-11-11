@@ -21,7 +21,7 @@
         /usr/bin/fish -c 'sbctl sign -s /efi/EFI/Linux/{{ kernel }}.efi'
   when: |-
     not ansible_check_mode and
-    bootstrap_mount_base | default('') | length and
+    (bootstrap_mount_base | default('') | length > 0) and
     kernels_secure_boot_sign
   tags:
     - kernel

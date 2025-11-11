@@ -7,7 +7,7 @@
     daemon_reload: false
     enabled: true
   # Only allow a handler to run when we're not inside a chroot environment
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
   tags:
     - kernel
     - systmed-boot
@@ -35,12 +35,12 @@
 
 - name: Install the systemd-boot bootloader in the chroot
   ansible.builtin.command: # noqa no-changed-when
-    cmd: >-
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }}
-        /usr/bin/fish -c 'bootctl install --esp-path=/efi'
+    # yamllint disable-line rule:line-length
+    cmd: /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} /usr/bin/bootctl install --esp-path=/efi
+    creates: "{{ bootstrap_mount_base }}/efi/EFI/BOOT/BOOTX64.EFI"
   when: >-
     not ansible_check_mode and
-    bootstrap_mount_base | default('') | length
+    (bootstrap_mount_base | default('') | length > 0)
   tags:
     - kernel
     - systemd-boot
@@ -49,10 +49,10 @@
 - name: Install the systemd-boot bootloader locally
   ansible.builtin.command: # noqa no-changed-when
     cmd: bootctl install
-    creates: "{{ bootstrap_mount_base | default('') }}/efi/EFI/BOOT/BOOTX64.EFI"
+    creates: /efi/EFI/BOOT/BOOTX64.EFI
   when: >-
     not ansible_check_mode and
-    not bootstrap_mount_base | default('') | length
+    (bootstrap_mount_base | default('') | length == 0)
   tags:
     - kernel
     - systmed-boot

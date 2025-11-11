@@ -1,5 +1,5 @@
 ---
-# arch-specific tasks file for fish on Debian Linux
+# debian-specific tasks file for fish
 
 - name: Install fish packages
   ansible.builtin.apt:

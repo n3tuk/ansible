@@ -7,7 +7,7 @@
     daemon_reload: false
     state: restarted
   # Only allow a handler to run when we're not inside a chroot environment
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
   tags:
     - systemd
     - systmed-journald
@@ -16,7 +16,7 @@
 - name: Run systemd daemon-reload locally
   ansible.builtin.systemd_service:
     daemon_reload: true
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
   tags:
     - systemd
     - service
@@ -26,7 +26,7 @@
     name: systemd-timesyncd.service
     daemon_reload: false
     state: restarted
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
   tags:
     - systemd
     - systemd-timesyncd

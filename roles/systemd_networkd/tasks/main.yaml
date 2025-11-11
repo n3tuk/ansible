@@ -1,6 +1,30 @@
 ---
 # tasks file for systemd-networkd
 
+- name: Configure the hostname
+  ansible.builtin.template:
+    src: hostname.jinja
+    dest: /etc/hostname
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - systemd-networkd
+    - networking
+    - configuration
+
+- name: Configure the hosts
+  ansible.builtin.template:
+    src: hosts.jinja
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - systemd-networkd
+    - networking
+    - configuration
+
 - name: Configure systemd-networkd
   ansible.builtin.template:
     src: networkd.conf.jinja
@@ -13,7 +37,8 @@
     - Run networkctl reload locally
   tags:
     - systemd-networkd
-    - configuraton
+    - networking
+    - configuration
 
 - name: Configure the ethernet interface
   ansible.builtin.template:
@@ -27,35 +52,8 @@
     - Run networkctl reload locally
   tags:
     - systemd-networkd
-    - configuraton
-
-- name: Configure VLAN and bridge network interfaces
-  ansible.builtin.template:
-    src: "{{ item.1 }}.jinja"
-    # yamllint disable-line rule:line-length
-    dest: "{{ bootstrap_mount_base | default('') }}/etc/systemd/network/{{item.1.split('.')[0] }}{{ '%02d' | format(item.0) }}.{{ item.1.split('.')[1] }}"
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-  # Create each of the four files required to configure the VLAN device and
-  # interface, as well as the bridge device and interface, and attach it to the
-  # bridge interface for KVM/QEMU access
-  loop: |
-    {{ systemd_networkd_vlans | product([
-          'vlan.netdev',
-          'vlan.network',
-          'bridge.netdev',
-          'bridge.network'
-        ])
-    }}
-  loop_control:
-    # yamllint disable-line rule:line-length
-    label: "{{item.1.split('.')[0] }}{{ '%02d' | format(item.0) }}.{{ item.1.split('.')[1] }}"
-  notify:
-    - Run networkctl reload locally
-  tags:
-    - systemd-networkd
-    - configuraton
+    - networking
+    - configuration
 
 - name: Ensure systemd-network is enabled in the chroot
   # If installing into the chroot'd environment, call systemd directly via
@@ -64,18 +62,22 @@
     cmd: |-
       /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }} \
         /usr/bin/fish -c 'systemctl enable systemd-networkd.service'
-  when: not ansible_check_mode and bootstrap_mount_base | default('') | length
+  when: >-
+    not ansible_check_mode and
+    bootstrap_mount_base | default('') | length > 0
   tags:
     - systemd
     - systemd-networkd
+    - networking
     - service
 
 - name: Ensure systemd-networkd is enabled locally
   ansible.builtin.systemd_service:
     name: systemd-networkd.service
     enabled: true
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
   tags:
     - systemd
     - systemd-networkd
+    - networking
     - service

@@ -2,6 +2,11 @@
 all:
   children:
     proxmox:
+    authentik:
+    dns:
+    ca:
+    cache:
+    netdata:
 
 development:
   hosts:
@@ -10,16 +15,68 @@ development:
 services:
   hosts:
     proxmox-[01:02].services.kub3.uk:
+  children:
+    authentik:
+    dns:
+    ca:
+    cache:
+    netdata:
 
 proxmox:
   hosts:
     proxmox-[01:03].development.kub3.uk:
     proxmox-[01:02].services.kub3.uk:
 
+authentik:
+  hosts:
+    authentik-[01:02].services.kub3.uk:
+
+dns:
+  hosts:
+    dns-[01:02].services.kub3.uk:
+
+ca:
+  hosts:
+    ca-[01:02].services.kub3.uk:
+
+cache:
+  hosts:
+    cache-[01:02].services.kub3.uk:
+
+netdata:
+  hosts:
+    netdata-[01:02].services.kub3.uk:
+
+arch:
+  children:
+    authentik:
+    dns:
+    ca:
+    cache:
+    netdata:
+
 debian:
   children:
     proxmox:
 
 bootstrap:
+  # WARNING: Do not keep any hosts in this group except during initial
+  #          installation (or re-installation), when the host requires
+  #          bootstrapping. The Ansible Play for this group contains
+  #          non-idempotent tasks that will break existing systems, including
+  #          the wiping of all filesystems and re-installation of the operating
+  #          system from scratch. All existing data will be removed without
+  #          warning.
+  children:
+
+virtual:
+  children:
+    authentik:
+    dns:
+    ca:
+    cache:
+    netdata:
+
+physical:
   children:
     proxmox:
