@@ -129,7 +129,6 @@ tasks:
       - task: prettier
       - task: markdownlint
       - task: jsonschema
-      - task: ansible-lint
 
   rename:
     desc: Find and rename all .yml files to .yaml
@@ -149,7 +148,7 @@ tasks:
     desc: Run the {{ name }} Ansible Playbook
     silent: true
     deps:
-      - task: ansible-lint
+      - task: jsonschema:ansible
     env:
       ANSIBLE_FORCE_COLOR: true
     cmds:
@@ -194,7 +193,7 @@ tasks:
     env:
       ANSIBLE_FORCE_COLOR: true
     deps:
-      - task: ansible-lint
+      - task: jsonschema:ansible
     prefix: '{{ trimSuffix ":*" .TASK }}:{{ index .MATCH 0 }}'
     silent: true
     cmds:
@@ -241,7 +240,7 @@ tasks:
     env:
       ANSIBLE_FORCE_COLOR: true
     deps:
-      - task: ansible-lint
+      - task: jsonschema:ansible
     prefix: '{{ trimSuffix ":*" .TASK }}:{{ index .MATCH 0 }}'
     silent: true
     cmds:

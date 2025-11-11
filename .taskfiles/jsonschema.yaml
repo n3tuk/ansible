@@ -12,7 +12,10 @@ tasks:
       - GitHub Dependabot configuration (.github/dependabot.yaml)
       - GitHub Workflows (.github/workflows/*.yaml)
       - pre-commit Configuration (.pre-commit-config)
-      - Ansible plays, tasks, and inventory files
+      - Ansible plays (plays/*.yaml)
+      - Ansible tasks and meta files (roles/*/{tasks,meta}/*.yaml)
+      - Ansible inventory (inventory.yaml)
+      - ansible-lint configuration (.ansible-lint.yaml)
 
       Checks on Kubernetes resources under the flux/ folder will be managed
       through the conform tasks using kubeconform, as although kubeconform still
@@ -23,14 +26,18 @@ tasks:
     deps:
       - task: yamllint
     cmds:
-      - task: taskfiles
-      - task: dependabot
-      - task: workflows
-      - task: pre-commit-config
-      - task: ansible-inventory
-      - task: ansible-plays
+      - task: jsonschema:taskfiles
+      - task: jsonschema:dependabot
+      - task: jsonschema:workflows
+      - task: jsonschema:pre-commit-config
+      - task: jsonschema:ansible-lint
+      - task: jsonschema:ansible:requirements
+      - task: jsonschema:ansible:inventory
+      - task: jsonschema:ansible:plays
+      - task: jsonschema:ansible:tasks
+      - task: jsonschema:ansible:meta
 
-  taskfiles:
+  jsonschema:taskfiles:
     internal: true
     silent: true
     sources:
@@ -44,7 +51,7 @@ tasks:
             Taskfile.yaml .taskfiles/*.yaml
           echo -e '{{ .cg }}Passed{{ .cc }}'
 
-  dependabot:
+  jsonschema:dependabot:
     internal: true
     silent: true
     sources:
@@ -58,7 +65,7 @@ tasks:
             .github/dependabot.yaml
           echo -e '{{ .cg }}Passed{{ .cc }}'
 
-  workflows:
+  jsonschema:workflows:
     internal: true
     silent: true
     sources:
@@ -81,7 +88,7 @@ tasks:
             {{ .files }}
           echo -e '{{ .cg }}Passed{{ .cc }}'
 
-  pre-commit-config:
+  jsonschema:pre-commit-config:
     internal: true
     silent: true
     sources:
@@ -98,7 +105,53 @@ tasks:
           echo -e '{{ .cg }}Passed{{ .cc }}'
       # yamllint enable rule:line-length
 
-  ansible-inventory:
+  jsonschema:ansible-lint:
+    internal: true
+    silent: true
+    sources:
+      - .ansible-lint.yaml
+    cmds:
+      # yamllint disable rule:line-length
+      - cmd: |-
+          [[ -f .ansible-lint.yaml ]] || exit 0
+          check-jsonschema \
+            --output-format text --verbose \
+            --cache-filename pre-commit-config.json \
+            --schemafile https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible-lint-config.json \
+            .ansible-lint.yaml
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+      # yamllint enable rule:line-length
+
+  jsonschema:ansible:
+    internal: true
+    silent: true
+    deps:
+      - task: yamllint
+    cmds:
+      - task: jsonschema:ansible:requirements
+      - task: jsonschema:ansible:inventory
+      - task: jsonschema:ansible:plays
+      - task: jsonschema:ansible:tasks
+      - task: jsonschema:ansible:meta
+
+  jsonschema:ansible:requirements:
+    internal: true
+    silent: true
+    sources:
+      - requirements.yaml
+    cmds:
+      # yamllint disable rule:line-length
+      - cmd: |-
+          [[ -f requirements.yaml ]] || exit 0
+          check-jsonschema \
+            --output-format text --verbose \
+            --cache-filename inventory.json \
+            --schemafile https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/requirements.json \
+            requirements.yaml
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+      # yamllint enable rule:line-length
+
+  jsonschema:ansible:inventory:
     internal: true
     silent: true
     sources:
@@ -115,7 +168,7 @@ tasks:
           echo -e '{{ .cg }}Passed{{ .cc }}'
       # yamllint enable rule:line-length
 
-  ansible-plays:
+  jsonschema:ansible:plays:
     internal: true
     silent: true
     sources:
@@ -125,7 +178,7 @@ tasks:
         sh: |-
           find plays/ \
             -ignore_readdir_race \
-            -type f -maxdepth 1 \
+            -maxdepth 1 -type f \
             -iname '*.yaml' \
             -printf 'plays/%P ' \
           2>/dev/null || true
@@ -136,7 +189,61 @@ tasks:
           check-jsonschema \
             --output-format text --verbose \
             --cache-filename ansible.json \
-            --schemafile https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json \
+            --schemafile 'https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook' \
+            {{ .files }}
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+      # yamllint enable rule:line-length
+
+  jsonschema:ansible:tasks:
+    internal: true
+    silent: true
+    sources:
+      - roles/*/tasks/*.yaml
+    vars:
+      files:
+        sh: |-
+          find roles/ \
+            -ignore_readdir_race \
+            -mindepth 3 -type f \
+            -path '*/tasks/*' \
+            -iname '*.yaml' \
+            -printf 'roles/%P ' \
+          2>/dev/null || true
+    cmds:
+      # yamllint disable rule:line-length
+      - cmd: |-
+          [[ -z '{{ .files }}' ]] && exit 0
+          check-jsonschema \
+            --output-format text --verbose \
+            --cache-filename ansible.json \
+            --schemafile 'https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks' \
+            {{ .files }}
+          echo -e '{{ .cg }}Passed{{ .cc }}'
+      # yamllint enable rule:line-length
+
+  jsonschema:ansible:meta:
+    internal: true
+    silent: true
+    sources:
+      - roles/*/meta/*.yaml
+    vars:
+      files:
+        sh: |-
+          find roles/ \
+            -ignore_readdir_race \
+            -mindepth 3 -type f \
+            -path '*/meta/*' \
+            -iname '*.yaml' \
+            -printf 'roles/%P ' \
+          2>/dev/null || true
+    cmds:
+      # yamllint disable rule:line-length
+      - cmd: |-
+          [[ -z '{{ .files }}' ]] && exit 0
+          check-jsonschema \
+            --output-format text --verbose \
+            --cache-filename ansible.json \
+            --schemafile https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/meta.json \
             {{ .files }}
           echo -e '{{ .cg }}Passed{{ .cc }}'
       # yamllint enable rule:line-length
