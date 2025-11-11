@@ -5,6 +5,7 @@ all:
     authentik:
     dns:
     ca:
+    cache:
 
 development:
   hosts:
@@ -17,6 +18,7 @@ services:
     authentik:
     dns:
     ca:
+    cache:
 
 proxmox:
   hosts:
@@ -35,11 +37,16 @@ ca:
   hosts:
     ca-[01:02].services.kub3.uk:
 
+cache:
+  hosts:
+    cache-[01:02].services.kub3.uk:
+
 arch:
   children:
     authentik:
     dns:
     ca:
+    cache:
 
 debian:
   children:
@@ -60,6 +67,7 @@ virtual:
     authentik:
     dns:
     ca:
+    cache:
 
 physical:
   children:
