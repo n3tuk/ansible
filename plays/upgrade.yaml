@@ -39,3 +39,15 @@
         upgrade: true
   tags:
     - virtual-machines
+
+- name: Upgrade all Caddy servers
+  # This will target both Proxmox hosts and Authentik servers
+  hosts: proxmox:authentik
+  become: true
+  become_user: root
+  vars:
+    caddy_upgrade: true
+  roles:
+    - role: caddy
+  tags:
+    - caddy

@@ -6,4 +6,5 @@
   roles:
     - role: proxmox/networking
     - role: caddy
+    - role: proxmox/caddy
     - role: tailscale

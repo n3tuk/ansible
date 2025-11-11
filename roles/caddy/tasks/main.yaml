@@ -36,7 +36,7 @@
     owner: "{{ caddy_user }}"
     group: "{{ caddy_group }}"
     mode: u=rwx,g=rx,o=rx
-  when: (caddy_update or not caddy_features_file.stat.exists)
+  when: (caddy_upgrade or not caddy_features_file.stat.exists)
   register: caddy_features_cache
   tags:
     - caddy
@@ -65,6 +65,7 @@
     (
       not ansible_check_mode and
       (
+        caddy_upgrade or
         caddy_features_cache.changed or
         not caddy_binary_file.stat.exists
       )
@@ -100,7 +101,7 @@
     mode: u=rwx,g=rx,o=rx
   loop:
     - "{{ caddy_config_path }}"
-    - "{{ caddy_config_path }}/conf.d"
+    - "{{ caddy_config_path }}/{{ caddy_config_file }}.d"
   loop_control:
     label: "{{ path }}"
     loop_var: path

@@ -1,0 +1,16 @@
+---
+# tasks file for proxmox/caddy
+
+- name: Create or update the {{ caddy_config_file }}
+  ansible.builtin.template:
+    src: Caddyfile.jinja
+    # yamllint disable-line rule:line-length
+    dest: "{{ caddy_config_path }}/{{ caddy_config_file }}.d/{{ proxmox_caddy_config_file }}"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rw,g=r,o=r
+  notify:
+    - Reload Caddy
+  tags:
+    - caddy
+    - configuration
