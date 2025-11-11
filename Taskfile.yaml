@@ -146,7 +146,7 @@ tasks:
           done
 
   play:bootstrap:
-    desc: Deploy the bootstrap configuration
+    desc: Run the {{ name }} Ansible Playbook
     silent: true
     deps:
       - task: ansible-lint
@@ -164,41 +164,97 @@ tasks:
             --ask-pass \
             plays/bootstrap.yaml
 
-  play:baseline:
-    desc: Deploy the baseline configuration
-    silent: true
-    deps:
-      - task: ansible-lint
-    env:
-      ANSIBLE_FORCE_COLOR: true
-    cmds:
-      - cmd: |-
-          ansible-playbook \
-            --syntax-check \
-            plays/baseline.yaml
-          echo -e '{{ .cg }}Checked{{ .cc }}'
-      - cmd: |-
-          ansible-playbook \
-            --limit {{ .limit }} \
-            plays/baseline.yaml
+  play:*:
+    label: '{{ trimSuffix ":*" .TASK }}:{{ "{" }}play{{ "}" }}'
+    desc: Run the named Ansible Playbook
+    summary: |-
+      Run the specified Ansible Playbook from within the plays/ directory. For
+      example, to run the `baseline.yaml` playbook, use:
 
-  play:proxmox:
-    desc: Deploy the Proxmox configuration
-    silent: true
-    deps:
-      - task: ansible-lint
+      $ task play:baseline
+
+      This will first perform a syntax check on the playbook to ensure it is
+      valid, and then run it against the hosts defined within the playbook in
+      check mode. Ansible can be limited to execution on those hosts defined by
+      the `--limit` parameter (by passing the argument limit={{ .limit }}),
+      which defaults to `all`.
+
+      $ task play:baseline limit=arch
+
+      If the file plays/encrypted_vars/become.yaml exists, it will be passed to
+      Ansible as an extra-vars file to provide become passwords for hosts that
+      require them.
+    vars:
+      name: "{{ index .MATCH 0 }}"
+      become:
+        sh: |-
+          if [[ -f plays/encrypted_vars/become.yaml ]]; then
+            echo -n "--extra-vars @plays/encrypted_vars/become.yaml"
+          fi
     env:
       ANSIBLE_FORCE_COLOR: true
+    deps:
+      - task: ansible-lint
+    prefix: '{{ trimSuffix ":*" .TASK }}:{{ index .MATCH 0 }}'
+    silent: true
     cmds:
       - cmd: |-
           ansible-playbook \
             --syntax-check \
-            plays/proxmox.yaml
+            plays/{{ .name }}.yaml
           echo -e '{{ .cg }}Checked{{ .cc }}'
       - cmd: |-
-          ansible-playbook \
+          ansible-playbook {{ .become }} \
             --limit {{ .limit }} \
-            plays/proxmox.yaml
+            plays/{{ .name }}.yaml
+
+  test:*:
+    label: '{{ trimSuffix ":*" .TASK }}:{{ "{" }}play{{ "}" }}'
+    desc: Check the named Ansible Playbook
+    summary: |-
+      Run the specified Ansible Playbook from within the plays/ directory in
+      check mode. For example, to run the `baseline.yaml` playbook, use:
+
+      $ task test:baseline
+
+      This will first perform a syntax check on the playbook to ensure it is
+      valid, and then run it against the hosts defined within the playbook in
+      check mode. Ansible can be limited to execution on those hosts defined by
+      the `--limit` parameter (by passing the argument limit={{ .limit }}),
+      which defaults to `all`.
+
+      All tasks will be dry-run in diff mode to show what changes would be made
+      without making any changes.
+
+      $ task test:baseline limit=arch
+
+      If the file plays/encrypted_vars/become.yaml exists, it will be passed to
+      Ansible as an extra-vars file to provide become passwords for hosts that
+      require them.
+    vars:
+      name: "{{ index .MATCH 0 }}"
+      become:
+        sh: |-
+          if [[ -f plays/encrypted_vars/become.yaml ]]; then
+            echo -n "--extra-vars @plays/encrypted_vars/become.yaml"
+          fi
+    env:
+      ANSIBLE_FORCE_COLOR: true
+    deps:
+      - task: ansible-lint
+    prefix: '{{ trimSuffix ":*" .TASK }}:{{ index .MATCH 0 }}'
+    silent: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check \
+            plays/{{ .name }}.yaml
+          echo -e '{{ .cg }}Checked{{ .cc }}'
+      - cmd: |-
+          ansible-playbook {{ .become }} \
+            --check --diff \
+            --limit {{ .limit }} \
+            plays/{{ .name }}.yaml
 
   clean:
     desc: Clean temporary files from the repository and configurations
