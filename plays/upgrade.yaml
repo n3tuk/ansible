@@ -6,23 +6,6 @@
 - name: Update all machines
   ansible.builtin.import_playbook: update.yaml
 
-- name: Upgrade all virtual machines
-  hosts: virtual
-  become: true
-  become_user: root
-  tasks:
-    - name: Upgrade the keyrings first
-      community.general.pacman:
-        name:
-          - archlinux-keyring
-          - alhp-keyring
-        state: latest
-    - name: Upgrade all available packages
-      community.general.pacman:
-        upgrade: true
-  tags:
-    - virtual-machines
-
 - name: Upgrade all physical machines
   hosts: physical
   become: true
@@ -39,3 +22,20 @@
         upgrade: true
   tags:
     - physical-machines
+
+- name: Upgrade all virtual machines
+  hosts: virtual
+  become: true
+  become_user: root
+  tasks:
+    - name: Upgrade the keyrings first
+      community.general.pacman:
+        name:
+          - archlinux-keyring
+          - alhp-keyring
+        state: latest
+    - name: Upgrade all available packages
+      community.general.pacman:
+        upgrade: true
+  tags:
+    - virtual-machines
