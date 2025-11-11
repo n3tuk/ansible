@@ -3,9 +3,9 @@
   hosts: arch
   become: true
   become_user: root
-  roles: []
+  roles:
     # - role: ca
-    # - role: pacman
+    - role: pacman
   tags:
     - update
 
