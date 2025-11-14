@@ -1,0 +1,14 @@
+---
+# vars file for postgresql
+
+postgresql_packages_arch:
+  - postgresql
+  # This is req for Ansible to interact with PostgreSQL
+  - python-psycopg2
+
+postgresql_service_name: postgresql
+postgresql_service_user: postgres
+postgresql_service_group: postgres
+
+postgresql_data_path: /var/lib/postgres/data
+postgresql_socket_path: /run/postgresql/

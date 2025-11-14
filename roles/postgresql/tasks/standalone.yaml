@@ -1,0 +1,27 @@
+---
+# primary-specific tasks file for postgresql on primary/standalone servers
+
+- name: Initialize the PostgreSQL database
+  ansible.builtin.command:
+    cmd: >-
+      /usr/sbin/initdb
+        --locale=C.UTF-8
+        --encoding=UTF8
+        -D "{{ postgresql_data_path }}"
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  args:
+    creates: "{{ postgresql_data_path }}/PG_VERSION"
+  when: >-
+    not ansible_check_mode
+  tags:
+    - postgresql
+    - database
+
+- name: Configure the PostgreSQL service
+  ansible.builtin.include_tasks:
+    file: configure.yaml
+
+- name: Set up the PostgreSQL service
+  ansible.builtin.include_tasks:
+    file: service.yaml

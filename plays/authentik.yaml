@@ -5,7 +5,7 @@
   become_user: root
   roles:
     - role: ufw
-    # - role: postgresql
+    - role: postgresql
     # - role: redis
     # - role: caddy
     # - role: authentik

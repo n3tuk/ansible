@@ -1,0 +1,13 @@
+---
+# service-specific tasks file for postgresql
+
+- name: Enable and start the PostgreSQL service
+  ansible.builtin.systemd:
+    name: "{{ postgresql_service_name }}.service"
+    state: started
+    enabled: true
+  # In order for a database to be replicated, a backup of the primary must be
+  # taken, therefore we should not start the service on standby nodes util this
+  # is done.
+  when: >-
+    not ansible_check_mode

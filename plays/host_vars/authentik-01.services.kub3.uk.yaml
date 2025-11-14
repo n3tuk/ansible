@@ -1,1 +1,2 @@
 ---
+postgresql_replication_role: primary

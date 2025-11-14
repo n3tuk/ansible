@@ -95,3 +95,31 @@ filesystems_logical_volumes:
     fs_opts: -L REDIS
     mount_opts:
       - nosuid
+
+postgresql_replication_hosts: "{{ groups['authentik'] | default([]) }}"
+postgresql_replication_username: replicator
+postgresql_replication_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  39326133613062633536393730616130333937623731313666396166343836616533643862313563
+  6130623332313234353561666436636333343435316163360a366636363463353436653565333431
+  36333662663764353765616462373966336132356332346132393636343637356264623866646231
+  3365636663613136330a356138643230346535353131663262376533396564613131633235626339
+  31303534653434643565653066323265666334393638393963636136373536646666313033323565
+  36343163633263393530663765306539666561386436623961623330343166393330633064666663
+  32306533363733326230356163626364613434346234613331336663653433653931643033613832
+  39616632646538303562636538386432346432323735613339366464636438376437616335373039
+  65626364346332303134393034393237313236373434386565313430653235366335
+
+postgresql_pg_hba_entries:
+  - type: host
+    database: "{{ authentik_postgresql_database | default('authentik') }}"
+    user: "{{ authentik_postgresql_username | default('authentik') }}"
+    # yamllint disable-line rule:line-length
+    address: "{{ hostvars['authentik-01.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
+    method: scram-sha-256
+  - type: host
+    database: "{{ authentik_postgresql_database | default('authentik') }}"
+    user: "{{ authentik_postgresql_username | default('authentik') }}"
+    # yamllint disable-line rule:line-length
+    address: "{{ hostvars['authentik-02.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
+    method: scram-sha-256

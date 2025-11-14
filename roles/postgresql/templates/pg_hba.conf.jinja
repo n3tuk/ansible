@@ -1,0 +1,38 @@
+# {{ ansible_managed }}
+
+# TYPE DATABASE USER ADDRESS METHOD
+
+# Enable database administrative login via the Unix domain socket
+local all postgres peer
+local replication postgres peer
+
+# Allowed local connections for database access
+host all all 127.0.0.1/32 scram-sha-256
+host all all {{ ansible_facts.default_ipv4.address }}/32 scram-sha-256
+host all all ::1/128 scram-sha-256
+host all all {{ ansible_facts.default_ipv6.address }}/128 scram-sha-256
+{%  if postgresql_pg_hba_entries | length > 0 %}
+
+# Allowed remote connections for database access
+{%    for entry in postgresql_pg_hba_entries %}
+{%      if entry.comment is defined %}# {{ entry.comment }}{% endif -%}
+{{ 'host' if entry.type == 'host' else 'hostssl' }} {{ entry.database | default('template0') }} {{ entry.user }} {{ entry.address | default('127.0.0.1/32') }} {{ entry.method | default('scram-sha-256') }}
+{%    endfor %}
+{%  endif %}
+{%  if postgresql_replication_hosts | length > 0 %}
+
+# Allowed remote connections for database replication
+# NOTE: replication does not imply all and visa versa, and hostssl cannot be set
+#       until the SSL configuration on the PostgreSQL server is completed.
+{%    for host in postgresql_replication_hosts if not host == inventory_hostname %}
+## {{ hostvars[host].ansible_facts.fqdn }}
+{%      if hostvars[host].ansible_facts.default_ipv4.address is defined
+           and hostvars[host].ansible_facts.default_ipv4.address | length > 0 %}
+host replication {{ postgresql_replication_username }} {{ hostvars[host].ansible_facts.default_ipv4.address }}/32 scram-sha-256
+{%      endif %}
+{%      if hostvars[host].ansible_facts.default_ipv6.address is defined
+           and hostvars[host].ansible_facts.default_ipv6.address | length > 0 %}
+host replication {{ postgresql_replication_username }} {{ hostvars[host].ansible_facts.default_ipv6.address }}/128 scram-sha-256
+{%      endif %}
+{%    endfor %}
+{%  endif %}

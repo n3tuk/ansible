@@ -61,10 +61,11 @@ task: [bootstrap] ansible-playbook \
 | [`nginx`][role-nginx]                       | A role to configure nginx on a system with standard settings, but not to configure any virtual hosts which it may serve.                                                                                      |
 | [`cache`][role-cache]                       | A role to configure a caching proxy virtual host in nginx which will proxy and cache Arch Linux repositories and packages.                                                                                    |
 | [`logrotate`][role-logrotate]               | A role to configure logrotate with sensible defaults to support the rotation and compression of historical log files.                                                                                         |
-| [`netdata`][role-netdata]                   | A role to configure netdata either as a parent node for centralised storage and processing, or a child to collect data and stream it to a parent node.                                                        |
+| [`netdata`][role-netdata]                   | A role to configure Netdata either as a parent node for centralised storage and processing, or a child to collect data and stream it to a parent node.                                                        |
 | [`vault`][role-vault]                       | A role to install and configure Hashicorp Vault along with associated proxies, certificates, and firewall rules.                                                                                              |
 | [`tailscale`][role-tailscale]               | A role to install and configure Tailscale on a system to allow it to connect to the n3t.uk Tailscale network for secure remote access.                                                                        |
 | [`ufw`][role-ufw]                           | A role to install and configure UFW (Uncomplicated Firewall) on a virtual machine to manage the firewall rules and enhance security.                                                                          |
+| [`postgresql`][role-postgresql]             | A role to install and configure PostgreSQL on a virtual machine to manage relational databases.                                                                                                               |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -93,3 +94,4 @@ task: [bootstrap] ansible-playbook \
 [role-vault]: https://github.com/n3tuk/ansible/tree/main/roles/vault
 [role-tailscale]: https://github.com/n3tuk/ansible/tree/main/roles/tailscale
 [role-ufw]: https://github.com/n3tuk/ansible/tree/main/roles/ufw
+[role-postgresql]: https://github.com/n3tuk/ansible/tree/main/roles/postgresql
