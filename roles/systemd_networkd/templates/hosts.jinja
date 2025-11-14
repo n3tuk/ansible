@@ -3,5 +3,16 @@
 127.0.0.1 localhost
 ::1 localhost
 
+# Local host addresses
 {{ ansible_facts.default_ipv4.address }} {{ ansible_facts.fqdn }} {{ ansible_facts.hostname }}
 {{ ansible_facts.default_ipv6.address }} {{ ansible_facts.fqdn }} {{ ansible_facts.hostname }}
+{%  if systemd_networkd_hosts_entries | length > 0 %}
+
+# Additional host addresses
+{%    for entry in systemd_networkd_hosts_entries %}
+{%      for address in entry.addresses %}
+{{ address }} {{ entry.hostname }}{% if entry.aliases is defined and entry.aliases | length > 0 %} {{ entry.aliases | join(' ') }}{% endif %}
+
+{%      endfor %}
+{%    endfor %}
+{%  endif %}

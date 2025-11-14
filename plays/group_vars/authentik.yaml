@@ -235,3 +235,12 @@ cloudflared_tunnel_token: !vault |
   30373130626234643531316532636165613036623034636163636635333539383732303863383366
   31303265363838333030613265653232393933363737636566303536393037316266643863393661
   64306331633365613231353635333531376232303937303736393034303661633537
+
+systemd_networkd_hosts_entries:
+  # In order to help Cloudflare tunnel the requests through to Caddy with valid
+  # TLS certificate checks, we need to ensure that auth.n3t.uk maps back to the
+  # server internally, and not try to redirect the request back out on to the
+  # Internet via external DNS.
+  - addresses:
+      - "::1"
+    hostname: auth.n3t.uk

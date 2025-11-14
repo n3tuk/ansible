@@ -1,0 +1,14 @@
+---
+# vars file for cloudflared
+
+cloudflared_packages_arch:
+  - cloudflared
+
+cloudflared_config_path: /etc/cloudflared
+cloudflared_log_path: /var/log/cloudflared
+
+cloudflared_service_name: cloudflared-tunnel
+cloudflared_service_user: cloudflared
+cloudflared_service_group: cloudflared
+
+cloudflared_sysctl_rmem_max: 2500000

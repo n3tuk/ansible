@@ -1,0 +1,8 @@
+---
+# defaults file for cloudflared
+
+cloudflared_account_tag: "00000000000000000000000000000000"
+cloudflared_tunnel_name: tunnel
+cloudflared_tunnel_id: 00000000-0000-0000-0000-000000000000
+cloudflared_tunnel_token: ""
+cloudflared_tunnel_secret: ""

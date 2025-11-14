@@ -10,4 +10,4 @@
     - role: caddy
     - role: authentik
     - role: tailscale
-    # - role: cloudflared
+    - role: cloudflared

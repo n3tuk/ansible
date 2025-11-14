@@ -1,0 +1,16 @@
+---
+# handlers file for cloudflared
+
+- name: Restart cloudflared-tunnel
+  ansible.builtin.systemd:
+    name: "{{ cloudflared_service_name }}@{{ cloudflared_tunnel_name }}.service"
+    # This is services includes self-installed service override; we need to
+    # reload systemd to ensure it's (re)loaded prior to this command to ensure
+    # any changes are processed
+    daemon_reload: true
+    state: restarted
+  when: >-
+    not ansible_check_mode
+  tags:
+    - cloudflared
+    - service

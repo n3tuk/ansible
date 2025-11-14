@@ -1,0 +1,47 @@
+---
+# arch-specific tasks file for cloudflared
+
+- name: Install cloudflared
+  community.general.pacman:
+    name: "{{ cloudflared_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - cloudflared
+    - packages
+
+# The Arch Linux package for cloudflared does not create a dedicated user and
+# group, not the service file, so we need to create them manually.
+
+- name: Create Group for cloudflared
+  ansible.builtin.group:
+    name: "{{ cloudflared_service_group }}"
+    system: true
+  tags:
+    - cloudflared
+    - user
+
+- name: Create User for cloudflared
+  ansible.builtin.user:
+    name: "{{ cloudflared_service_user }}"
+    system: true
+    group: "{{ cloudflared_service_group }}"
+    home: "{{ cloudflared_config_path }}"
+    shell: /usr/sbin/nologin
+    create_home: false
+  tags:
+    - cloudflared
+    - user
+
+- name: Create or update the systemd service file
+  ansible.builtin.template:
+    src: cloudflared-tunnel@.service.jinja
+    dest: /etc/systemd/system/{{ cloudflared_service_name }}@.service
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  notify:
+    - Restart cloudflared-tunnel
+  tags:
+    - cloudflared
+    - service

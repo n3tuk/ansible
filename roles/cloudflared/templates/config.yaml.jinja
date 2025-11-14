@@ -1,0 +1,14 @@
+---
+# {{ ansible_managed }}
+
+tunnel: {{ cloudflared_tunnel_id }}
+token: {{ cloudflared_tunnel_token }}
+credentials-file: {{ cloudflared_config_path }}/{{ cloudflared_tunnel_name }}.json
+
+protocol: auto
+edge-ip-version: auto
+no-tls-verify: true
+no-autoupdate: true
+
+logfile: /var/log/cloudflared/{{ cloudflared_tunnel_name }}.log
+loglevel: info
