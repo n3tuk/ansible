@@ -19,6 +19,7 @@ set:
 
 env:
   limit: '{{ .limit | default "all" }}'
+  tags: '{{ .tags | default "" }}'
 
 vars:
   # ANSI Colours
@@ -185,6 +186,11 @@ tasks:
       require them.
     vars:
       name: "{{ index .MATCH 0 }}"
+      options:
+        sh: |-
+          if [[ -n "{{ .tags }}" ]]; then
+            echo -n " --tags {{ .tags }}"
+          fi
       become:
         sh: |-
           if [[ -f plays/encrypted_vars/become.yaml ]]; then
@@ -203,7 +209,8 @@ tasks:
             plays/{{ .name }}.yaml
           echo -e '{{ .cg }}Checked{{ .cc }}'
       - cmd: |-
-          ansible-playbook {{ .become }} \
+          ansible-playbook \
+            {{ .become }}{{ .options }} \
             --limit {{ .limit }} \
             plays/{{ .name }}.yaml
 
@@ -232,6 +239,11 @@ tasks:
       require them.
     vars:
       name: "{{ index .MATCH 0 }}"
+      options:
+        sh: |-
+          if [[ -n "{{ .tags }}" ]]; then
+            echo -n " --tags {{ .tags }}"
+          fi
       become:
         sh: |-
           if [[ -f plays/encrypted_vars/become.yaml ]]; then
@@ -250,7 +262,8 @@ tasks:
             plays/{{ .name }}.yaml
           echo -e '{{ .cg }}Checked{{ .cc }}'
       - cmd: |-
-          ansible-playbook {{ .become }} \
+          ansible-playbook \
+            {{ .become }}{{ .options }} \
             --check --diff \
             --limit {{ .limit }} \
             plays/{{ .name }}.yaml
