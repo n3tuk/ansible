@@ -1,0 +1,9 @@
+---
+# service-specific tasks file for valkey
+
+- name: Enable and start the Valkey service
+  ansible.builtin.systemd:
+    name: "{{ valkey_service_name }}.service"
+    state: started
+    enabled: true
+  when: not ansible_check_mode

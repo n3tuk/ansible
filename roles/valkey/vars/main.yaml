@@ -1,0 +1,13 @@
+---
+# vars file for valkey
+
+valkey_packages_arch:
+  - valkey
+  - ruby
+  - ruby-valkey
+
+valkey_service_name: valkey
+valkey_service_user: valkey
+valkey_service_group: valkey
+
+valkey_data_dir: /var/lib/valkey

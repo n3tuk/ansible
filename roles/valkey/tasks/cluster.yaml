@@ -1,0 +1,14 @@
+---
+# cluster-specific tasks file for valkey
+
+- name: Create Valkey cluster (only on primary)
+  ansible.builtin.command: >-
+    valkey-cli
+      --cluster create {{ valkey_cluster_nodes | join(' ') }}
+      --cluster-replicas {{ valkey_cluster_replicas }}
+      --cluster-yes
+  changed_when: false
+  when: >-
+    not ansible_check_mode and
+    valkey_is_primary and
+    valkey_cluster_enabled

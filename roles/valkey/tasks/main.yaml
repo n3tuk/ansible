@@ -1,0 +1,30 @@
+---
+# tasks file for valkey
+
+- name: Run pre-flight checks
+  ansible.builtin.include_tasks:
+    file: pre-flight.yaml
+
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
+  when: >-
+    ansible_facts.distribution == 'Archlinux'
+
+- name: Configure the valkey service
+  ansible.builtin.include_tasks:
+    file: configure.yaml
+
+- name: Configure the valkey firewall
+  ansible.builtin.include_tasks:
+    file: firewall.yaml
+
+- name: Set up the valkey service
+  ansible.builtin.include_tasks:
+    file: service.yaml
+
+- name: Set up the valkey cluster
+  ansible.builtin.include_tasks:
+    file: cluster.yaml
+  when: >-
+    valkey_cluster_enabled

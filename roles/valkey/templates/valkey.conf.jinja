@@ -1,0 +1,120 @@
+# {{ ansible_managed }}
+
+## General Settings
+
+loglevel {{ valkey_loglevel }}
+always-show-logo no
+log-format logfmt
+log-timestamp-format iso8601
+hide-user-data-from-log yes
+
+set-proc-title yes
+proc-title-template "{title} {listen-addr} {server-mode}"
+
+extended-redis-compatibility no
+
+protected-mode yes
+
+enable-protected-configs local
+enable-debug-command local
+enable-module-command local
+
+## Service Settings
+
+daemonize no
+bind {{ valkey_bind | join(' ') }}
+{%  if valkey_tls_enabled -%}
+port 0
+tls-port {{ valkey_port }}
+{%  else -%}
+port {{ valkey_port }}
+{%  endif %}
+tcp-backlog 511
+tcp-keepalive 300
+
+unixsocket /run/valkey/valkey.sock
+unixsocketgroup wheel
+unixsocketperm 660
+
+timeout 0
+maxclients {{ valkey_max_clients }}
+
+{%- if valkey_tls_enabled %}
+## TLS Settings
+
+tls-protocols "TLSv1.3"
+tls-ciphersuites TLS_CHACHA20_POLY1305_SHA256
+tls-prefer-server-ciphers yes
+tls-session-caching yes
+
+tls-replication yes
+tls-cluster yes
+
+tls-ca-cert-file {{ valkey_tls_ca_cert_file }}
+tls-cert-file {{ valkey_tls_cert_file }}
+tls-key-file {{ valkey_tls_key_file }}
+
+tls-client-cert-file {{ valkey_tls_client_cert_file }}
+tls-client-key-file {{ valkey_tls_client_key_file }}
+{%  endif %}
+
+{%- if valkey_cluster_enabled == true %}
+## Cluster Settings
+
+cluster-enabled yes
+cluster-config-file nodes-{{ valkey_port }}.conf
+cluster-node-timeout 15000
+cluster-port {{ valkey_port + 10000 }}
+cluster-preferred-endpoint-type ip # or hostname
+cluster-announce-hostname {{ ansible_facts.fqdn }}
+cluster-announce-human-nodename {{ ansible_facts.fqdn }}
+shutdown-timeout 10
+{%  else %}
+cluster-enabled no
+{%  endif %}
+
+## Database Settings
+databases 16
+dir {{ valkey_data_dir }}
+
+# The server will save the database:
+# - After an hour if at least 1 change was performed
+# - After 5 minutes if at least 100 changes were performed
+# - After 60 seconds if at least 10000 changes were performed
+save 3600 1 300 100 60 10000
+
+stop-writes-on-bgsave-error no
+rdbcompression yes
+rdbchecksum yes
+rdb-version-check strict
+dbfilename dump.rdb
+rdb-del-sync-files no
+
+{%- if valkey_cluster_enabled == true %}
+## Replication Settings for Cluster
+
+replicaof {{ hostvars[valkey_replication_primary].ansible_facts.default_ipv6.address }} {{ valkey_port }}
+primaryuser {{ valkey_replication_username }}
+primaryauth {{ valkey_replication_password }}
+
+dual-channel-replication-enabled yes
+replica-priority 100
+replica-serve-stale-data yes
+replica-read-only yes
+repl-diskless-sync yes
+repl-diskless-sync-delay 5
+repl-diskless-sync-max-replicas 0
+repl-diskless-load disabled
+repl-disable-tcp-nodelay no
+{%  endif %}
+
+## ACL Settings
+
+{%  if valkey_cluster_enabled == true -%}
+user {{ valkey_replication_username }} on >{{ valkey_replication_password }} +@all
+{%  endif -%}
+
+{%  for user in valkey_acl_users -%}
+{% if user.comment is defined %}# {{ user.comment }}{% endif %}
+user {{ user.name }} {{ 'on' if user.enabled else 'off'}} {% if user.password is defined %}>{{ user.password }}{% endif %} {{ user.rules | join(' ') }}
+{%  endfor %}

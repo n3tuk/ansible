@@ -6,7 +6,6 @@
   roles:
     - role: ufw
     - role: postgresql
-    # - role: redis
     - role: caddy
     - role: authentik
     - role: tailscale

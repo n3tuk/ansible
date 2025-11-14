@@ -1,0 +1,48 @@
+---
+# firewall-specific tasks file for valkey
+
+- name: Enable firewall access for valkey
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ hostvars[host.0].ansible_facts[host.1].address }}"
+    proto: tcp
+    port: "{{ valkey_port }}"
+    comment: Allow valkey for {{ hostvars[host.0].ansible_facts.fqdn }}
+  when: >-
+    hostvars[host.0].ansible_facts[host.1] is defined
+  loop: >-
+    {{ valkey_allowed_hosts | difference([inventory_hostname])
+       | product(['default_ipv4', 'default_ipv6']) | list }}
+  loop_control:
+    label: >-
+      allow {{ valkey_port }}/tcp from
+      {{ hostvars[host.0].ansible_facts[host.1].address
+         | default('unknown') }}
+      to any
+    loop_var: host
+  tags:
+    - valkey
+    - firewall
+
+- name: Enable firewall access for valkey Cluster
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ hostvars[host.0].ansible_facts[host.1].address }}"
+    proto: tcp
+    port: "{{ valkey_port + 10000 }}"
+    comment: Allow valkey Cluster for {{ hostvars[host.0].ansible_facts.fqdn }}
+  when: >-
+    hostvars[host.0].ansible_facts[host.1] is defined
+  loop: >-
+    {{ valkey_cluster_hosts | difference([inventory_hostname])
+       | product(['default_ipv4', 'default_ipv6']) | list }}
+  loop_control:
+    label: >-
+      allow {{ valkey_port + 10000 }}/tcp from
+      {{ hostvars[host.0].ansible_facts[host.1].address
+         | default('unknown') }}
+      to any
+    loop_var: host
+  tags:
+    - valkey
+    - firewall
