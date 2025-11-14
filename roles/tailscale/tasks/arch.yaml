@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for tailscale
+
+- name: Install Tailscale
+  community.general.pacman:
+    name: "{{ tailscale_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - tailscale
+    - packages

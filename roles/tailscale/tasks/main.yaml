@@ -5,7 +5,12 @@
   ansible.builtin.include_tasks:
     file: pre-flight.yaml
 
-- name: Install on Debian
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
+  when: ansible_facts.distribution == 'Archlinux'
+
+- name: Install on Debian Linux
   ansible.builtin.include_tasks:
     file: debian.yaml
   when: ansible_facts.distribution == 'Debian'

@@ -9,5 +9,5 @@
     # - role: redis
     - role: caddy
     - role: authentik
-    # - role: tailscale
+    - role: tailscale
     # - role: cloudflared

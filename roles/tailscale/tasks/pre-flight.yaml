@@ -1,6 +1,16 @@
 ---
 # pre-flight specific tasks file for tailscale
 
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: |
+      This role does not support being run when bootstrapping hosts. Failing.
+  when: >-
+    bootstrap_mount_base | default('') | length > 0
+  tags:
+    - tailscale
+    - pre-flight
+
 - name: Check for supported distributions
   ansible.builtin.fail:
     msg: >-
@@ -9,7 +19,7 @@
   when: >-
     not (
       ansible_facts.distribution == 'Debian' or
-      ansible_facts.distribution == 'ArchLinux'
+      ansible_facts.distribution == 'Archlinux'
     )
   tags:
     - tailscale
