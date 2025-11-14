@@ -11,7 +11,7 @@
   when: >-
     ansible_facts.distribution == 'Archlinux'
 
-- name: Configure the UFW service
+- name: Set up the UFW service
   ansible.builtin.include_tasks:
     file: service.yaml
 

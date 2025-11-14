@@ -7,6 +7,9 @@
       This role does not support being run when bootstrapping hosts. Failing.
   when: >-
     bootstrap_mount_base | default('') | length > 0
+  tags:
+    - ufw
+    - pre-flight
 
 - name: Check for supported distributions
   ansible.builtin.fail:
