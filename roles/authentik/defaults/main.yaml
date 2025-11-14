@@ -1,0 +1,47 @@
+---
+# defaults file for authentik
+
+authentik_image: ghcr.io/goauthentik/server
+authentik_version: "2025.10.1"
+
+authentik_public_hostname: ""
+
+authentik_listen_address: 0.0.0.0
+authentik_listen_http: 8080
+authentik_listen_https: 8443
+authentik_listen_ldap: 3389
+authentik_listen_ldaps: 6636
+authentik_listen_metrics: 9300
+authentik_listen_trusted_proxy_cidrs:
+  - "127.0.0.1/32"
+  - "::1/128"
+
+authentik_allowed_hosts: []
+
+authentik_secret_key: ""
+
+authentik_log_level: debug
+authentik_disable_update_check: true
+
+authentik_email_from: ""
+authentik_email_host: ""
+authentik_email_port: 25
+authentik_email_timeout: 10
+authentik_email_use_tls: true
+authentik_email_use_ssl: false
+authentik_email_username: ""
+authentik_email_password: ""
+
+authentik_postgresql_manager: false
+authentik_postgresql_host: localhost
+authentik_postgresql_port: 5432
+authentik_postgresql_username: ""
+authentik_postgresql_password: ""
+authentik_postgresql_database: authentik
+authentik_postgresql_conn_max_age: 0
+authentik_postgresql_conn_health_checks: true
+
+authentik_postgresql_ssl_mode: disable
+authentik_postgresql_ssl_root_cert: /etc/ssl/certs/ca.crt
+authentik_postgresql_ssl_cert:
+authentik_postgresql_ssl_key:

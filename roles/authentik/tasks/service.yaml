@@ -1,0 +1,46 @@
+---
+# service-specific tasks file for authentik
+
+- name: Install the Authentik systemd service files
+  ansible.builtin.template:
+    src: "{{ service.src }}"
+    # yamllint disable-line rule:line-length
+    dest: "{{ authentik_service_path }}/{{ authentik_service_prefix }}-{{ service.name }}.service"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - src: authentik-server.service.jinja
+      name: server
+    - src: authentik-worker.service.jinja
+      name: worker
+  loop_control:
+    # yamllint disable rule:line-length
+    label: >-
+      {{ authentik_service_path }}/{{ authentik_service_prefix }}-{{ service.name }}.service"
+    # yamllint enable rule:line-length
+    loop_var: service
+  notify:
+    - Restart Authentik {{ service.name | capitalize }}
+  tags:
+    - authentik
+    - service
+
+- name: Enable and start the Authentik services
+  ansible.builtin.systemd:
+    name: "{{ authentik_service_prefix }}-{{ service }}.service"
+    daemon_reload: true
+    state: started
+    enabled: true
+  when: >-
+    not ansible_check_mode
+  loop:
+    - server
+    - worker
+  loop_control:
+    label: >-
+      {{ authentik_service_prefix }}-{{ service }}.service"
+    loop_var: service
+  tags:
+    - authentik
+    - service

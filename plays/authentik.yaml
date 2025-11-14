@@ -8,6 +8,6 @@
     - role: postgresql
     # - role: redis
     - role: caddy
-    # - role: authentik
+    - role: authentik
     # - role: tailscale
     # - role: cloudflared

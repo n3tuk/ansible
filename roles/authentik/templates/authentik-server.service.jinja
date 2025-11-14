@@ -1,0 +1,40 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Authentik Server
+Documentation=https://docs.goauthentik.io/
+After=network.target network-online.target
+Requires=network-online.target podman.service postgresql.service
+RequiresMountsFor=%t/containers
+
+[Service]
+Type=notify
+TimeoutStopSec=70
+Restart=on-failure
+Environment=PODMAN_SYSTEMD_UNIT=%n
+ExecStart=/usr/bin/podman run \
+  --name {{ authentik_service_prefix }}-server \
+  --cidfile=%t/%n.ctr-id \
+  --rm \
+  --replace \
+  --sdnotify=conmon \
+  --detach \
+  --env-file=/etc/default/{{ authentik_service_prefix }} \
+  --network=host \
+  --publish {{ authentik_listen_http }}:{{ authentik_listen_http }} \
+  --publish {{ authentik_listen_https }}:{{ authentik_listen_https }} \
+  {{ authentik_image }}:{{ authentik_version }} server
+ExecStop=/usr/bin/podman stop \
+  --cidfile=%t/%n.ctr-id \
+  --time 10 \
+  --ignore
+ExecStopPost=/usr/bin/podman rm \
+  --cidfile=%t/%n.ctr-id \
+  --time 10 \
+  --force \
+  --ignore
+Type=notify
+NotifyAccess=all
+
+[Install]
+WantedBy=default.target

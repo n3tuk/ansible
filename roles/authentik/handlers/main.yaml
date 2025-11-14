@@ -1,0 +1,20 @@
+---
+# handlers file for authentik
+
+- name: Restart Authentik Server
+  ansible.builtin.systemd:
+    name: "{{ authentik_service_prefix }}-server.service"
+    # This is a self-installed service; we need to reload systemd to ensure it's
+    # (re)loaded prior to this command to ensure any changes are processed
+    daemon_reload: true
+    state: restarted
+  when: >-
+    not ansible_check_mode
+
+- name: Restart Authentik Worker
+  ansible.builtin.systemd:
+    name: "{{ authentik_service_prefix }}-worker.service"
+    daemon_reload: true
+    state: restarted
+  when: >-
+    not ansible_check_mode

@@ -27,6 +27,7 @@
     port: "{{ rule.port | default(omit) }}"
     comment: "{{ rule.comment | default(omit) }}"
     state: '{{ "enabled" if rule.enabled | default(true) else "disabled" }}'
+  loop: "{{ ufw_extra_rules }}"
   loop_control:
     label: >-
       {{ rule.rule | default("allow") }}
@@ -34,7 +35,6 @@
       from {{ rule.from_ip | default("any") }}
       to {{ rule.to_ip | default("any") }}'
     loop_var: rule
-  loop: "{{ ufw_extra_rules }}"
 
 - name: Enable the UFW configuration
   community.general.ufw:

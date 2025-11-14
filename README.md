@@ -65,6 +65,7 @@ task: [bootstrap] ansible-playbook \
 | [`vault`][role-vault]                       | A role to install and configure Hashicorp Vault along with associated proxies, certificates, and firewall rules.                                                                                              |
 | [`tailscale`][role-tailscale]               | A role to install and configure Tailscale on a system to allow it to connect to the n3t.uk Tailscale network for secure remote access.                                                                        |
 | [`ufw`][role-ufw]                           | A role to install and configure UFW (Uncomplicated Firewall) on a virtual machine to manage the firewall rules and enhance security.                                                                          |
+| [`authentik`][role-authentik]               | A role to install and configure Authentik on a virtual machine to manage authentication and authorization for applications.                                                                                   |
 | [`postgresql`][role-postgresql]             | A role to install and configure PostgreSQL on a virtual machine to manage relational databases.                                                                                                               |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
@@ -94,4 +95,5 @@ task: [bootstrap] ansible-playbook \
 [role-vault]: https://github.com/n3tuk/ansible/tree/main/roles/vault
 [role-tailscale]: https://github.com/n3tuk/ansible/tree/main/roles/tailscale
 [role-ufw]: https://github.com/n3tuk/ansible/tree/main/roles/ufw
+[role-authentik]: https://github.com/n3tuk/ansible/tree/main/roles/authentik
 [role-postgresql]: https://github.com/n3tuk/ansible/tree/main/roles/postgresql

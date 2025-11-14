@@ -1,0 +1,11 @@
+---
+# vars file for authentik
+
+authentik_caddy_config_file: authentik
+
+authentik_service_path: /etc/systemd/system
+authentik_service_prefix: authentik
+
+authentik_packages_arch:
+  - podman
+  - runc

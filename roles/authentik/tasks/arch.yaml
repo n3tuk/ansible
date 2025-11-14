@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for authentik
+
+- name: Install Authentik dependencies
+  community.general.pacman:
+    name: "{{ authentik_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - authentik
+    - packages
