@@ -9,8 +9,11 @@
     owner: "{{ caddy_user }}"
     group: "{{ caddy_group }}"
     mode: u=rw,g=r,o=r
+  # This file contains secrets, including Cloudflare keys
+  no_log: true
   notify:
     - Reload Caddy
   tags:
+    - proxmox
     - caddy
     - configuration

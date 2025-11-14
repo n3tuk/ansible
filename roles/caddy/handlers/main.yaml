@@ -8,7 +8,8 @@
     # (re)loaded prior to this command to ensure any changes are processed
     daemon_reload: true
     state: reloaded
-  ignore_errors: "{{ ansible_check_mode }}"
+  when: >-
+    not ansible_check_mode
 
 - name: Restart Caddy
   ansible.builtin.systemd:
@@ -17,4 +18,5 @@
     # (re)loaded prior to this command to ensure any changes are processed
     daemon_reload: true
     state: restarted
-  ignore_errors: "{{ ansible_check_mode }}"
+  when: >-
+    not ansible_check_mode

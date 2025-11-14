@@ -92,7 +92,7 @@
     - caddy
     - packages
 
-- name: Ensure Caddy configuration paths exist
+- name: Ensure Caddy configuration and log paths exist
   ansible.builtin.file:
     path: "{{ path }}"
     state: directory
@@ -102,6 +102,7 @@
   loop:
     - "{{ caddy_config_path }}"
     - "{{ caddy_config_path }}/{{ caddy_config_file }}.d"
+    - "{{ caddy_log_path }}"
   loop_control:
     label: "{{ path }}"
     loop_var: path
@@ -116,6 +117,8 @@
     owner: "{{ caddy_user }}"
     group: "{{ caddy_group }}"
     mode: u=rw,g=r,o=r
+  # This file contains secrets, including Cloudflare keys
+  no_log: true
   notify:
     - Reload Caddy
   tags:
@@ -136,13 +139,23 @@
     - caddy
     - service
 
+- name: Enable 80,443/tcp access for Caddy
+  community.general.ufw:
+    rule: allow
+    from_ip: any
+    to_ip: any
+    proto: tcp
+    port: 80,443
+    comment: Allow HTTP(S) for Caddy
+
 - name: Start and enable Caddy service
   ansible.builtin.systemd:
     name: "{{ caddy_service_name }}.service"
     daemon_reload: true
     enabled: true
     state: started
-  ignore_errors: "{{ ansible_check_mode }}"
+  when: >-
+    not ansible_check_mode
   tags:
     - caddy
     - service

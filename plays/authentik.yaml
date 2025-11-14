@@ -7,7 +7,7 @@
     - role: ufw
     - role: postgresql
     # - role: redis
-    # - role: caddy
+    - role: caddy
     # - role: authentik
     # - role: tailscale
     # - role: cloudflared
