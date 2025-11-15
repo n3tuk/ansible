@@ -13,17 +13,12 @@ tasks:
       - GitHub Workflows (.github/workflows/*.yaml)
       - pre-commit Configuration (.pre-commit-config)
       - Ansible plays, tasks, and inventory files
-
-      Checks on Kubernetes resources under the flux/ folder will be managed
-      through the conform tasks using kubeconform, as although kubeconform still
-      uses JSON Schemas, it is able to dynamocally find and process the schemas.
-
-      $ task --summary conform
     silent: true
     sources:
       - plays/**.yaml
       - roles/**.yaml
     deps:
+      - task: jsonschema:ansible
       - task: yamllint
     cmds:
       - cmd: |-

@@ -1,1 +1,6 @@
 ---
+postgresql_replication_role: primary
+
+# This node will be responsible for managing the authentik database, including
+# both the user and the database itself
+authentik_postgresql_manager: true

@@ -4,6 +4,7 @@
   become: true
   become_user: root
   roles:
-    - role: networking
+    - role: proxmox/networking
     - role: caddy
+    - role: proxmox/caddy
     - role: tailscale

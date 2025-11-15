@@ -1,0 +1,49 @@
+# {{ ansible_managed }}
+
+{{ authentik_public_hostname }} {
+{% if caddy_acme_cloudflare_enabled %}
+  tls {
+    dns cloudflare {{ caddy_acme_cloudflare_api_token }}
+    resolvers 1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001
+  }
+
+  log authentik {
+    level info
+    output file {{ caddy_log_path }}/{{ authentik_public_hostname }}.log {
+       mode 0644
+       roll_size 10MiB
+       roll_keep_for 72h
+     }
+
+    format json {
+       time_format rfc3339_nano
+       duration_format seconds
+    }
+  }
+
+{% endif %}
+  reverse_proxy
+{%- for host in groups['authentik'] %}
+ [{{ hostvars[host].ansible_facts.default_ipv4.address }}]:{{ authentik_listen_https }}
+{%- endfor %} {
+    transport http {
+      # The Proxmox servers currently do not have valid TLS certificates, so
+      # skip checks until valid certificates have been created and loaded
+      tls_insecure_skip_verify
+    }
+
+    trusted_proxies ::1/128 127.0.0.1/32
+
+    # Generally send all traffic to proxmox-01 first, failing over to other
+    # nodes in the event the first one is not avilable.
+    lb_policy least_conn
+
+    # Configure the health checks against the Proxmox nodes to ensure the first
+    # load balancer policy is effective and will fail over to the next node
+    health_interval 10s
+    health_uri /-/health/live/
+    health_status 200
+    health_timeout 2s
+    health_fails 2
+  }
+}

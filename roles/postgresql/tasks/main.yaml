@@ -1,0 +1,37 @@
+---
+# tasks file for postgresql
+
+- name: Run pre-flight checks
+  ansible.builtin.include_tasks:
+    file: pre-flight.yaml
+
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
+  when: >-
+    ansible_facts.distribution == 'Archlinux'
+
+- name: Configure the PostgreSQL firewall rules
+  ansible.builtin.include_tasks:
+    file: firewall.yaml
+
+- name: Set up PostgreSQL on Standalone
+  ansible.builtin.include_tasks:
+    file: primary.yaml
+  when: >-
+    postgresql_replication_role is not defined or
+    postgresql_replication_role == 'standalone'
+
+- name: Set up PostgreSQL on Primary
+  ansible.builtin.include_tasks:
+    file: primary.yaml
+  when: >-
+    postgresql_replication_role is defined and
+    postgresql_replication_role == 'primary'
+
+- name: Set up PostgreSQL on Standby
+  ansible.builtin.include_tasks:
+    file: standby.yaml
+  when: >-
+    postgresql_replication_role is defined and
+    postgresql_replication_role == 'standby'

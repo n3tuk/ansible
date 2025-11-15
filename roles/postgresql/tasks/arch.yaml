@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for postgresql
+
+- name: Install PostgreSQL
+  community.general.pacman:
+    name: "{{ postgresql_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - postgresql
+    - packages

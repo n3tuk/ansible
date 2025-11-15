@@ -1,0 +1,50 @@
+# {{ ansible_managed }}
+
+proxmox.{{ env_name }}.kub3.uk {
+{% if caddy_acme_cloudflare_enabled %}
+  tls {
+    dns cloudflare {{ caddy_acme_cloudflare_api_token }}
+    resolvers 1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001
+  }
+
+{% endif %}
+  reverse_proxy
+{%- for host in groups[env_name] %}
+{%-   if host in groups['proxmox'] %}
+ [{{ hostvars[host].ansible_facts.default_ipv6.address }}]:8006
+{%-   endif %}
+{%- endfor %} {
+    transport http {
+      # The Proxmox servers currently do not have valid TLS certificates, so
+      # skip checks until valid certificates have been created and loaded
+      tls_insecure_skip_verify
+    }
+
+    # Generally send all traffic to proxmox-01 first, failing over to other
+    # nodes in the event the first one is not avilable.
+    lb_policy first
+
+    # Configure the health checks against the Proxmox nodes to ensure the first
+    # load balancer policy is effective and will fail over to the next node
+    health_interval 10s
+    health_uri /
+    health_status 200
+    health_timeout 2s
+    health_fails 2
+  }
+}
+
+{{ ansible_facts.fqdn }} {
+{% if caddy_acme_cloudflare_enabled %}
+  tls {
+    dns cloudflare {{ caddy_acme_cloudflare_api_token }}
+    resolvers {{ caddy_tls_resolvers | join(" ") }}
+  }
+
+{% endif %}
+  reverse_proxy [{{ ansible_facts.default_ipv6.address }}]:8006 {
+    transport http {
+      tls_insecure_skip_verify
+    }
+  }
+}

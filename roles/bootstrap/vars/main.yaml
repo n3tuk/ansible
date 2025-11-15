@@ -22,3 +22,4 @@ bootstrap_pacstrap_packages:
   - man-pages
   - texinfo
   - netdata
+  - ufw

@@ -1,0 +1,15 @@
+---
+# configuration-specific tasks file for valkey
+
+- name: Create or update the valkey.conf file
+  ansible.builtin.template:
+    src: valkey.conf.jinja
+    dest: "{{ valkey_conf_path }}/valkey.conf"
+    owner: "{{ valkey_service_user }}"
+    group: "{{ valkey_service_group }}"
+    mode: u=rw,g=r,o=
+  notify:
+    - Reload the valkey service
+  tags:
+    - valkey
+    - configuration

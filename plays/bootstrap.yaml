@@ -39,6 +39,12 @@
     - role: issue
     - role: ssh
 
+- name: Bootstrap new Proxmox machines
+  hosts: bootstrap:&proxmox
+  remote_user: root
+  roles:
+    - role: proxmox/networking
+
 - name: Bootstrap Common Configuration for all new Machines
   hosts: bootstrap:!arch
   remote_user: root

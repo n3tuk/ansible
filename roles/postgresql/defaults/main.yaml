@@ -1,0 +1,22 @@
+---
+# defaults file for postgresql
+
+postgresql_allowed_hosts: []
+postgresql_replication_hosts: []
+
+postgresql_listen_addresses:
+  - "*"
+postgresql_port: 5432
+
+postgresql_max_connections: 100
+
+postgresql_replication_role: standalone
+postgresql_replication_username: replicator
+postgresql_replication_password: replicator
+
+postgresql_pg_hba_entries: []
+# - type: host
+#   database: replicator
+#   user: replicator
+#   address: 0.0.0.0/0
+#   method: scram-sha-256

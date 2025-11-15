@@ -11,6 +11,7 @@ caddy_service_name: caddy
 caddy_admin_socket_path: /run/caddy
 caddy_admin_socket_name: admin.sock
 caddy_cache_path: /var/cache/caddy
+caddy_log_path: /var/log/caddy
 
 caddy_url: >-
   {{ caddy_url_base }}?os=linux&amd64{%

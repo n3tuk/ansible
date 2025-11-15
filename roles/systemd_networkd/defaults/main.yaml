@@ -1,2 +1,10 @@
 ---
 # defaults file for systemd-networkd
+
+systemd_networkd_hosts_entries: []
+# - addresses:
+#     - ::1
+#     - 127.0.0.1
+#   hostname: an.example.com
+#   aliases:
+#     - an

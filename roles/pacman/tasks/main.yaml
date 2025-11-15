@@ -4,7 +4,8 @@
 - name: Check this role is not being run under bootstrap conditions
   ansible.builtin.fail:
     msg: This role does not support being run when bootstrapping hosts. Failing.
-  when: bootstrap_mount_base | default('') | length
+  when: >-
+    bootstrap_mount_base | default('') | length > 0
 
 - name: Check for the existance of the ALHP mirror file
   ansible.builtin.stat:

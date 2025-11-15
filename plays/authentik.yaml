@@ -1,0 +1,12 @@
+---
+- name: Configure Authentik Hosts
+  hosts: authentik
+  become: true
+  become_user: root
+  roles:
+    - role: ufw
+    - role: postgresql
+    - role: caddy
+    - role: authentik
+    - role: tailscale
+    - role: cloudflared

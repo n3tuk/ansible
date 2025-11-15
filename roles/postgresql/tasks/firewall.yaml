@@ -1,0 +1,26 @@
+---
+# firewall-specific tasks file for postgresql
+
+- name: Enable firewall access for PostgreSQL
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ hostvars[host.0].ansible_facts[host.1].address }}"
+    proto: tcp
+    port: "{{ postgresql_port }}"
+    comment: >-
+      Allow PostgreSQL for {{ hostvars[host.0].ansible_facts.fqdn }} replication
+  when: >-
+    hostvars[host.0].ansible_facts[host.1] is defined
+  loop: >-
+    {{ postgresql_allowed_hosts + postgresql_replication_hosts
+       | unique | difference([inventory_hostname])
+       | product(['default_ipv4', 'default_ipv6']) | list }}
+  loop_control:
+    label: >-
+      allow from
+      {{ hostvars[host.0].ansible_facts[host.1].address }}
+      to { postgresql_port }}/tcp
+    loop_var: host
+  tags:
+    - postgresql
+    - firewall

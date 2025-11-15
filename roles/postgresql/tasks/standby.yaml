@@ -1,0 +1,39 @@
+---
+# replication-specific tasks file for postgresql on standby servers
+
+- name: Take a base backup from the Primary
+  ansible.builtin.command:
+    # yamllint disable rule:line-length
+    cmd: >-
+      /usr/bin/pg_basebackup
+        --host='{{ hostvars[postgresql_replication_primary].ansible_facts.default_ipv6.address }}'
+        --port='{{ postgresql_port }}'
+        --username='{{ postgresql_replication_username }}'
+        --password
+        --pgdata='{{ postgresql_data_path }}'
+        --wal-method=stream
+        --write-recovery-conf
+    # yamllint enable rule:line-length
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  args:
+    creates: "{{ postgresql_data_path }}/PG_VERSION"
+  environment:
+    PGPASSWORD: "{{ postgresql_replication_password }}"
+  when: >-
+    not ansible_check_mode
+  tags:
+    - postgresql
+    - replication
+
+# The data directory for PostgreSQL must be empty for the base backup to be
+# taken, and that include configuration files, so take the backup first before
+# we configure PostgreSQL and then start the service
+
+- name: Configure the PostgreSQL service
+  ansible.builtin.include_tasks:
+    file: configure.yaml
+
+- name: Set up the PostgreSQL service
+  ansible.builtin.include_tasks:
+    file: service.yaml

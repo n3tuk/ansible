@@ -1,0 +1,4 @@
+---
+# vars file for proxmox/caddy
+
+proxmox_caddy_config_file: proxmox

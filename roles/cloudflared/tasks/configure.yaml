@@ -1,0 +1,62 @@
+---
+# configuration-specific tasks file for cloudflared
+
+- name: Create configuration and log directories for cloudflared
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: "{{ cloudflared_service_user }}"
+    group: "{{ cloudflared_service_group }}"
+    mode: u=rwx,g=rx,o=rx
+  when: >-
+    not ansible_check_mode
+  loop:
+    - "{{ cloudflared_config_path }}"
+    - "{{ cloudflared_log_path }}"
+  loop_control:
+    label: "{{ directory }}"
+    loop_var: directory
+  tags:
+    - cloudflared
+    - configuration
+
+- name: Create or update the configuration file for cloudflared
+  ansible.builtin.template:
+    src: config.yaml.jinja
+    dest: "{{ cloudflared_config_path }}/{{ cloudflared_tunnel_name }}.yaml"
+    owner: "{{ cloudflared_service_user }}"
+    group: "{{ cloudflared_service_group }}"
+    mode: u=rw,g=r,o=r
+  # This file contains secrets, including tokens
+  no_log: true
+  notify:
+    - Restart cloudflared-tunnel
+  tags:
+    - cloudflared
+    - configuration
+
+- name: Create or update the tunnel settings for cloudflared
+  ansible.builtin.template:
+    src: tunnel.json.jinja
+    dest: "{{ cloudflared_config_path }}/{{ cloudflared_tunnel_name }}.json"
+    owner: "{{ cloudflared_service_user }}"
+    group: "{{ cloudflared_service_group }}"
+    mode: u=rw,g=,o=
+  # This file contains secrets, including secrets
+  no_log: true
+  notify:
+    - Restart cloudflared-tunnel
+  tags:
+    - cloudflared
+    - configuration
+
+- name: Increase the rmem_max value for cloudflared
+  ansible.posix.sysctl:
+    name: net.core.rmem_max
+    value: "{{ cloudflared_sysctl_rmem_max }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  tags:
+    - cloudflared
+    - configuration

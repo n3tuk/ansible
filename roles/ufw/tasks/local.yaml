@@ -1,0 +1,46 @@
+---
+# local-specific tasks file for ufw
+
+- name: Configure the default rules
+  community.general.ufw:
+    rule: '{{ rule.rule | default("allow") }}'
+    from_ip: "{{ rule.from_ip | default(omit) }}"
+    to_ip: "{{ rule.to_ip | default(omit) }}"
+    proto: "{{ rule.proto | default(omit) }}"
+    port: "{{ rule.port | default(omit) }}"
+    comment: "{{ rule.comment | default(omit) }}"
+  loop: "{{ ufw_default_rules }}"
+  loop_control:
+    label: >-
+      {{ rule.rule | default("allow") }}
+      {{ rule.port | default("any") }}/{{ rule.proto | default("any") }}
+      from {{ rule.from_ip | default("any") }}
+      to {{ rule.to_ip | default("any") }}'
+    loop_var: rule
+
+- name: Configure the extra rules
+  community.general.ufw:
+    rule: '{{ rule.rule | default("allow") }}'
+    from_ip: "{{ rule.from_ip | default(omit) }}"
+    to_ip: "{{ rule.to_ip | default(omit) }}"
+    proto: "{{ rule.proto | default(omit) }}"
+    port: "{{ rule.port | default(omit) }}"
+    comment: "{{ rule.comment | default(omit) }}"
+    state: '{{ "enabled" if rule.enabled | default(true) else "disabled" }}'
+  loop_control:
+    label: >-
+      {{ rule.rule | default("allow") }}
+      {{ rule.port | default("any") }}/{{ rule.proto | default("any") }}
+      from {{ rule.from_ip | default("any") }}
+      to {{ rule.to_ip | default("any") }}'
+    loop_var: rule
+  loop: "{{ ufw_extra_rules }}"
+
+- name: Ensure UFW is enabled
+  community.general.ufw:
+    state: enabled
+
+- name: Start the UFW service
+  ansible.builtin.systemd:
+    name: "{{ ufw_service_name }}.service"
+    state: started

@@ -1,0 +1,10 @@
+---
+# service-specific tasks file for ufw
+
+# Do not start the service yet, as we want to create the ingress rules before
+# starting to ensure that Ansible can continue to access the system via SSH
+- name: Enable the UFW service only
+  ansible.builtin.systemd:
+    name: "{{ ufw_service_name }}.service"
+    enabled: true
+  when: not ansible_check_mode

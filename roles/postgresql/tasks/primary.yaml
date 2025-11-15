@@ -1,0 +1,64 @@
+---
+# primary-specific tasks file for postgresql on primary/standalone servers
+
+- name: Initialize the PostgreSQL database
+  ansible.builtin.command:
+    cmd: >-
+      /usr/sbin/initdb
+        --locale=C.UTF-8
+        --encoding=UTF8
+        -D "{{ postgresql_data_path }}"
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  args:
+    creates: "{{ postgresql_data_path }}/PG_VERSION"
+  when: >-
+    not ansible_check_mode
+  tags:
+    - postgresql
+    - database
+
+- name: Configure the PostgreSQL service
+  ansible.builtin.include_tasks:
+    file: configure.yaml
+
+- name: Set up the PostgreSQL service
+  ansible.builtin.include_tasks:
+    file: service.yaml
+
+# Ensure that any configuration changes are applied before creating the
+# replication user (and therefore permitting the standby servers to
+# connect), as some changes require a restart first
+- name: Flush the PostgreSQL handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure the replication user exists on the Primary
+  community.postgresql.postgresql_user:
+    # yamllint disable-line rule:line-length
+    login_unix_socket: "{{ postgresql_socket_path }}"
+    name: "{{ postgresql_replication_username }}"
+    password: "{{ postgresql_replication_password }}"
+    role_attr_flags: REPLICATION,LOGIN
+    state: present
+  environment:
+    PGOPTIONS: "-c password_encryption=scram-sha-256"
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  when: >-
+    not ansible_check_mode
+
+- name: Ensure the replication slots exist on the Primary
+  community.postgresql.postgresql_slot:
+    login_unix_socket: "{{ postgresql_socket_path }}"
+    name: "{{ hostvars[host].ansible_facts.hostname | replace('-', '_') }}"
+    state: present
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  when: >-
+    not ansible_check_mode
+  loop: >
+    {{ postgresql_replication_hosts | difference([inventory_hostname]) }}
+  loop_control:
+    label: >-
+      {{ hostvars[host].ansible_facts.hostname | replace('-', '_') }}
+    loop_var: host

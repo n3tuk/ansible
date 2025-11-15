@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: Jonathan Wright
+  description: Configure Tailscale VPN client
+  company: n3tuk
+  issue_tracker_url: https://github.com/n3tuk/ansible/issues
+  license: MIT
+  min_ansible_version: "2.19"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - trixie
+
+  galaxy_tags:
+    - tailscale
+    - wireguard
+    - vpn
+
+dependencies: []

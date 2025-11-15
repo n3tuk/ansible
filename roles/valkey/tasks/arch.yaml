@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for valkey
+
+- name: Install Valkey
+  community.general.pacman:
+    name: "{{ valkey_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - valkey
+    - packages

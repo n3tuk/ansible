@@ -1,0 +1,20 @@
+---
+# tasks file for cloudflared
+
+- name: Run pre-flight checks
+  ansible.builtin.include_tasks:
+    file: pre-flight.yaml
+
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
+  when: >-
+    ansible_facts.distribution == 'Archlinux'
+
+- name: Configure cloudflared
+  ansible.builtin.include_tasks:
+    file: configure.yaml
+
+- name: Set up the cloudflared service
+  ansible.builtin.include_tasks:
+    file: service.yaml

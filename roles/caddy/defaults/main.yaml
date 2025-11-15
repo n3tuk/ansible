@@ -8,7 +8,7 @@ caddy_url_base: https://caddyserver.com/api/download
 caddy_packages:
   - github.com/caddy-dns/cloudflare
 
-caddy_update: false
+caddy_upgrade: false
 
 caddy_acme_email: admin@n3t.uk
 caddy_acme_cloudflare_enabled: true

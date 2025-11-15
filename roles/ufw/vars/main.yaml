@@ -1,0 +1,23 @@
+---
+# vars file for ufw
+
+ufw_default_rules:
+  - rule: allow
+    from_ip: 172.27.4.128/26
+    proto: tcp
+    port: 22
+    comment: Allow SSH from @private
+  - rule: allow
+    from_ip: 2a02:8010:8006:7a22::/64
+    proto: tcp
+    port: 22
+    comment: Allow SSH from @private
+  - rule: allow
+    from_ip: 2a00:1098:0:82:1000:a:ea:b72c
+    proto: tcp
+    port: 22
+    comment: Allow SSH from Owain
+
+ufw_packages_arch:
+  - ufw
+ufw_service_name: ufw

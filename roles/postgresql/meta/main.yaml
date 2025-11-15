@@ -1,22 +1,18 @@
 ---
 galaxy_info:
   author: Jonathan Wright
-  description: Configure Tailscale VPN client
+  description: Configure the PostgreSQL database server
   company: n3tuk
   issue_tracker_url: https://github.com/n3tuk/ansible/issues
   license: MIT
-  min_ansible_version: '2.19'
+  min_ansible_version: "2.20"
   platforms:
     - name: ArchLinux
       versions:
         - all
-    - name: Debian
-      versions:
-        - trixie
 
   galaxy_tags:
-    - tailscale
-    - wireguard
-    - vpn
+    - database
+    - postgresql
 
 dependencies: []

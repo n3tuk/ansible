@@ -1,0 +1,22 @@
+---
+# pre-flight specific tasks for ufw
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: |
+      This role does not support being run when bootstrapping hosts. Failing.
+  when: >-
+    bootstrap_mount_base | default('') | length > 0
+  tags:
+    - ufw
+    - pre-flight
+
+- name: Check for supported distributions
+  ansible.builtin.fail:
+    msg: >-
+      This Ansible role is intended to run on Arch-based Linux systems only.
+  when: >-
+    not ansible_facts.distribution == 'Archlinux'
+  tags:
+    - ufw
+    - pre-flight

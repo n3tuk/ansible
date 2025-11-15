@@ -1,0 +1,28 @@
+---
+# configuration-specific tasks file for postgresql
+
+- name: Create or update the pg_hba.conf file
+  ansible.builtin.template:
+    src: pg_hba.conf.jinja
+    dest: "{{ postgresql_data_path }}/pg_hba.conf"
+    owner: "{{ postgresql_service_user }}"
+    group: "{{ postgresql_service_group }}"
+    mode: u=rw,g=,o=
+  notify:
+    - Reload the PostgreSQL service
+  tags:
+    - postgresql
+    - configuration
+
+- name: Create or update the postgresql.conf file
+  ansible.builtin.template:
+    src: postgresql.conf.jinja
+    dest: "{{ postgresql_data_path }}/postgresql.conf"
+    owner: "{{ postgresql_service_user }}"
+    group: "{{ postgresql_service_group }}"
+    mode: u=rw,g=,o=
+  notify:
+    - Restart the PostgreSQL service
+  tags:
+    - postgresql
+    - configuration
