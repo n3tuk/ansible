@@ -35,7 +35,7 @@
     dest: "{{ caddy_lib_path }}/features"
     owner: "{{ caddy_user }}"
     group: "{{ caddy_group }}"
-    mode: u=rwx,g=rx,o=rx
+    mode: u=rw,g=r,o=r
   when: (caddy_upgrade or not caddy_features_file.stat.exists)
   register: caddy_features_cache
   tags:
