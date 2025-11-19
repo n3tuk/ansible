@@ -34,7 +34,6 @@
 
 - name: Ensure the replication user exists on the Primary
   community.postgresql.postgresql_user:
-    # yamllint disable-line rule:line-length
     login_unix_socket: "{{ postgresql_socket_path }}"
     name: "{{ postgresql_replication_username }}"
     password: "{{ postgresql_replication_password }}"

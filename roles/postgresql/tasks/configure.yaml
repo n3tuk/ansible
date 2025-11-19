@@ -21,6 +21,8 @@
     owner: "{{ postgresql_service_user }}"
     group: "{{ postgresql_service_group }}"
     mode: u=rw,g=,o=
+  # This file contains secrets, including passwords
+  no_log: true
   notify:
     - Restart the PostgreSQL service
   tags:
