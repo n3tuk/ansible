@@ -1,0 +1,13 @@
+[Unit]
+Description=WAL-G Database Backup Trigger
+Documentation=https://wal-g.readthedocs.io/
+
+[Timer]
+OnCalendar=*-*-* 3:15:00
+# Add up to fifteen minutes hour on the start time of this timer to avoid the
+# backups being taken always at the same time on the system
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=multi-user.target

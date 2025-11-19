@@ -16,7 +16,14 @@ postgresql_replication_password: replicator
 
 postgresql_pg_hba_entries: []
 # - type: host
-#   database: replicator
+#   database: replication
 #   user: replicator
 #   address: 0.0.0.0/0
 #   method: scram-sha-256
+
+postgresql_walg_enabled: false
+postgresql_walg_version: "3.0.7"
+postgresql_walg_aws_region: us-east-1
+postgresql_walg_aws_access_key_id: ""
+postgresql_walg_aws_secret_access_key: ""
+postgresql_walg_aws_s3_prefix: ""

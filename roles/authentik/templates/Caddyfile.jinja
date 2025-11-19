@@ -34,8 +34,10 @@
 
     trusted_proxies ::1/128 127.0.0.1/32
 
+    header_down +Strict-Transport-Security "max-age=63072000; always"
+
     # Generally send all traffic to proxmox-01 first, failing over to other
-    # nodes in the event the first one is not avilable.
+    # nodes in the event the first one is not available.
     lb_policy least_conn
 
     # Configure the health checks against the Proxmox nodes to ensure the first

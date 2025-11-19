@@ -34,7 +34,6 @@
 
 - name: Ensure the replication user exists on the Primary
   community.postgresql.postgresql_user:
-    # yamllint disable-line rule:line-length
     login_unix_socket: "{{ postgresql_socket_path }}"
     name: "{{ postgresql_replication_username }}"
     password: "{{ postgresql_replication_password }}"
@@ -46,6 +45,9 @@
   become_user: "{{ postgresql_service_user }}"
   when: >-
     not ansible_check_mode
+  tags:
+    - postgresql
+    - database
 
 - name: Ensure the replication slots exist on the Primary
   community.postgresql.postgresql_slot:
@@ -62,3 +64,11 @@
     label: >-
       {{ hostvars[host].ansible_facts.hostname | replace('-', '_') }}
     loop_var: host
+  tags:
+    - postgresql
+    - database
+
+- name: Set up the WAL-G backup service
+  ansible.builtin.include_tasks:
+    file: backup.yaml
+  when: postgresql_walg_enabled

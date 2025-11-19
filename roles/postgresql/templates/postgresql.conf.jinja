@@ -66,6 +66,20 @@ checkpoint_warning = 30s
 max_wal_size = 64MB
 min_wal_size = 32MB
 
+{%  if postgresql_walg_enabled and
+    ( postgresql_replication_role == "primary" or
+      postgresql_replication_role == "standalone" ) -%}
+
+# - Archiving -
+
+archive_mode = on
+recovery_prefetch = try
+archive_command = '{{ postgresql_walg_bin_path }}/{{ postgresql_walg_bin_file }} --config {{ postgresql_data_path }}/.{{ postgresql_walg_name }}.env wal-push %p'
+
+# - Archive Recovery -
+
+restore_command = '{{ postgresql_walg_bin_path }}/{{ postgresql_walg_bin_file }} --config {{ postgresql_data_path }}/.{{ postgresql_walg_name }}.env wal-fetch %f %p'
+{%  endif %}
 {%  if postgresql_replication_role == "primary" -%}
 
 # - Replication Sending Servers -
@@ -82,7 +96,7 @@ max_slot_wal_keep_size = -1 # unlimited
 synchronous_standby_names = ''
 synchronized_standby_slots = ''
 {%  endif %}
-{% if postgresql_replication_role == "standby" -%}
+{%  if postgresql_replication_role == "standby" -%}
 
 # - Replication Standby Servers -
 

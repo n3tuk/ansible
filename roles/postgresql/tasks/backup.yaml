@@ -1,0 +1,128 @@
+---
+# backup-specific tasks file for postgresql
+
+- name: Create the WAL-G installation directory
+  ansible.builtin.file:
+    path: "{{ postgresql_walg_cache_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  tags:
+    - postgresql
+    - wal-g
+    - packages
+
+- name: Set the WAL-G version
+  ansible.builtin.copy:
+    content: "{{ postgresql_walg_version }}"
+    dest: "{{ postgresql_walg_cache_path }}/version"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  register: postgresql_walg_version_cache
+  tags:
+    - postgresql
+    - wal-g
+    - packages
+
+- name: Download WAL-G
+  ansible.builtin.get_url: # noqa no-handler
+    url: "{{ postgresql_walg_url }}"
+    dest: "{{ postgresql_walg_cache_path }}/{{ postgresql_walg_bin_file }}"
+    mode: u=rwx,g=rx,o=rx
+  when: >-
+    not ansible_check_mode and
+    postgresql_walg_version_cache.changed
+  register: postgresql_walg_bin_cache
+  tags:
+    - postgresql
+    - wal-g
+    - packages
+
+- name: Copy WAL-G binary
+  ansible.builtin.copy:
+    src: "{{ postgresql_walg_cache_path }}/{{ postgresql_walg_bin_file }}"
+    dest: "{{ postgresql_walg_bin_path }}/{{ postgresql_walg_bin_file }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+    remote_src: true
+  when: >-
+    not ansible_check_mode and
+    postgresql_walg_bin_cache.changed
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - postgresql
+    - wal-g
+    - packages
+
+- name: Create or update the WAL-G configuration file
+  ansible.builtin.template:
+    src: walg.env.jinja
+    dest: "{{ postgresql_data_path }}/.{{ postgresql_walg_name }}.env"
+    owner: "{{ postgresql_service_user }}"
+    group: "{{ postgresql_service_group }}"
+    mode: u=rw,g=,o=
+  # This file contains secrets, including passwords
+  no_log: true
+  tags:
+    - postgresql
+    - wal-g
+    - configuration
+
+- name: Ensure the WAL-G user exists on the database
+  community.postgresql.postgresql_user:
+    login_unix_socket: "{{ postgresql_socket_path }}"
+    name: "{{ postgresql_walg_name }}"
+    # No password is needed as we will use peer authentication for the local
+    # connection from wal-g to the PostgreSQL server on this host
+    role_attr_flags: REPLICATION,LOGIN
+    state: present
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  when: >-
+    not ansible_check_mode
+  tags:
+    - postgresql
+    - wal-g
+    - user
+
+- name: Ensure the WAL-G replication slot exists
+  community.postgresql.postgresql_slot:
+    login_unix_socket: "{{ postgresql_socket_path }}"
+    name: "{{ postgresql_walg_name }}"
+    state: present
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  when: >-
+    not ansible_check_mode
+  tags:
+    - postgresql
+    - wal-g
+    - user
+
+- name: Create or update the WAL-G service files
+  ansible.builtin.template:
+    src: "walg-backup.{{ type }}"
+    dest: "/etc/systemd/system/{{ postgresql_walg_name }}-backup.{{ type }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - service
+    - timer
+  loop_control:
+    label: "/etc/systemd/system/{{ postgresql_walg_name }}-backup.{{ type }}"
+    loop_var: type
+  tags:
+    - postgresql
+    - wal-g
+    - service
+
+- name: Enable the WAL-G timer
+  ansible.builtin.systemd:
+    name: "{{ postgresql_walg_name }}-backup.timer"
+    daemon_reload: true
+    enabled: true
+  when: not ansible_check_mode

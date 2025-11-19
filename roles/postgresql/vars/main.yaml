@@ -11,4 +11,12 @@ postgresql_service_user: postgres
 postgresql_service_group: postgres
 
 postgresql_data_path: /var/lib/postgres/data
-postgresql_socket_path: /run/postgresql/
+postgresql_socket_path: /run/postgresql
+postgresql_backups_path: /var/lib/backups/postgresql
+
+postgresql_walg_name: walg
+postgresql_walg_cache_path: /var/cache/wal-g
+postgresql_walg_bin_path: /usr/local/bin
+postgresql_walg_bin_file: wal-g
+# yamllint disable-line rule:line-length
+postgresql_walg_url: https://github.com/wal-g/wal-g/releases/download/v{{ postgresql_walg_version }}/wal-g-pg-ubuntu-24.04-amd64
