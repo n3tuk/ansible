@@ -25,3 +25,8 @@
 - name: Set up the PostgreSQL service
   ansible.builtin.include_tasks:
     file: service.yaml
+
+- name: Set up the WAL-G backup service
+  ansible.builtin.include_tasks:
+    file: backup.yaml
+  when: postgresql_walg_enabled

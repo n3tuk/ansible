@@ -67,7 +67,7 @@ task: [bootstrap] ansible-playbook \
 | [`ufw`][role-ufw]                           | A role to install and configure UFW (Uncomplicated Firewall) on a virtual machine to manage the firewall rules and enhance security.                                                                          |
 | [`authentik`][role-authentik]               | A role to install and configure Authentik on a virtual machine to manage authentication and authorization for applications.                                                                                   |
 | [`postgresql`][role-postgresql]             | A role to install and configure PostgreSQL on a virtual machine to manage relational databases.                                                                                                               |
-| [`valkey`][role-valkey]                       | A role to install and configure Valkey on a virtual machine to manage in-memory data structures.                                                                                                            |
+| [`valkey`][role-valkey]                     | A role to install and configure Valkey on a virtual machine to manage in-memory data structures.                                                                                                              |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap

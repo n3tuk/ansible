@@ -20,3 +20,25 @@
   tags:
     - postgresql
     - pre-flight
+
+- name: Check for AWS credentials and S3 bucket prefix
+  ansible.builtin.fail:
+    msg: >-
+      This role requires all AWS credentials (AWS Region, AWS Access Key ID, and
+      AWS Secret Access Key) alongside an S3 bucket prefix to be set when WAL-G
+      is enabled.
+  when: >-
+    postgresql_walg_enabled and
+    (
+      postgresql_walg_aws_region is not defined or
+      postgresql_walg_aws_region == "" or
+      postgresql_walg_aws_access_key_id is not defined or
+      postgresql_walg_aws_access_key_id == "" or
+      postgresql_walg_aws_secret_access_key is not defined or
+      postgresql_walg_aws_secret_access_key == "" or
+      postgresql_walg_aws_s3_prefix is not defined or
+      postgresql_walg_aws_s3_prefix == ""
+    )
+  tags:
+    - postgresql
+    - pre-flight

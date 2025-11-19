@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=WAL-G Database Backup for PostgreSQL
+Documentation=https://wal-g.readthedocs.io/
+
+[Service]
+Type=oneshot
+User={{ postgresql_service_user }}
+Group={{ postgresql_service_group }}
+EnvironmentFile={{ postgresql_data_path }}/.{{ postgresql_walg_name }}.env
+ExecStart={{ postgresql_walg_bin_path }}/{{ postgresql_walg_bin_file }} backup-push {{ postgresql_data_path }}
