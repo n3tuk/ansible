@@ -5,8 +5,20 @@
   become_user: root
   roles:
     - role: ufw
+      tags:
+        - ufw
     - role: postgresql
+      tags:
+        - postgresql
     - role: caddy
+      tags:
+        - caddy
     - role: authentik
+      tags:
+        - authentik
     - role: tailscale
+      tags:
+        - tailscale
     - role: cloudflared
+      tags:
+        - cloudflare

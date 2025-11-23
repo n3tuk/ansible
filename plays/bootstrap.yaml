@@ -49,10 +49,27 @@
   hosts: bootstrap:!arch
   remote_user: root
   roles:
+    # - role: ca
+    #   tags:
+    #     - ca
     - role: starship
+      tags:
+        - starship
     - role: fish
+      tags:
+        - fish
     - role: bash
+      tags:
+        - bash
     - role: sudo
+      tags:
+        - sudo
     - role: users
+      tags:
+        - users
     - role: issue
+      tags:
+        - issue
     - role: ssh
+      tags:
+        - ssh

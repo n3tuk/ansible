@@ -5,7 +5,11 @@
   become_user: root
   roles:
     # - role: ca
+    #   tags:
+    #     - ca
     - role: pacman
+      tags:
+        - pacman
   tags:
     - update
 
@@ -14,8 +18,12 @@
   become: true
   become_user: root
   roles: []
-  # - role: ca
-  # - role: apt
+    # - role: ca
+    #   tags:
+    #     - ca
+    # - role: apt
+    #   tags:
+    #     - ca
   tags:
     - update
 
@@ -25,10 +33,20 @@
   become_user: root
   roles:
     - role: kernels
+      tags:
+        - kernels
     - role: systemd
+      tags:
+        - systemd
     - role: systemd_networkd
+      tags:
+        - systemd_networkd
     - role: systemd_resolved
+      tags:
+        - systemd_resolved
     - role: ufw
+      tags:
+        - ufw
   tags:
     - baseline
 
@@ -37,12 +55,29 @@
   become: true
   become_user: root
   roles:
+    # - role: ca
+    #   tags:
+    #     - ca
     - role: starship
+      tags:
+        - starship
     - role: fish
+      tags:
+        - tailscale
     - role: bash
+      tags:
+        - bash
     - role: sudo
+      tags:
+        - sudo
     - role: users
+      tags:
+        - users
     - role: issue
+      tags:
+        - issue
     - role: ssh
+      tags:
+        - ssh
   tags:
     - baseline
