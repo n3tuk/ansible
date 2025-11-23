@@ -1,6 +1,6 @@
 ---
-- name: Configure Authentik Hosts
-  hosts: authentik
+- name: Configure Certificate Authority Hosts
+  hosts: ca
   become: true
   become_user: root
   roles:
@@ -13,12 +13,9 @@
     - role: caddy
       tags:
         - caddy
-    - role: authentik
+    - role: stepca
       tags:
-        - authentik
+        - step-ca
     - role: tailscale
       tags:
         - tailscale
-    - role: cloudflared
-      tags:
-        - cloudflare

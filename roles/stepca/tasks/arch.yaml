@@ -1,0 +1,56 @@
+---
+# arch-specific tasks file for step-ca
+
+- name: Install step-ca
+  community.general.pacman:
+    name: "{{ stepca_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - step-ca
+    - packages
+
+# The current Arch Linux package for step-ca does not create the step user and
+# step group which are referenced in the systemd service file, so create them
+# here until the package is fixed.
+
+- name: Create Group for step-ca
+  ansible.builtin.group:
+    name: "{{ stepca_service_group }}"
+    system: true
+  tags:
+    - step-ca
+    - user
+
+- name: Create User for step-ca
+  ansible.builtin.user:
+    name: "{{ stepca_service_user }}"
+    system: true
+    group: "{{ stepca_service_group }}"
+    home: "{{ stepca_lib_path }}"
+    shell: /usr/sbin/nologin
+    create_home: false
+  tags:
+    - step-ca
+    - user
+
+# The configuration and storage directories are also not created by the Arch
+# Linux package, so, again, create them here
+
+- name: Ensure step-ca system directories exist
+  ansible.builtin.file:
+    path: "{{ path }}"
+    state: directory
+    owner: "{{ stepca_service_user }}"
+    group: "{{ stepca_service_group }}"
+    mode: u=rwx,g=rx,o=
+  loop:
+    - "{{ stepca_etc_path }}"
+    - "{{ stepca_lib_path }}"
+    - "{{ stepca_log_path }}"
+  loop_control:
+    label: "{{ path }}"
+    loop_var: path
+  tags:
+    - step-ca
+    - configuration

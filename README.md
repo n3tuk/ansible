@@ -14,7 +14,8 @@ n3tuk.
 | [`users.yaml`][play-users]         | [`play:users`][taskfile]     | A play which will create or update of all the users and groups on a system.                                                                      |
 | [`update.yaml`][play-update]       | [`update`][taskfile]         | A play which will update all Arch Linux repositories of using `pacman` (but not upgrade the packages).                                           |
 | [`upgrade.yaml`][play-upgrade]     | [`upgrade`][taskfile]        | A play which will update and upgrade all Arch Linux packages of using `pacman`.                                                                  |
-| [`authentik.yaml`][play-authentik] | [`play:authentik`][taskfile] | A play which will deploy and configure the Authentik identity provider alongside PostgreSQL, Redis, and `cloudflared`.                           |
+| [`authentik.yaml`][play-authentik] | [`play:authentik`][taskfile] | A play which will deploy and configure the Authentik identity provider alongside PostgreSQL, `cloudflared`, and Tailscale.                       |
+| [`ca.yaml`][play-ca]               | [`play:ca`][taskfile]        | A play which will deploy and configure the `step-ca` Certificate Authority alongside PostgreSQL and Tailscale.                                   |
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -30,7 +31,9 @@ task: [bootstrap] ansible-playbook \
 [play-baseline]: https://github.com/n3tuk/ansible/blob/main/plays/baseline.yaml
 [play-update]: https://github.com/n3tuk/ansible/blob/main/plays/update.yaml
 [play-upgrade]: https://github.com/n3tuk/ansible/blob/main/plays/upgrade.yaml
-[play-users]: https://github.com/n3tuk/ansible/blob/main/plays/upgrade.yaml
+[play-users]: https://github.com/n3tuk/ansible/blob/main/plays/users.yaml
+[play-authentik]: https://github.com/n3tuk/ansible/blob/main/plays/authentik.yaml
+[play-ca]: https://github.com/n3tuk/ansible/blob/main/plays/ca.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
@@ -68,6 +71,7 @@ task: [bootstrap] ansible-playbook \
 | [`authentik`][role-authentik]               | A role to install and configure Authentik on a virtual machine to manage authentication and authorization for applications.                                                                                   |
 | [`postgresql`][role-postgresql]             | A role to install and configure PostgreSQL on a virtual machine to manage relational databases.                                                                                                               |
 | [`valkey`][role-valkey]                     | A role to install and configure Valkey on a virtual machine to manage in-memory data structures.                                                                                                              |
+| [`stepca`][role-stepca]                     | A role to install and configure `step-ca` on a virtual machine to provide Certificate Authority services.                                                                                                     |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -99,3 +103,4 @@ task: [bootstrap] ansible-playbook \
 [role-authentik]: https://github.com/n3tuk/ansible/tree/main/roles/authentik
 [role-postgresql]: https://github.com/n3tuk/ansible/tree/main/roles/postgresql
 [role-valkey]: https://github.com/n3tuk/ansible/tree/main/roles/valkey
+[role-stepca]: https://github.com/n3tuk/ansible/tree/main/roles/stepca

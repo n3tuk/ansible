@@ -1,0 +1,55 @@
+---
+# service-specific tasks file for step-ca
+
+- name: Configure the drop-in directory for step-ca
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ stepca_service_name }}.service.d"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+    state: directory
+  tags:
+    - step-ca
+    - systemd
+    - configuration
+
+- name: Configure the service override file for step-ca
+  ansible.builtin.template:
+    src: override.conf.jinja
+    # yamllint disable-line rule:line-length
+    dest: "/etc/systemd/system/{{ stepca_service_name }}.service.d/override.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Restart step-ca
+  tags:
+    - step-ca
+    - systemd
+    - configuration
+
+- name: Create or update the step-ca PolKit rules
+  ansible.builtin.template:
+    src: step-ca.rules.jinja
+    # yamllint disable-line rule:line-length
+    dest: /etc/polkit-1/rules.d/50-step-ca.rules
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  tags:
+    - step-ca
+    - polkit
+    - service
+
+- name: Start and enable the step-ca service
+  ansible.builtin.systemd:
+    name: "{{ stepca_service_name }}.service"
+    daemon_reload: true
+    enabled: true
+    state: started
+  when: >-
+    not ansible_check_mode
+  tags:
+    - step-ca
+    - systemd
+    - service

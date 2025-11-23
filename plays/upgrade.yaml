@@ -17,9 +17,13 @@
           - archlinux-keyring
           - alhp-keyring
         state: latest
+      tags:
+        - pacman
     - name: Upgrade all available packages
       community.general.pacman:
         upgrade: true
+      tags:
+        - pacman
   tags:
     - physical-machines
 
@@ -34,9 +38,13 @@
           - archlinux-keyring
           - alhp-keyring
         state: latest
+      tags:
+        - pacman
     - name: Upgrade all available packages
       community.general.pacman:
         upgrade: true
+      tags:
+        - pacman
   tags:
     - virtual-machines
 
@@ -49,5 +57,7 @@
     caddy_upgrade: true
   roles:
     - role: caddy
+      tags:
+        - caddy
   tags:
     - caddy

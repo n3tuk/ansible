@@ -1,0 +1,88 @@
+---
+# configuration-specific tasks file for step-ca
+
+- name: Create the step-ca configuration directories
+  ansible.builtin.file:
+    dest: "{{ directory }}"
+    state: directory
+    owner: "{{ stepca_service_user }}"
+    group: "{{ stepca_service_group }}"
+    mode: u=rwx,g=rx,o=
+  loop:
+    - "{{ stepca_lib_path }}"
+    - "{{ stepca_lib_path }}/config"
+    - "{{ stepca_lib_path }}/certs"
+    - "{{ stepca_lib_path }}/certs/n3tuk"
+    - "{{ stepca_lib_path }}/templates"
+    - "{{ stepca_lib_path }}/templates/n3tuk"
+  loop_control:
+    label: "{{ directory }}"
+    loop_var: directory
+  tags:
+    - step-ca
+    - configuration
+
+- name: Create or update the step-ca configuration file
+  ansible.builtin.template:
+    src: config.json.jinja
+    # yamllint disable-line rule:line-length
+    dest: "{{ stepca_lib_path }}/config/ca.json"
+    owner: "{{ stepca_service_user }}"
+    group: "{{ stepca_service_group }}"
+    mode: u=rw,g=r,o=
+  # This file contains secrets, including Cloudflare keys
+  no_log: true
+  notify:
+    - Reload Caddy
+  tags:
+    - step-ca
+    - caddy
+    - configuration
+
+- name: Create or update the Certificate Authority Root certificate
+  ansible.builtin.copy:
+    content: "{{ stepca_root_certificate }}"
+    dest: "{{ stepca_lib_path }}/certs/n3tuk/ca-root-r1.crt"
+    owner: "{{ stepca_service_user }}"
+    group: "{{ stepca_service_group }}"
+    mode: u=rw,g=r,o=r
+  tags:
+    - step-ca
+    - configuration
+
+- name: Create or update the Certificate Authority Intermediate certificate
+  ansible.builtin.copy:
+    content: "{{ stepca_intermediate_certificate }}"
+    # yamllint disable-line rule:line-length
+    dest: "{{ stepca_lib_path }}/certs/n3tuk/ca-intermediate-c{{ stepca_intermediate_ca_id }}.crt"
+    owner: "{{ stepca_service_user }}"
+    group: "{{ stepca_service_group }}"
+    mode: u=rw,g=r,o=r
+  tags:
+    - step-ca
+    - configuration
+
+- name: Create the step-ca user in PostgreSQL
+  community.postgresql.postgresql_user:
+    login_unix_socket: "{{ postgresql_socket_path }}"
+    name: "{{ stepca_postgresql_username }}"
+    password: "{{ stepca_postgresql_password }}"
+    role_attr_flags: LOGIN
+    state: present
+  environment:
+    PGOPTIONS: "-c password_encryption=scram-sha-256"
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  when: >-
+    not ansible_check_mode
+
+- name: Create the step-ca database in PostgreSQL
+  community.postgresql.postgresql_db:
+    login_unix_socket: "{{ postgresql_socket_path }}"
+    name: "{{ stepca_postgresql_database }}"
+    owner: "{{ stepca_postgresql_username }}"
+    state: present
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  when: >-
+    not ansible_check_mode

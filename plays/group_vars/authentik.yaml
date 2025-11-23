@@ -160,10 +160,11 @@ authentik_allowed_hosts: "{{ groups['authentik'] | default([]) }}"
 authentik_listen_trusted_proxy_cidrs:
   - "127.0.0.1/32"
   - "::1/128"
-  # Because we load balance beteen the two nodes from the nodes themselves,
+  # Because we load balance between the two nodes from the nodes themselves,
   # Authentik can see either local host for traffic coming through the current
   # node or the private IP address of the other node if it's being sent to there
-  # by Cloudflare, therefore ensure that all relevant addresses are trusted.
+  # by Cloudflare or Tailscale, therefore ensure that all relevant addresses are
+  # trusted.
   # yamllint disable rule:line-length
   - "{{ hostvars['authentik-01.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
   - "{{ hostvars['authentik-01.services.kub3.uk'].ansible_facts.default_ipv6.address }}/128"

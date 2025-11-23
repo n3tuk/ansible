@@ -1,0 +1,48 @@
+---
+# caddy-specific tasks file for step-ca
+
+- name: Create the file server directory for Caddy
+  ansible.builtin.file:
+    dest: "{{ stepca_srv_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  tags:
+    - step-ca
+    - caddy
+    - configuration
+
+- name: Create or update the Certificates for Caddy
+  ansible.builtin.copy:
+    content: "{{ certificate.value }}"
+    # yamllint disable-line rule:line-length
+    dest: "{{ stepca_srv_path }}/{{ certificate.key }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop: "{{ stepca_caddy_serve_certificates | dict2items }}"
+  loop_control:
+    label: "{{ stepca_srv_path }}{{ certificate.key }}"
+    loop_var: certificate
+  tags:
+    - step-ca
+    - caddy
+    - configuration
+
+- name: Create or update the {{ caddy_config_file }}
+  ansible.builtin.template:
+    src: Caddyfile.jinja
+    # yamllint disable-line rule:line-length
+    dest: "{{ caddy_config_path }}/{{ caddy_config_file }}.d/{{ stepca_caddy_config_file }}"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rw,g=r,o=
+  # This file contains secrets, including Cloudflare keys
+  no_log: true
+  notify:
+    - Reload Caddy
+  tags:
+    - step-ca
+    - caddy
+    - configuration

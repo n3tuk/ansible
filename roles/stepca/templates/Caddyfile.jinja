@@ -1,0 +1,150 @@
+# {{ ansible_managed }}
+
+# NOTE: This configuration for step-ca is predicated on the step-ca service being
+#       up-and-running before Caddy can serve most requests and it will need
+#       step-ca to request and create the TLS certificates necessary to serve
+#       HTTPS traffic.
+
+# This is an unsecured HTTP port specifically for the Certificate Authority
+# Certificates created for the step-ca Certificate Authority services. It should
+# be on a non-HTTPS port per RFC 5280, but will be available over HTTPS
+certs.{{ stepca_public_hostname }}:80 {
+  log ca-certs {
+    level info
+    output file {{ caddy_log_path }}/certs.{{ stepca_public_hostname }}.log {
+       mode 0644
+       roll_size 10MiB
+       roll_keep_for 72h
+     }
+
+    format json {
+       time_format rfc3339_nano
+       duration_format seconds
+    }
+  }
+
+  root * {{ stepca_srv_path }}
+  file_server
+}
+
+certs.{{ stepca_public_hostname }}:443 {
+  tls {
+    issuer acme {
+      dir https://[::1]:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      trusted_roots "{{ stepca_acme_trusted_roots }}"
+      email {{ caddy_acme_email }}
+    }
+
+  }
+
+  log ca-certs {
+    level info
+    output file {{ caddy_log_path }}/certs.{{ stepca_public_hostname }}.log {
+       mode 0644
+       roll_size 10MiB
+       roll_keep_for 72h
+     }
+
+    format json {
+       time_format rfc3339_nano
+       duration_format seconds
+    }
+  }
+
+  root * {{ stepca_srv_path }}
+  file_server
+}
+
+# This is an unsecured HTTP port specifically for the Certificate Revocation
+# List (CRL) issued by the step-ca Certificate Authority service on this server,
+# and is required to be on a non-HTTPS port per RFC 5280. All other traffic is
+# redirected to HTTPS on the main step-ca public hostname.
+c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}:80 {
+  log ca-crl {
+    level info
+    output file {{ caddy_log_path }}/c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}.log {
+       mode 0644
+       roll_size 10MiB
+       roll_keep_for 72h
+     }
+
+    format json {
+       time_format rfc3339_nano
+       duration_format seconds
+    }
+  }
+
+  reverse_proxy [{{ ansible_facts.default_ipv6.address }}]:{{ stepca_listen_http }} {
+    trusted_proxies {{ stepca_listen_trusted_proxy_cidrs | join(' ') }}
+  }
+}
+
+# Redirect all the HTTPS traffic received for the CRL endpoint to the step-ca
+# server via the configured public hostname
+c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}:443 {
+  tls {
+    issuer acme {
+      dir https://[::1]:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      trusted_roots "{{ stepca_acme_trusted_roots }}"
+      email {{ caddy_acme_email }}
+    }
+  }
+
+  redir https://{{ stepca_public_hostname }}{uri} permanent
+}
+
+# Serve the step-ca Certificate Authority service on the configured public hostname
+{{ stepca_public_hostname }}:80 {
+  redir https://{{ stepca_public_hostname }}{uri} permanent
+}
+
+{{ stepca_public_hostname }}:443 {
+  tls {
+    issuer acme {
+      dir https://[::1]:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      trusted_roots "{{ stepca_acme_trusted_roots }}"
+      email {{ caddy_acme_email }}
+    }
+  }
+
+  log step-ca {
+    level info
+    output file {{ caddy_log_path }}/{{ stepca_public_hostname }}.log {
+       mode 0644
+       roll_size 10MiB
+       roll_keep_for 72h
+     }
+
+    format json {
+       time_format rfc3339_nano
+       duration_format seconds
+    }
+  }
+
+  reverse_proxy
+{%- for host in groups['ca'] | sort %}
+ [{{ hostvars[host].ansible_facts.default_ipv6.address }}]:{{ stepca_listen_https }}
+{%- endfor %} {
+    transport http {
+      # The step-ca service uses mTLS for all connections, so ensure we use root
+      # certificate as the Certificate Authority for the proxied connections
+      tls_trusted_ca_certs "{{ stepca_srv_path }}/r1.crt"
+    }
+
+    trusted_proxies {{ stepca_listen_trusted_proxy_cidrs | join(' ') }}
+
+    # Send all traffic to the ca-01 node first (as that node will always be the
+    # first in the list provided above), failing over to the next host in the
+    # list only in the event the first one is not available. This should keep
+    # requests directly to the primary step-ca node where possible.
+    lb_policy first
+
+    # Configure the health checks against the step-ca nodes to ensure the first
+    # load balancer policy is effective and will fail over to the next node
+    health_interval 10s
+    health_uri /health
+    health_status 200
+    health_timeout 2s
+    health_fails 2
+  }
+}

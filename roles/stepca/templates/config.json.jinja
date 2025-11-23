@@ -1,0 +1,125 @@
+{
+  "root": "certs/n3tuk/ca-root-r1.crt",
+  "federatedRoots": [],
+  "crt": "certs/n3tuk/ca-intermediate-c{{ stepca_intermediate_ca_id }}.crt",
+  "key": "yubikey:{% if stepca_yubikey_serial is defined and stepca_yubikey_serial | length > 0 %}serial={{ stepca_yubikey_serial }};{% endif %}slot-id={{ stepca_yubikey_slot }}",
+  "kms": {
+    "type": "yubikey",
+    "pin": "{{ stepca_yubikey_pin }}"
+  },
+  "address": "{{ stepca_listen_address }}:{{ stepca_listen_https }}",
+  "insecureAddress": "{{ stepca_listen_address }}:{{ stepca_listen_http }}",
+  "dnsNames": [
+    "{{ stepca_public_hostname }}",
+    "c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}",
+    "{{ ansible_facts.default_ipv6.address }}",
+    "::1"
+  ],
+  "logger": {
+    "format": "json"
+  },
+  "db": {
+    "type": "postgresql",
+    "dataSource": "postgresql://{{ stepca_postgresql_username }}:{{ stepca_postgresql_password }}@{{ stepca_postgresql_host }}:{{ stepca_postgresql_port }}/{{ stepca_postgresql_database }}{% if stepca_postgresql_options | length > 0 %}?{{ stepca_postgresql_options | join('&') }}{% endif %}"
+  },
+  "crl": {
+{%  if stepca_crl_enabled %}
+    "enabled": true,
+    "generateOnRevoke": true,
+    "idpURL": "http://c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}/1.0/crl",
+    "cacheDuration": "{{ stepca_crl_cache_duration }}"
+{%  else %}
+    "enabled": false
+{%  endif %}
+  },
+  "authority": {
+    "enableAdmin": false,
+    "disableIssuedAtCheck": false,
+    "claims": {
+      "minTLSCertDuration": "5m",
+      "defaultTLSCertDuration": "24h",
+      "maxTLSCertDuration": "1128h",
+      "disableRenewal": false,
+      "allowRenewalAfterExpiry": false
+    },
+    "policy": {
+      "x509": {
+        "allow": {
+          "dns": {% if (stepca_x509_allow_dns | length == 0) %}[]{% else %}[
+{%  for dns in stepca_x509_allow_dns %}
+            "{{ dns }}"{% if not loop.last %},{%  endif %}
+
+{%  endfor %}
+          ]{% endif %},
+          "email": {% if (stepca_x509_allow_email | length == 0) %}[]{% else %}[
+{%  for email in stepca_x509_allow_email %}
+            "{{ email }}"{% if not loop.last %},{%  endif %}
+
+{%  endfor %}
+          ]{% endif %},
+          "ip": {% if (stepca_x509_allow_ip | length == 0) %}[]{% else %}[
+{%  for ip in stepca_x509_allow_ip %}
+            "{{ ip }}"{% if not loop.last %},{%  endif %}
+
+{%  endfor %}
+          ]{% endif %}
+        },
+        "allowWildcardNames": {{ 'true' if stepca_x509_allow_wildcard_names else 'false' }}
+      }
+    },
+    "provisioners": [
+      {
+        "type": "ACME",
+        "name": "{{ stepca_acme_provisioner_name }}",
+        "forceCN": false,
+        "claims": {
+          "minTLSCertDuration": "8h",
+          "defaultTLSCertDuration": "168h",
+          "maxTLSCertDuration": "1128h"
+        },
+        "termsOfService": "https://certs.{{ stepca_public_hostname }}/terms-of-service",
+        "website": "https://{{ stepca_public_hostname }}/",
+        "caaIdentities": [
+          "{{ stepca_public_hostname}}",
+          "{{ ansible_facts.fqdn }}"
+        ],
+        "challenges": [
+          "http-01",
+          "tls-alpn-01"
+        ],
+        "attestationFormats": [],
+        "attestationRoots": ""
+      },
+      {
+        "type": "OIDC",
+        "name": "{{ stepca_oidc_provisioner_name }}",
+        "clientID": "{{ stepca_oidc_provisioner_client_id }}",
+        "clientSecret": "{{ stepca_oidc_provisioner_client_secret }}",
+        "configurationEndpoint": "{{ stepca_oidc_provisioner_endpoint }}",
+        "scopes": ["openid", "email"],
+        "admins": {% if (stepca_oidc_provisioner_admins | length == 0) %}[]{% else %}[
+{%  for admin in stepca_oidc_provisioner_admins %}
+          "{{ admin }}"{% if not loop.last %},{%  endif %}
+
+{%  endfor %}
+        ]{% endif %},
+        "domains": [],
+        "listenAddress": ":10000",
+        "claims": {
+          "defaultTLSCertDuration": "2h",
+          "maxTLSCertDuration": "8h",
+          "disableRenewal": true
+        }
+      }
+    ]
+  },
+  "tls": {
+    "cipherSuites": [
+      "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+      "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+    ],
+    "minVersion": 1.3,
+    "maxVersion": 1.3,
+    "renegotiation": false
+  }
+}

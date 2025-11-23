@@ -24,7 +24,7 @@
     dest: "{{ caddy_config_path }}/{{ caddy_config_file }}.d/{{ authentik_caddy_config_file }}"
     owner: "{{ caddy_user }}"
     group: "{{ caddy_group }}"
-    mode: u=rw,g=r,o=r
+    mode: u=rw,g=r,o=
   # This file contains secrets, including Cloudflare keys
   no_log: true
   notify:

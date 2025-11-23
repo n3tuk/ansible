@@ -31,6 +31,7 @@
     # below as they must have access to the bootstrap_mount_base variable above
     # to correctly install the files and settings into the chroot during Arch
     # Linux bootstrapping
+    - role: ca
     - role: starship
     - role: fish
     - role: bash
@@ -49,10 +50,27 @@
   hosts: bootstrap:!arch
   remote_user: root
   roles:
+    - role: ca
+      tags:
+        - ca
     - role: starship
+      tags:
+        - starship
     - role: fish
+      tags:
+        - fish
     - role: bash
+      tags:
+        - bash
     - role: sudo
+      tags:
+        - sudo
     - role: users
+      tags:
+        - users
     - role: issue
+      tags:
+        - issue
     - role: ssh
+      tags:
+        - ssh

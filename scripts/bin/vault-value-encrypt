@@ -1,16 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ ${#} -ne 2 ]]; then
-  (>&2 echo "FATAL: vault-value-encrypt requires two arguments (name and value)")
-  exit 1
+declare unencrypted
+
+unencrypted=$(
+  zenity --forms \
+    --title="Ansible Vault" \
+    --text="Enter the name of the variable,and the value of the\nvariable to be encrypted using GPG" \
+    --add-entry="Name" \
+    --add-multiline-entry="Value" \
+    --ok-label="Encrypt" \
+    --cancel-label="Exit" \
+    2> /dev/null
+)
+
+declare status=${?}
+if [[ ${status} -ne 0 ]]; then
+  exit ${status}
 fi
 
-if [[ "${1}" == "" || "${2}" == "" ]]; then
+if [[ -z ${unencrypted} ]]; then
+  exit 0
+fi
+
+name=$(echo "${unencrypted}" | sed -n '1p' | awk -F'|' '{print $1}')
+value=${unencrypted#*|}
+
+if [[ "${name}" == "" || "${value}" == "" ]]; then
   (>&2 echo "FATAL: vault-value-encrypt arguments (name and value) cannot be empty")
   exit 1
 fi
 
-ansible-vault \
-  encrypt_string \
-  --name "${1}" "${2}"
+ansible-vault encrypt_string --name "${name}" "${value}" \
+  | sed -e 's/^\s\+/  /g' \
+  | wl-copy --trim-newline --paste-once --foreground

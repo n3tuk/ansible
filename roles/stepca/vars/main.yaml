@@ -1,0 +1,26 @@
+---
+# vars file for step-ca
+
+stepca_packages_arch:
+  - step-ca
+  - step-cli
+  - ccid
+  - opensc
+  - pcsclite
+  - libp11
+  - pkcs11-provider
+  - pkcs11-helper
+  - yubico-piv-tool
+  - yubikey-manager
+  - yubikey-personalization
+
+stepca_service_name: step-ca
+stepca_service_user: step
+stepca_service_group: step
+
+stepca_etc_path: /etc/step-ca
+stepca_lib_path: /var/lib/step-ca
+stepca_log_path: /var/lib/step-ca
+stepca_srv_path: /srv/http/step-ca
+
+stepca_caddy_config_file: step-ca

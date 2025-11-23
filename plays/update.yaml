@@ -8,11 +8,17 @@
   become_user: root
   roles:
     - role: ca
+      tags:
+        - ca
     - role: pacman
+      tags:
+        - pacman
   tasks:
     - name: Refresh the pacman databases
       community.general.pacman:
         update_cache: true
+      tags:
+        - pacman
   tags:
     - virtual-machines
 
@@ -22,10 +28,16 @@
   become_user: root
   roles:
     - role: ca
+      tags:
+        - ca
     - role: pacman
+      tags:
+        - pacman
   tasks:
     - name: Refresh the pacman databases
       community.general.pacman:
         update_cache: true
+      tags:
+        - pacman
   tags:
     - physical-machines

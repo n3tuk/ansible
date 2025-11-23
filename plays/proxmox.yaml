@@ -5,6 +5,15 @@
   become_user: root
   roles:
     - role: proxmox/networking
+      tags:
+        - proxmox
     - role: caddy
+      tags:
+        - caddy
     - role: proxmox/caddy
+      tags:
+        - proxmox
+        - caddy
     - role: tailscale
+      tags:
+        - tailscale

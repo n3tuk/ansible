@@ -27,21 +27,22 @@
  [{{ hostvars[host].ansible_facts.default_ipv4.address }}]:{{ authentik_listen_https }}
 {%- endfor %} {
     transport http {
-      # The Proxmox servers currently do not have valid TLS certificates, so
+      # The Authentik servers currently do not have valid TLS certificates, so
       # skip checks until valid certificates have been created and loaded
       tls_insecure_skip_verify
     }
 
-    trusted_proxies ::1/128 127.0.0.1/32
+    trusted_proxies {{ authentik_listen_trusted_proxy_cidrs | join(' ') }}
 
     header_down +Strict-Transport-Security "max-age=63072000; always"
 
-    # Generally send all traffic to proxmox-01 first, failing over to other
+    # Generally send all traffic to authentik-01 first, failing over to other
     # nodes in the event the first one is not available.
     lb_policy least_conn
 
-    # Configure the health checks against the Proxmox nodes to ensure the first
-    # load balancer policy is effective and will fail over to the next node
+    # Configure the health checks against the Authentik nodes to ensure the
+    # first load balancer policy is effective and will fail over to the next
+    # node
     health_interval 10s
     health_uri /-/health/live/
     health_status 200

@@ -279,4 +279,5 @@ tasks:
     cmds:
       - cmd: rm -f .prettiercache
       - cmd: rm -rf .task
+      - cmd: rm -rf .cache
       - cmd: echo -e '{{ .cg }}Completed{{ .cc }}'

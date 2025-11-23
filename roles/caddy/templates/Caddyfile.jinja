@@ -2,6 +2,9 @@
 
 {
   email {{ caddy_acme_email }}
+{% if caddy_auto_https | length > 0 %}
+  auto_https {{ caddy_auto_https }}
+{% endif %}
 }
 
 # Import additional Caddyfile config files in /etc/caddy/conf.d/
