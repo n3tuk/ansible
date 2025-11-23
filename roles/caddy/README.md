@@ -21,6 +21,7 @@ None other than the Ansible Role.
 | `caddy_acme_email`                | `admin@n3t.uk`                                                           | (**optional**) The email address to use for ACME certificate issuance.                                                                                                        |
 | `caddy_acme_cloudflare_enabled`   | `true`                                                                   | (**optional**) Whether to enable the Cloudflare DNS challenge for ACME certificate issuance.                                                                                  |
 | `caddy_acme_cloudflare_api_token` | `""`                                                                     | (**optional**) The Cloudflare API token to use for ACME certificate issuance via the Cloudflare DNS challenge.                                                                |
+| `caddy_auto_https`                | `""`                                                                     | (**optional**) Set whether or not to override the `auto_https` setting within Caddy, such as `disable_redirects`.                                                             |
 | `caddy_tls_resolvers`             | `["1.1.1.1", "1.0.0.1", "2606:4700:4700::1111", "2606:4700:4700::1001"]` | (**optional**) A list of DNS resolvers to configure Caddy to use for resolution during DNS challenges.                                                                        |
 
 ## Dependencies

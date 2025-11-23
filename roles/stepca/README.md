@@ -1,0 +1,362 @@
+# n3t.uk step-ca Ansible Role
+
+An Ansible role for the installation and basic configuration of the
+[step-ca][step-ca] certificate authority service, connecting with a local
+PostgreSQL database backend.
+
+[step-ca]: https://smallstep.com/docs/step-ca/about-step-ca
+
+## Setting up the Certificate Authority
+
+The n3t.uk Certificate Authority is structured in two parts:
+
+1. A YubiKey 5 which holds the root certificate and private key for the
+   Certificate Authority, kept offline in a secure location, and used only to
+   sign the intermediate certificates, as needed.
+2. Two independent servers, each hosting a dedicated configuration of the
+   `step-ca` service, which holds their intermediate certificates and private
+   keys on their own YubiKey 5 Nanos (passed through to the Virtual Machine in
+   Proxmox), and issue certificates to clients as needed.
+
+The open-source version of `step-ca` does not support clustering or replication,
+or operating in high-availability modes. Therefore, each `step-ca` server is
+it's own fully independent Certificate Authority, with its own intermediate
+certificate and private key, signed by the offline root Certificate Authority on
+the YubiKey 5.
+
+It should not matter which server issues the certificate to a client, as both
+servers will be trusted by clients and servers through the same root Certificate
+Authority certificate.
+
+Nonetheless, the underlying [Caddy][caddy] load balancer that operates on each
+node, receiving traffic from both internal and external networks, is configured
+to service traffic via `ca-01.services.kub3.uk` in the first instance. In the
+event of any major issue with the first server which prevents connectivity, we
+will failover to `ca-02.services.kub3.uk`. Both Cloudflare (through Argo
+Tunnels) and Tailscale (through Tailscale Services) will also automatically
+redirect their routing to the alternate server on connectivity issues as well.
+
+[caddy]: https://caddyserver.com/
+
+### Creating and Operating the Root Certificate Authority
+
+> [!note]
+> Please ensure that `openssl`, `pcscd`, `pkcs11-provider`, `opensc`, `libp11`,
+> `yubico-piv-tool`, and `ykman` are installed on the system before proceeding.
+
+If the key has been used previously for something, first, issue a `reset`
+command using `ykman` to clear out all the existing keys and settings:
+
+> [!note]
+> To interact with the PIV component of the YubiKeys, the `pcscd.service` must
+> be running on the system. However, this must subsequently be disabled in
+> order to use GPG.
+
+```shell
+$ ykman piv reset
+WARNING! This will delete all stored PIV data and restore factory settings. Proceed? [y/N]: y
+Resetting PIV data...
+Reset complete. All PIV data has been cleared from the YubiKey.
+Your YubiKey now has the default PIN, PUK and Management Key:
+        PIN:    123456
+        PUK:    12345678
+        Management Key: 010203040506070801020304050607080102030405060708
+```
+
+Next, set the `PIN`, `PUK`, and the Management Key credentials:
+
+```shell
+$ ykman piv access set-retries 5 5
+Enter a management key [blank to use default key]:
+Enter PIN: 123456
+WARNING: This will reset the PIN and PUK to the factory defaults!
+Set the number of PIN and PUK retry attempts to: 5 5? [y/N]: y
+Number of PIN/PUK retries set.
+Default PINs have been restored:
+        PIN:    123456
+        PUK:    12345678
+
+$ pwgen -1s 6 1
+$ ykman piv access change-pin
+Enter the current PIN: 123456
+Enter the new PIN:
+Repeat for confirmation:
+New PIN set.
+
+$ pwgen -1s 6 1
+$ ykman piv access change-puk
+Enter the current PUK: 12345678
+Enter the new PUK:
+Repeat for confirmation:
+New PUK set.
+
+$ pwgen -1sAr ghijklmnopqrstuvwxyz 64 1
+$ ykman piv change-management-key --algorithm AES256 --touch
+Enter the current management key [blank to use default key]:
+Enter the new management key:
+Repeat for confirmation:
+New management key set.
+```
+
+With the YubiKey now secured, we can generate a new key and certificate for the
+Root Certificate Authority using the `yubico-piv-tool`:
+
+> [!warning]
+> At the time of writing, there is currently a limitation in the `libp11`
+> library which prevents the enumeration of ED25519 keys directly on the YubiKey
+> through `openssl` (see [`yubico/yubico-piv-tool#510`][issue-510] for more
+> details). Therefore, we will stick with generating RSA4096 keys for the Root
+> and Intermediate Certificate Authorities.
+
+[issue-510]: https://github.com/Yubico/yubico-piv-tool/issues/510
+
+```shell
+$ yubico-piv-tool --key \
+    --action generate \
+    --slot 9c \
+    --pin-policy always \
+    --touch-policy always \
+    --algorithm RSA4096 \
+    --output ca-root-r1.pub \
+    --key-format PEM
+Enter management key:
+Successfully generated a new private key.
+
+$ yubico-piv-tool \
+    --action verify-pin \
+    --action selfsign-certificate \
+    --slot 9c \
+    --subject "/C=UK/O=n3t.uk/CN=n3t.uk/" \
+    --hash SHA512 \
+    --valid-days 5154 \
+    --input ca-root-r1.pub \
+    --output ca-root-r1.crt
+Enter PIN:
+Successfully verified PIN.
+Successfully generated a new self signed certificate.
+
+$ openssl x509 -in ca-root-r1.crt -noout -text
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            99:29:62:8f:3a:dc:a5:2e
+        Signature Algorithm: sha512WithRSAEncryption
+        Issuer: C=UK, O=n3t.uk, CN=n3t.uk Root CA R1
+        Validity
+            Not Before: Nov 21 00:00:00 2025 GMT
+            Not After : Jan  1 00:00:00 2040 GMT
+        Subject: C=UK, O=n3t.uk, CN=n3t.uk Root CA R1
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+                Modulus:
+                    ....
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Subject Key Identifier:
+                E9:8A:49:15:AC:69:6B:C1:32:09:77:D2:80:85:85:B3:A0:11:99:F0
+            X509v3 Authority Key Identifier:
+                0.
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+    Signature Algorithm: sha512WithRSAEncryption
+    Signature Value:
+        .....
+```
+
+Finally, we can import the Root CA certificate back in to the YubiKey for safekeeping:
+
+```shell
+$ yubico-piv-tool \
+    --action import-certificate \
+    --slot 82 \
+    --input ca-root-r1.crt
+Enter management key:
+Successfully imported a new certificate.
+
+$ ykman piv info
+PIV version:              5.7.1
+PIN tries remaining:      5/5
+PUK tries remaining:      5/5
+Management key algorithm: AES256
+CHUID: No data available
+CCC:   No data available
+Slot 9C (SIGNATURE):
+  Private key type: RSA4096
+
+Slot 82 (RETIRED1):
+  Private key type: EMPTY
+  Public key type:  RSA4096
+  Subject DN:       CN=n3t.uk Root CA R1,O=n3t.uk,C=UK
+  Issuer DN:        CN=n3t.uk Root CA R1,O=n3t.uk,C=UK
+  Serial:           12303132662296684516 (0xaabd81f8b8b327e4)
+  Fingerprint:      8f2aaa4b006bec27c98e466121d3e85c2fa04fc885a2dccb5fe1288df9a6e883
+  Not before:       2025-11-21T00:00:00+00:00
+  Not after:        2040-01-01T00:00:00+00:00
+```
+
+### Creating and Operating the Intermediate Certificate Authorities
+
+As noted above, each `step-ca` server operates as its own independent
+Intermediate Certificate Authority, with it's own YubiKey holding the private
+key and certificate. Much like the Root Certificate Authority, we need to
+prepare this YubiKey by securing the PIV application. Once done, we can create
+the private/public key pair and prepare a Certificate Signing Request (CSR)
+which we will then use the Root Certicate Authority YubiKey to sign and issue
+the Intermediate Certificate.
+
+After following the steps above to secure the YubiKey, we can generate a new
+private/public key pair and create the CSR:
+
+> [!note]
+> Ensure that the `--touch-policy` is set to `never` for the intermediate CA keys,
+> as we do not want to have to physically touch the YubiKey every time the
+> `step-ca` service needs to sign a certificate.
+
+```shell
+$ yubico-piv-tool --key \
+    --action generate \
+    --slot 9c \
+    --pin-policy always \
+    --touch-policy never \
+    --algorithm RSA4096 \
+    --output ca-intermediate-c1.pub \
+    --key-format PEM
+Enter management key:
+Successfully generated a new private key.
+
+$ yubico-piv-tool \
+    --action verify-pin \
+    --action request-certificate \
+    --slot 9c \
+    --subject "/C=UK/O=n3t.uk/CN=n3t.uk Intermediate CA C1/" \
+    --hash SHA512 \
+    --input ca-intermediate-c1.pub \
+    --output ca-intermediate-c1.csr \
+    --key-format PEM
+Enter PIN:
+Successfully verified PIN.
+Successfully generated a certificate request.
+```
+
+> [!note]
+> The Common Name (CN) in the subject must be unique for each intermediate CA,
+> to avoid conflicts when both intermediate CA certificates are presented to
+> clients during certificate validation. Here, we are using the Common Name of
+> `n3t.uk Intermediate CA C1` for the first intermediate CA, and therefore
+> should use `n3t.uk Intermediate CA C2` for the second.
+
+Once the CSR has been created and written to the file locally, it must be signed
+by the Root Certificate Authority on the (currently) offline YubiKey. Swap back
+to the YubiKey holding the Root CA, and issue the signing command:
+
+```shell
+$ OPENSSL_CONF=openssl.conf \
+  PKCS11_MODULE_PATH=/usr/lib/libykcs11.so \
+  openssl x509 -req  \
+    -engine pkcs11 \
+    -CA ca-root-r1.crt \
+    -CAkeyform engine \
+    -CAkey "pkcs11:object=Private key for Digital Signature;type=private" \
+    -set_serial 1 \
+    -extensions ca_intermediate_c1 -extfile ca-intermediate-c1.conf \
+    -days 1865 \
+    -sha512 \
+    -in ca-intermediate-c1.csr \
+    -out ca-intermediate-c1.crt
+Engine "pkcs11" set.
+Certificate request self-signature ok
+subject=C=UK, O=n3t.uk, CN=n3t.uk Intermediate CA C1
+Enter PKCS#11 token PIN for YubiKey PIV #00000000:
+Enter PKCS#11 key PIN for Private key for Digital Signature:
+```
+
+Finally, re-insert the Intermediate CA YubiKey, and import the signed
+certificate back on to the YubiKey:
+
+```shell
+$ yubico-piv-tool \
+    --action import-certificate \
+    --slot 82 \
+    --input ca-root-r1.crt
+Enter management key:
+Successfully imported a new certificate.
+
+$ yubico-piv-tool \
+    --action import-certificate \
+    --slot 83 \
+    --input ca-intermediate-c1.crt
+Enter management key:
+Successfully imported a new certificate.
+
+$ ykman piv info
+PIV version:              5.7.4
+PIN tries remaining:      5/5
+PUK tries remaining:      5/5
+Management key algorithm: AES256
+CHUID: No data available
+CCC:   No data available
+Slot 9C (SIGNATURE):
+  Private key type: RSA4096
+
+Slot 82 (RETIRED1):
+  Private key type: EMPTY
+  Public key type:  RSA4096
+  Subject DN:       CN=n3t.uk Root CA R1,O=n3t.uk,C=UK
+  Issuer DN:        CN=n3t.uk Root CA R1,O=n3t.uk,C=UK
+  Serial:           11036460729155495214 (0x9929628f3adca52e)
+  Fingerprint:
+  Not before:       2025-11-21T00:00:00+00:00
+  Not after:        2040-01-01T00:00:00+00:00
+
+Slot 83 (RETIRED2):
+  Private key type: EMPTY
+  Public key type:  RSA4096
+  Subject DN:       CN=n3t.uk Intermediate CA C1,O=n3t.uk,C=UK
+  Issuer DN:        CN=n3t.uk Root CA R1,O=n3t.uk,C=UK
+  Serial:           17634661091255856397 (0xf4bae6d47eb52d0d)
+  Fingerprint:
+  Not before:       2025-11-21T00:00:00+00:00
+  Not after:        2031-01-01T00:00:00+00:00
+```
+
+All the keys are now ready to use for the `step-ca` service on each server.
+
+## Requirements
+
+None other than the Ansible Role.
+
+## Role Variables
+
+| Variable                  | Default | Description                                                                                 |
+| :------------------------ | :------ | :------------------------------------------------------------------------------------------ |
+| `stepca_listen_addresses` | `['*']` | (**optional**) The list of IP adresses to which the `step-ca` service will bind on startup. |
+
+## Dependencies
+
+- The `ufw` role is required to manage the firewall rules for Authentik access.
+- The `postgresql` role is required to provide the necessary backend services
+  for `step-ca` manage its data.
+- The `caddy` role is required to provide the web server and reverse proxy for
+  `step-ca`, including providing Let's Encrypt TLS certificates for secure HTTPS
+  access.
+- The `tailscale` role is recommended to provide secure tunneling to `step-ca`
+  from private networks.
+
+## Example Playbook
+
+```yaml
+---
+- name: Install step-ca
+  hosts: all
+  remote_user: root
+  vars:
+    postgresql_replication_role: standalone
+  roles:
+    - role: ufw
+    - role: postgresql
+    - role: caddy
+    - role: tailscale
+    - role: stepca
+```

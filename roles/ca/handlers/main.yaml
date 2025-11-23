@@ -1,18 +1,20 @@
 ---
 # handlers file for ca
 
-- name: Install n3t.uk Root CA in the chroot
+- name: Install n3t.uk CA Root R1 in the chroot
   ansible.builtin.command: # noqa no-changed-when
+    # yamllint disable rule:line-length
     cmd: >
-      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }}
-        /usr/bin/fish -c 'trust anchor --store /etc/ssl/private/n3tuk-root.pem'
+      /usr/bin/arch-chroot {{ bootstrap_mount_base }}
+        /usr/bin/fish -c "trust anchor --store '{{ ca_root_path }}/{{ ca_root_file }}'"
+    # yamllint enable rule:line-length
   when: >
     not ansible_check_mode and
-    ( bootstrap_mount_base | default('') | length )
+    (bootstrap_mount_base | default('') | length > 0)
 
-- name: Install n3t.uk Root CA locally
+- name: Install n3t.uk CA Root R1 locally
   ansible.builtin.command: # noqa no-changed-when
-    cmd: trust anchor --store /etc/ssl/private/n3tuk-root.pem
+    cmd: trust anchor --store '{{ ca_root_path }}/{{ ca_root_file }}'
   when: >
     not ansible_check_mode and
-    not ( bootstrap_mount_base | default('') | length )
+    (bootstrap_mount_base | default('') | length == 0)

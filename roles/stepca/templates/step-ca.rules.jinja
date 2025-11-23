@@ -1,0 +1,16 @@
+// {{ ansible_managed }}
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.debian.pcsc-lite.access_pcsc" &&
+        subject.user == "{{ stepca_service_user }}") {
+            return polkit.Result.YES;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.debian.pcsc-lite.access_card" &&
+        action.lookup("reader") == "{{ stepca_yubikey_reader_name }}" &&
+        subject.user == "{{ stepca_service_user }}") {
+            return polkit.Result.YES;
+    }
+});

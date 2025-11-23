@@ -4,9 +4,9 @@
   become: true
   become_user: root
   roles:
-    # - role: ca
-    #   tags:
-    #     - ca
+    - role: ca
+      tags:
+        - ca
     - role: pacman
       tags:
         - pacman
@@ -17,10 +17,10 @@
   hosts: debian
   become: true
   become_user: root
-  roles: []
-    # - role: ca
-    #   tags:
-    #     - ca
+  roles:
+    - role: ca
+      tags:
+        - ca
     # - role: apt
     #   tags:
     #     - ca
@@ -55,15 +55,15 @@
   become: true
   become_user: root
   roles:
-    # - role: ca
-    #   tags:
-    #     - ca
+    - role: ca
+      tags:
+        - ca
     - role: starship
       tags:
         - starship
     - role: fish
       tags:
-        - tailscale
+        - fish
     - role: bash
       tags:
         - bash

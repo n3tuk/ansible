@@ -1,17 +1,17 @@
 ---
 # tasks file for ca
 
-- name: Copy the n3t.uk Root Certificate Authority certificate
+- name: Copy the n3t.uk Certificate Authority R1 certificate
   ansible.builtin.copy:
-    src: n3tuk-root.pem
-    dest: |
-      {{ bootstrap_mount_base | default('') }}/etc/ssl/private/n3tuk-root.pem
+    src: n3tuk-ca-root-r1.pem
+    # yamllint disable-line rule:line-length
+    dest: "{{ bootstrap_mount_base | default('') }}{{ ca_root_path }}/{{ ca_root_file }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=r
   notify:
-    - Install n3t.uk Root CA locally
-    - Install n3t.uk Root CA in the chroot
+    - Install n3t.uk CA Root R1 locally
+    - Install n3t.uk CA Root R1 in the chroot
   tags:
     - ca
     - configuration

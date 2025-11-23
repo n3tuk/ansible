@@ -1,0 +1,50 @@
+---
+# defaults file for step-ca
+
+stepca_public_hostname: ""
+
+stepca_listen_address: 0.0.0.0
+stepca_listen_http: 8080
+stepca_listen_https: 8443
+stepca_listen_trusted_proxy_cidrs:
+  - "127.0.0.1/32"
+  - "::1/128"
+
+stepca_allowed_hosts: []
+
+stepca_postgresql_host: localhost
+stepca_postgresql_port: 5432
+stepca_postgresql_username:
+stepca_postgresql_password:
+stepca_postgresql_database: stepca
+stepca_postgresql_options:
+  - sslmode=disable
+
+stepca_crl_enabled: true
+stepca_crl_cache_duration: 24h
+
+stepca_yubikey_reader_name: "Yubico YubiKey OTP+FIDO+CCID 00 00"
+stepca_yubikey_serial:
+stepca_yubikey_slot: 9c
+stepca_yubikey_pin: "123456"
+
+stepca_root_certificate:
+stepca_intermediate_ca_id: 0
+stepca_intermediate_certificate:
+
+stepca_x509_allow_dns:
+  - localhost
+stepca_x509_allow_email: []
+stepca_x509_allow_ip:
+  - "::1"
+  - "127.0.0.1/32"
+stepca_x509_allow_wildcard_names: false
+
+stepca_acme_provisioner_name: acme
+stepca_acme_trusted_roots: "{{ stepca_lib_path }}/example/certs/root_ca.pem"
+
+stepca_oidc_provisioner_name: oidc
+stepca_oidc_provisioner_endpoint: https://auth.example.com/.well-known/openid-configuration
+stepca_oidc_provisioner_client_id:
+stepca_oidc_provisioner_client_secret:
+stepca_oidc_provisioner_admins: []

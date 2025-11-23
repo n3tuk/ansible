@@ -1,0 +1,14 @@
+
+[Unit]
+Description=step-ca Service
+ConditionFileNotEmpty=
+ConditionFileNotEmpty=/var/lib/step-ca/config/ca.json
+
+[Service]
+Environment=STEPPATH=/var/lib/step-ca
+WorkingDirectory=/var/lib/step-ca
+ExecStart=
+ExecStart=/usr/bin/step-ca config/ca.json
+
+ReadWriteDirectories=
+ReadWriteDirectories=/var/lib/step-ca/config -/var/lib/step-ca/db

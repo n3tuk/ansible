@@ -1,0 +1,25 @@
+---
+# firewall-specific tasks file for step-ca
+
+- name: Enable firewall access for step-ca
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ hostvars[host.0].ansible_facts[host.1].address }}"
+    proto: tcp
+    port: "{{ stepca_listen_http }},{{ stepca_listen_https }}"
+    comment: >-
+      Allow step-ca for {{ hostvars[host.0].ansible_facts.fqdn }}
+  when: >-
+    hostvars[host.0].ansible_facts[host.1] is defined
+  loop: >-
+    {{ stepca_allowed_hosts | unique | difference([inventory_hostname])
+       | product(['default_ipv4', 'default_ipv6']) | list }}
+  loop_control:
+    label: >-
+      allow from
+      {{ hostvars[host.0].ansible_facts[host.1].address }}
+      to {{ stepca_listen_http }},{{ stepca_listen_https }}/tcp
+    loop_var: host
+  tags:
+    - step-ca
+    - firewall

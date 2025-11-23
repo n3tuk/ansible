@@ -1,0 +1,21 @@
+---
+- name: Configure Certificate Authority Hosts
+  hosts: ca
+  become: true
+  become_user: root
+  roles:
+    - role: ufw
+      tags:
+        - ufw
+    - role: postgresql
+      tags:
+        - postgresql
+    - role: caddy
+      tags:
+        - caddy
+    - role: stepca
+      tags:
+        - step-ca
+    - role: tailscale
+      tags:
+        - tailscale

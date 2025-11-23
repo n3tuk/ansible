@@ -1,2 +1,5 @@
 ---
 # vars file for ca
+
+ca_root_path: /etc/ssl/private
+ca_root_file: n3tuk-ca-root-r1.pem

@@ -14,8 +14,8 @@ None.
 ## Dependencies
 
 - The `ufw` role is required to manage the firewall rules for Authentik access.
-- The `redis` and `postgresql` roles are required to provide the necessary
-  backend services for Authentik to connect and manage data and caching.
+- The `postgresql` roles is required to provide the necessary backend services
+  for Authentik to connect and manage data and caching.
 - The `caddy` role is required to provide the web server and reverse proxy for
   Authentik, including providing Let's Encrypt TLS certificates for secure HTTPS
   access.
