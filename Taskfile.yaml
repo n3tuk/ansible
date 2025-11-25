@@ -183,7 +183,7 @@ tasks:
 
       If the file plays/encrypted_vars/become.yaml exists, it will be passed to
       Ansible as an extra-vars file to provide become passwords for hosts that
-      require them.
+      require them, instead of prompting for the become password at runtime.
     vars:
       name: "{{ index .MATCH 0 }}"
       options:
@@ -195,6 +195,8 @@ tasks:
         sh: |-
           if [[ -f plays/encrypted_vars/become.yaml ]]; then
             echo -n "--extra-vars @plays/encrypted_vars/become.yaml"
+          else
+            echo -n "--ask-become-pass"
           fi
     env:
       ANSIBLE_FORCE_COLOR: true
@@ -236,7 +238,7 @@ tasks:
 
       If the file plays/encrypted_vars/become.yaml exists, it will be passed to
       Ansible as an extra-vars file to provide become passwords for hosts that
-      require them.
+      require them, instead of prompting for the become password at runtime.
     vars:
       name: "{{ index .MATCH 0 }}"
       options:
@@ -248,6 +250,8 @@ tasks:
         sh: |-
           if [[ -f plays/encrypted_vars/become.yaml ]]; then
             echo -n "--extra-vars @plays/encrypted_vars/become.yaml"
+          else
+            echo -n "--ask-become-pass"
           fi
     env:
       ANSIBLE_FORCE_COLOR: true
