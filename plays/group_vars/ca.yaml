@@ -160,6 +160,9 @@ stepca_x509_allow_dns:
   - "*.services.kub3.uk"
   # Tailscale Tailnet addresses and custom domain
   - "*.icefish-vibe.ts.net"
+stepca_x509_allow_email:
+  - "@n3t.uk"
+  - "@than.io"
 stepca_x509_allow_ip:
   # Localhost addresses for local services
   - "::1"
