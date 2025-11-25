@@ -1,0 +1,15 @@
+---
+- name: Configure DNS Hosts
+  hosts: dns
+  become: true
+  become_user: root
+  roles:
+    - role: ufw
+      tags:
+        - ufw
+    - role: bind
+      tags:
+        - bind
+    - role: tailscale
+      tags:
+        - tailscale
