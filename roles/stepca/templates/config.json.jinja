@@ -103,7 +103,12 @@
 
 {%  endfor %}
         ]{% endif %},
-        "domains": [],
+        "domains": {% if (stepca_oidc_provisioner_domains | length == 0) %}[]{% else %}[
+{%  for domain in stepca_oidc_provisioner_domains %}
+          "{{ domain }}"{% if not loop.last %},{%  endif %}
+
+{%  endfor %}
+        ]{% endif %},
         "listenAddress": ":10000",
         "claims": {
           "defaultTLSCertDuration": "2h",

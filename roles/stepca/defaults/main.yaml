@@ -48,3 +48,4 @@ stepca_oidc_provisioner_endpoint: https://auth.example.com/.well-known/openid-co
 stepca_oidc_provisioner_client_id:
 stepca_oidc_provisioner_client_secret:
 stepca_oidc_provisioner_admins: []
+stepca_oidc_provisioner_domains: []
