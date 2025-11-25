@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for bind
+
+- name: Install bind
+  community.general.pacman:
+    name: "{{ bind_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - bind
+    - packages

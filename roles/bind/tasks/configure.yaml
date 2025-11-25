@@ -1,0 +1,49 @@
+---
+# configuration-specific tasks file for bind
+
+- name: Create the bind system directories
+  ansible.builtin.file:
+    dest: "{{ directory }}"
+    state: directory
+    owner: "{{ bind_service_user }}"
+    group: "{{ bind_service_group }}"
+    mode: u=rwx,g=rx,o=
+  loop:
+    - "{{ bind_log_path }}"
+  loop_control:
+    label: "{{ directory }}"
+    loop_var: directory
+  tags:
+    - step-ca
+    - configuration
+
+- name: Create the bind database directories
+  ansible.builtin.file:
+    dest: "{{ bind_var_path }}/{{ view.name }}"
+    state: directory
+    owner: "{{ bind_service_user }}"
+    group: "{{ bind_service_group }}"
+    mode: u=rwx,g=rwx,o=
+  loop: "{{ bind_views }}"
+  loop_control:
+    label: "{{ bind_var_path }}/{{ view.name }}"
+    loop_var: view
+  tags:
+    - step-ca
+    - configuration
+
+- name: Create or update the named.conf configuration file
+  ansible.builtin.template:
+    src: named.conf.jinja
+    # yamllint disable-line rule:line-length
+    dest: "{{ bind_etc_path }}/{{ bind_etc_name }}"
+    owner: "{{ bind_service_user }}"
+    group: "{{ bind_service_group }}"
+    mode: u=rw,g=r,o=
+  # This file contains secrets, including access tokens
+  no_log: true
+  notify:
+    - Reload bind
+  tags:
+    - bind
+    - configuration

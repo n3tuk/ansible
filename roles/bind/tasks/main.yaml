@@ -1,0 +1,24 @@
+---
+# tasks file for bind
+
+- name: Run pre-flight checks
+  ansible.builtin.include_tasks:
+    file: pre-flight.yaml
+
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
+  when: >-
+    ansible_facts.distribution == 'Archlinux'
+
+- name: Configure bind
+  ansible.builtin.include_tasks:
+    file: configure.yaml
+
+- name: Set up the bind firewall rules
+  ansible.builtin.include_tasks:
+    file: firewall.yaml
+
+- name: Set up bind
+  ansible.builtin.include_tasks:
+    file: service.yaml
