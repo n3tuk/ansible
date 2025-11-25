@@ -1,0 +1,174 @@
+// {{ ansible_managed }}
+
+options {
+  directory "{{ bind_var_path }}";
+  pid-file "{{ bind_run_path }}/named.pid";
+
+  listen-on port {{ bind_port_dns }} { {{ bind_listen_ipv4_addresses | join("; ") }}; };
+  listen-on-v6 port {{ bind_port_dns }} { {{ bind_listen_ipv6_addresses | join("; ") }}; };
+
+  notify explicit;
+  allow-transfer { none; };
+
+  forward only;
+  forwarders {
+{%    for forwarder in bind_forwarders %}
+    {{ forwarder }};
+{%    endfor %}
+  };
+};
+
+// Create a dedicated view which can prevent the use of information commands in
+// DNS amplified reflection DoS attacks, or just general excessive querying
+view "override_bind" chaos {
+  rate-limit {
+    responses-per-second 3;
+    slip 0;
+    min-table-size 10;
+  };
+
+  zone "version.bind" chaos {
+    type master;
+    database "_builtin version";
+  };
+
+  zone "hostname.bind" chaos {
+    type master;
+    database "_builtin hostname";
+  };
+
+  zone "authors.bind" chaos {
+    type master;
+    database "_builtin authors";
+  };
+
+  zone "id.server" chaos {
+    type master;
+    database "_builtin id";
+  };
+};
+
+{%  for view in bind_views %}
+// VIEW {{ view.name }}
+{%    if view.comment is defined %}
+{%      for line in view.comment.splitlines() %}
+// {{ line }}
+{%      endfor %}
+{%    endif %}
+{%    if ( view.secrets is defined and
+           view.secrets.update is defined and
+           view.servers is defined and
+           view.servers.master is defined and
+           inventory_hostname == view.servers.master) %}
+
+key {{ view.name }}-update-key {
+  algorithm hmac-sha512;
+  secret "{{ view.secrets['update'] }}";
+};
+{%    endif %}
+{%    if ( view.secrets is defined and
+           view.secrets.transfer is defined ) %}
+
+key {{ view.name }}-transfer-key {
+  algorithm hmac-sha512;
+  secret "{{ view.secrets.transfer }}";
+};
+{%    endif %}
+
+acl {{ view.name }}-acl {
+{%    for v in bind_views %}
+{%      for s in v.secrets | dict2items %}
+{%        if ( ( not ( v.name == view.name and
+                     s.key == "transfer" ) ) and
+               ( not ( view.servers is defined and
+                       view.servers.slaves is defined and
+                       inventory_hostname is in view.servers.slaves and
+                       s.key == "update" ) ) ) %}
+  !key {{ v.name }}-{{ s.key }}-key;
+{%        endif %}
+{%      endfor %}
+{%    endfor %}
+{%    if view.secrets is defined and view.secrets.transfer is defined %}
+
+  key {{ view.name }}-transfer-key;
+{%    endif %}
+
+{%    for cidr in view.cidrs %}
+  {{ cidr }};
+{%    endfor %}
+};
+
+view {{ view.name }} {
+  match-clients { {{ view.name }}-acl; };
+
+  allow-recursion { any; };
+{%    if ( view.secrets is defined and
+           view.secrets.update is defined and
+           view.servers is defined and
+           view.servers.master is defined and
+           inventory_hostname == view.servers.master) %}
+  allow-update { key {{ view.name }}-update-key; };
+{%    endif %}
+{%    if ( view.secrets is defined and
+           view.secrets.transfer is defined ) %}
+  allow-transfer { key {{ view.name }}-transfer-key; };
+{%    endif %}
+{%    for domain in view.domains %}
+
+  zone "{{ domain.name }}" {
+{%      if ( domain.forwarders is defined and
+             domain.forwarders | length > 0 ) %}
+    type forward; // domain-specific forwarder
+
+    forwarders {
+{%        for forwarder in domain.forwarders %}
+      {{ forwarder }};
+{%        endfor %}
+    };
+{%      elif ( view.servers is not defined or
+               view.servers.master is not defined or
+               view.servers.slaves is not defined or
+               view.secrets is not defined or
+               view.secrets.transfer is not defined ) %}
+    type master; // standalone master
+    file "{{ view.name }}/{{ domain.name }}.db";
+{%      elif inventory_hostname == view.servers.master %}
+    type master; // upstream master
+
+    also-notify {
+{%        for slave in view.servers.slaves %}
+      {{ hostvars[slave].ansible_facts.default_ipv6.address }} key {{ view.name }}-transfer-key;
+{%        endfor %}
+    };
+
+    file "{{ view.name }}/{{ domain.name }}.db";
+{%      elif inventory_hostname is in view.servers.slaves %}
+    type slave; // downstream slave
+    masterfile-format text;
+
+    masters {
+        {{ hostvars[view.servers.master].ansible_facts.default_ipv6.address }} key {{ view.name }}-transfer-key;
+    };
+
+    file "{{ view.name }}/{{ domain.name }}.db";
+{%      else %}
+    type slave; // unconfigured slave
+    file "{{ view.name }}/{{ domain.name }}.db";
+{%      endif %}
+  };
+{%    endfor %}
+};
+
+{%  endfor %}
+logging {
+  channel xfer-log {
+    file "{{ bind_log_path }}/named.log";
+    print-category yes;
+    print-severity yes;
+    severity info;
+  };
+
+  category xfer-in { xfer-log; };
+  category xfer-out { xfer-log; };
+  category notify { xfer-log; };
+};

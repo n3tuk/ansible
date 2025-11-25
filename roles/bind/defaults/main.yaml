@@ -1,0 +1,31 @@
+---
+# defaults file for bind
+
+bind_listen_ipv4_addresses:
+  - any
+bind_listen_ipv6_addresses:
+  - any
+bind_port_dns: 53
+
+bind_forwarders: []
+
+bind_views: []
+# - name: example
+#   comment: Comment goes here...
+#   domains:
+#     - name: example.com
+#   cidrs:
+#     - 192.0.2.0/24
+#     - 198.51.100.0/24
+#     - 203.0.113.0/24
+#     - 2001:db8:1::/48
+#     - 2001:db8:2::/48
+#     - 2001:db8:3::/48
+#   servers:
+#     master: dns-01.example.com
+#     slaves:
+#       - dns-02.example.com
+#       - dns-03.example.com
+#   secrets:
+#     transfer: ...
+#     update: ...

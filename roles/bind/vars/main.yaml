@@ -1,0 +1,16 @@
+---
+# vars file for bind
+
+bind_packages_arch:
+  - bind
+  - bind-tools
+
+bind_service_name: named
+bind_service_user: named
+bind_service_group: named
+
+bind_etc_path: /etc
+bind_etc_name: named.conf
+bind_var_path: /var/named
+bind_run_path: /run/named
+bind_log_path: /var/log/named

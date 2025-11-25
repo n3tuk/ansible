@@ -1,0 +1,14 @@
+---
+# service-specific tasks file for bind
+
+- name: Start and enable the bind service
+  ansible.builtin.systemd:
+    name: "{{ bind_service_name }}.service"
+    enabled: true
+    state: started
+  when: >-
+    not ansible_check_mode
+  tags:
+    - bind
+    - systemd
+    - service
