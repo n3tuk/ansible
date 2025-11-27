@@ -62,7 +62,7 @@ view "override_bind" chaos {
            inventory_hostname == view.servers.master) %}
 
 key {{ view.name }}-update-key {
-  algorithm hmac-sha512;
+  algorithm hmac-sha256;
   secret "{{ view.secrets['update'] }}";
 };
 {%    endif %}
@@ -78,8 +78,7 @@ key {{ view.name }}-transfer-key {
 acl {{ view.name }}-acl {
 {%    for v in bind_views %}
 {%      for s in v.secrets | dict2items %}
-{%        if ( ( not ( v.name == view.name and
-                     s.key == "transfer" ) ) and
+{%        if ( ( not v.name == view.name ) and
                ( not ( view.servers is defined and
                        view.servers.slaves is defined and
                        inventory_hostname is in view.servers.slaves and
@@ -88,8 +87,11 @@ acl {{ view.name }}-acl {
 {%        endif %}
 {%      endfor %}
 {%    endfor %}
-{%    if view.secrets is defined and view.secrets.transfer is defined %}
 
+{%    if view.secrets is defined and view.secrets.update is defined %}
+  key {{ view.name }}-update-key;
+{%    endif %}
+{%    if view.secrets is defined and view.secrets.transfer is defined %}
   key {{ view.name }}-transfer-key;
 {%    endif %}
 
@@ -99,20 +101,13 @@ acl {{ view.name }}-acl {
 };
 
 view {{ view.name }} {
-  match-clients { {{ view.name }}-acl; };
+  match-clients {
+    {{ view.name }}-acl;
+  };
 
-  allow-recursion { any; };
-{%    if ( view.secrets is defined and
-           view.secrets.update is defined and
-           view.servers is defined and
-           view.servers.master is defined and
-           inventory_hostname == view.servers.master) %}
-  allow-update { key {{ view.name }}-update-key; };
-{%    endif %}
-{%    if ( view.secrets is defined and
-           view.secrets.transfer is defined ) %}
-  allow-transfer { key {{ view.name }}-transfer-key; };
-{%    endif %}
+  allow-recursion {
+    any;
+  };
 {%    for domain in view.domains %}
 
   zone "{{ domain.name }}" {
@@ -131,9 +126,40 @@ view {{ view.name }} {
                view.secrets is not defined or
                view.secrets.transfer is not defined ) %}
     type master; // standalone master
+{%        if ( view.secrets is defined and
+               view.secrets.update is defined and
+               view.servers is defined and
+               view.servers.master is defined and
+               inventory_hostname == view.servers.master) %}
+
+    update-policy { grant {{ view.name }}-update-key zonesub ANY; };
+    allow-transfer { key {{ view.name }}-update-key; };
+
+{%        endif %}
+    masterfile-format text;
     file "{{ view.name }}/{{ domain.name }}.db";
 {%      elif inventory_hostname == view.servers.master %}
     type master; // upstream master
+{%        if ( view.secrets is defined and
+               ( view.secrets.update is defined or
+                 view.secrets.transfer is defined ) and
+               view.servers is defined and
+               view.servers.master is defined and
+               inventory_hostname == view.servers.master) %}
+{%          if view.secrets.update is defined %}
+
+    update-policy { grant {{ view.name }}-update-key zonesub ANY; };
+{%-          endif -%}
+
+    allow-transfer {
+{%-          endif -%}
+{%-         if view.secrets.update is defined %}
+ key {{ view.name }}-update-key;
+{%-          endif -%}
+{%-         if view.secrets.transfer is defined %}
+ key {{ view.name }}-transfer-key;
+{%-         endif %}
+ };
 
     also-notify {
 {%        for slave in view.servers.slaves %}
@@ -141,18 +167,31 @@ view {{ view.name }} {
 {%        endfor %}
     };
 
+    masterfile-format text;
     file "{{ view.name }}/{{ domain.name }}.db";
 {%      elif inventory_hostname is in view.servers.slaves %}
     type slave; // downstream slave
-    masterfile-format text;
+{%        if ( view.secrets is defined and
+               view.secrets.transfer is defined ) %}
+
+    allow-transfer { key {{ view.name }}-transfer-key; };
+{%        endif %}
 
     masters {
         {{ hostvars[view.servers.master].ansible_facts.default_ipv6.address }} key {{ view.name }}-transfer-key;
     };
 
+    masterfile-format text;
     file "{{ view.name }}/{{ domain.name }}.db";
 {%      else %}
     type slave; // unconfigured slave
+{%        if ( view.secrets is defined and
+               view.secrets.transfer is defined ) %}
+
+    allow-transfer { key {{ view.name }}-transfer-key; };
+
+{%        endif %}
+    masterfile-format text;
     file "{{ view.name }}/{{ domain.name }}.db";
 {%      endif %}
   };
@@ -161,11 +200,52 @@ view {{ view.name }} {
 
 {%  endfor %}
 logging {
-  channel xfer-log {
-    file "{{ bind_log_path }}/named.log";
+  channel update-log {
+    file "{{ bind_log_path }}/update.log";
+    print-time yes;
     print-category yes;
     print-severity yes;
-    severity info;
+    severity warning;
+  };
+
+  category update { update-log; };
+
+  channel dnssec-log {
+    file "{{ bind_log_path }}/dnssec.log";
+    print-time yes;
+    print-category yes;
+    print-severity yes;
+    severity warning;
+  };
+
+  category dnssec { dnssec-log; };
+
+  channel security-log {
+    file "{{ bind_log_path }}/security.log";
+    print-time yes;
+    print-category yes;
+    print-severity yes;
+    severity warning;
+  };
+
+  category security { security-log; };
+
+  channel client-log {
+    file "{{ bind_log_path }}/client.log";
+    print-time yes;
+    print-category yes;
+    print-severity yes;
+    severity warning;
+  };
+
+  category client { client-log; };
+
+  channel xfer-log {
+    file "{{ bind_log_path }}/xfer.log";
+    print-time yes;
+    print-category yes;
+    print-severity yes;
+    severity warning;
   };
 
   category xfer-in { xfer-log; };

@@ -40,13 +40,14 @@ None other than the Ansible Role.
 
 ## Role Variables
 
-| Variable                     | Default   | Description                                                                                                                          |
-| :--------------------------- | :-------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| `bind_listen_ipv4_addresses` | `["any"]` | (**optional**) A list of IPv4 addresses for `bind` to listen on, on the ports selected.                                              |
-| `bind_listen_ipv6_addresses` | `["any"]` | (**optional**) A list of IPv6 addresses for `bind` to listen on, on the ports selected .                                             |
-| `bind_port_dns`              | `53`      | (**optional**) The port for `bind` to listen on for standard, unencrypted, DNS requests.                                             |
-| bind_forwarders              | `[]`      | (**optional**) A list of IP addresses of upstream DNS servers for `bind` to forward requests to when it cannot resolve them itself.  |
-| `bind_views`                 | `[]`      | (**optional**) A list of dictionaries containing the structure of the views and zones to create in `bind`. See below for an example. |
+| Variable                     | Default   | Description                                                                                                                               |
+| :--------------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| `bind_listen_ipv4_addresses` | `["any"]` | (**optional**) A list of IPv4 addresses for `bind` to listen on, on the ports selected.                                                   |
+| `bind_listen_ipv6_addresses` | `["any"]` | (**optional**) A list of IPv6 addresses for `bind` to listen on, on the ports selected .                                                  |
+| `bind_port_dns`              | `53`      | (**optional**) The port for `bind` to listen on for standard, unencrypted, DNS requests.                                                  |
+| `bind_forwarders`            | `[]`      | (**optional**) A list of IP addresses of upstream DNS servers for `bind` to forward requests to when it cannot resolve them itself.       |
+| `bind_views`                 | `[]`      | (**optional**) A list of dictionaries containing the structure of the views and zones to create in `bind`. See below for an example.      |
+| `bind_dnssec_validation`     | `true`    | (**optional**) Whether to enable DNSSEC validation in `bind` when forwarding and resolving DNS requests upstream from downstream clients. |
 
 ## Dependencies
 
