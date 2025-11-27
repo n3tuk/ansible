@@ -16,6 +16,8 @@ options {
     {{ forwarder }};
 {%    endfor %}
   };
+
+  dnssec-validation {{ bind_dnssec_validation }};
 };
 
 // Create a dedicated view which can prevent the use of information commands in
@@ -115,6 +117,7 @@ view {{ view.name }} {
              domain.forwarders | length > 0 ) %}
     type forward; // domain-specific forwarder
 
+    forward only;
     forwarders {
 {%        for forwarder in domain.forwarders %}
       {{ forwarder }};

@@ -103,6 +103,7 @@ bind_forwarders:
   - 1.0.0.1
   - 2606:4700:4700::1111
   - 2606:4700:4700::1001
+bind_dnssec_validation: "no"
 
 bind_views:
   - name: tailnet
