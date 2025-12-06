@@ -1,0 +1,6 @@
+// {{ ansible_managed }}
+
+key {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-master-key {
+  algorithm hmac-sha512;
+  secret "{{ view.tsig.master.secret }}";
+};

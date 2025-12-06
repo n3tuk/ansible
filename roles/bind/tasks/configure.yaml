@@ -1,7 +1,7 @@
 ---
 # configuration-specific tasks file for bind
 
-- name: Create the bind system directories
+- name: Create the BIND system directories
   ansible.builtin.file:
     dest: "{{ directory }}"
     state: directory
@@ -9,6 +9,7 @@
     group: "{{ bind_service_group }}"
     mode: u=rwx,g=rx,o=
   loop:
+    - "{{ bind_var_path }}"
     - "{{ bind_log_path }}"
   loop_control:
     label: "{{ directory }}"
@@ -17,7 +18,7 @@
     - bind
     - configuration
 
-- name: Create the bind database directories
+- name: Create the BIND database directories
   ansible.builtin.file:
     dest: "{{ bind_var_path }}/{{ view.name }}"
     state: directory
@@ -43,17 +44,18 @@
   # This file contains secrets, including access tokens
   no_log: true
   notify:
-    - Reload bind
+    - Reload BIND
   tags:
     - bind
     - configuration
 
-- name: Create group for RNDC access
+- name: Create group for RNDC and TSIG access
   ansible.builtin.group:
     name: "{{ group }}"
     system: true
   loop:
     - "{{ bind_rndc_group }}"
+    - "{{ bind_tsig_group }}"
   loop_control:
     label: "{{ group }}"
     loop_var: group
@@ -61,15 +63,33 @@
     - bind
     - user
 
-- name: Add users to RNDC group
+- name: Add users to RNDC access group
   ansible.builtin.user:
     name: "{{ member.user }}"
     groups: "{{ bind_rndc_group }}"
     append: true
+  # NOTE: Groups cannot be removed from users using ansible.builtin.user, so if
+  #       the user is enabled and then disabled, they will remain in the group.
   when: member.enabled | default(true)
   ignore_errors: "{{ ansible_check_mode }}"
   loop: >-
     {{ bind_rndc_group_members }}
+  loop_control:
+    label: "{{ member.user }}"
+    loop_var: member
+  tags:
+    - bind
+    - user
+
+- name: Add users to TSIG access group
+  ansible.builtin.user:
+    name: "{{ member.user }}"
+    groups: "{{ bind_tsig_group }}"
+    append: true
+  when: member.enabled | default(true)
+  ignore_errors: "{{ ansible_check_mode }}"
+  loop: >-
+    {{ bind_tsig_group_members }}
   loop_control:
     label: "{{ member.user }}"
     loop_var: member
@@ -86,6 +106,43 @@
     mode: u=rw,g=r,o=
   # This file contains secrets, including access tokens
   no_log: true
+  tags:
+    - bind
+    - configuration
+
+- name: Create the TSIG key directory
+  ansible.builtin.file:
+    dest: "{{ bind_tsig_path }}"
+    state: directory
+    owner: "{{ bind_service_user }}"
+    group: "{{ bind_tsig_group }}"
+    mode: u=rwx,g=rx,o=
+  tags:
+    - bind
+    - configuration
+
+- name: Create or update the TSIG configuration files
+  ansible.builtin.template:
+    src: tsig.conf.jinja
+    dest: "{{ bind_tsig_path }}/{{ view.name }}.key"
+    owner: "{{ bind_service_user }}"
+    group: "{{ bind_tsig_group }}"
+    mode: u=rw,g=r,o=
+  when: >-
+    ( ( view.servers is not defined or
+        view.servers.master is not defined ) or
+      ( view.servers is defined and
+        view.servers.master is defined and
+        view.servers.master == inventory_hostname ) ) and
+    view.tsig is defined and
+    view.tsig.master is defined and
+    view.tsig.master.secret is defined
+  # This file contains secrets, including access tokens
+  no_log: true
+  loop: "{{ bind_views }}"
+  loop_control:
+    label: "{{ bind_tsig_path }}/{{ view.name }}.key"
+    loop_var: view
   tags:
     - bind
     - configuration

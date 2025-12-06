@@ -1,7 +1,7 @@
 ---
 # arch-specific tasks file for bind
 
-- name: Install bind
+- name: Install BIND
   community.general.pacman:
     name: "{{ bind_packages_arch }}"
     state: present

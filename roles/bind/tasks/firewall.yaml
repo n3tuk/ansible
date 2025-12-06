@@ -1,7 +1,7 @@
 ---
 # firewall-specific tasks file for bind
 
-- name: Enable firewall access for bind
+- name: Enable firewall access for BIND
   community.general.ufw:
     rule: allow
     proto: "{{ port.split('/') | last }}"

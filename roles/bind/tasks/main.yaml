@@ -11,14 +11,14 @@
   when: >-
     ansible_facts.distribution == 'Archlinux'
 
-- name: Configure bind
+- name: Configure BIND
   ansible.builtin.include_tasks:
     file: configure.yaml
 
-- name: Set up the bind firewall rules
+- name: Set up the BIND firewall rules
   ansible.builtin.include_tasks:
     file: firewall.yaml
 
-- name: Set up bind
+- name: Set up BIND
   ansible.builtin.include_tasks:
     file: service.yaml
