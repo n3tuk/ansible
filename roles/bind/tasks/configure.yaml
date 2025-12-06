@@ -14,7 +14,7 @@
     label: "{{ directory }}"
     loop_var: directory
   tags:
-    - step-ca
+    - bind
     - configuration
 
 - name: Create the bind database directories
@@ -29,7 +29,7 @@
     label: "{{ bind_var_path }}/{{ view.name }}"
     loop_var: view
   tags:
-    - step-ca
+    - bind
     - configuration
 
 - name: Create or update the named.conf configuration file
@@ -44,6 +44,48 @@
   no_log: true
   notify:
     - Reload bind
+  tags:
+    - bind
+    - configuration
+
+- name: Create group for RNDC access
+  ansible.builtin.group:
+    name: "{{ group }}"
+    system: true
+  loop:
+    - "{{ bind_rndc_group }}"
+  loop_control:
+    label: "{{ group }}"
+    loop_var: group
+  tags:
+    - bind
+    - user
+
+- name: Add users to RNDC group
+  ansible.builtin.user:
+    name: "{{ member.user }}"
+    groups: "{{ bind_rndc_group }}"
+    append: true
+  when: member.enabled | default(true)
+  ignore_errors: "{{ ansible_check_mode }}"
+  loop: >-
+    {{ bind_rndc_group_members }}
+  loop_control:
+    label: "{{ member.user }}"
+    loop_var: member
+  tags:
+    - bind
+    - user
+
+- name: Create or update the RNDC configuration file
+  ansible.builtin.template:
+    src: "rndc.conf.jinja"
+    dest: "{{ bind_etc_path }}/rndc.conf"
+    owner: "{{ bind_service_user }}"
+    group: "{{ bind_rndc_group }}"
+    mode: u=rw,g=r,o=
+  # This file contains secrets, including access tokens
+  no_log: true
   tags:
     - bind
     - configuration

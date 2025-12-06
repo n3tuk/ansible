@@ -9,6 +9,8 @@ bind_service_name: named
 bind_service_user: named
 bind_service_group: named
 
+bind_rndc_group: rndc
+
 bind_etc_path: /etc
 bind_etc_name: named.conf
 bind_var_path: /var/named
