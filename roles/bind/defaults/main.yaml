@@ -31,3 +31,8 @@ bind_views: []
 #     update: ...
 
 bind_dnssec_validation: auto
+
+bind_rndc_key_secret:
+bind_rndc_group_members: []
+# - user: jonathan
+#   enabled: false

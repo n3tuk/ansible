@@ -105,6 +105,9 @@ bind_forwarders:
   - 2606:4700:4700::1001
 bind_dnssec_validation: "no"
 
+bind_rndc_group_members:
+  - user: jonathan
+
 bind_views:
   - name: tailnet
     comment: |-

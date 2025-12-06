@@ -19,6 +19,23 @@ options {
 
   dnssec-validation {{ bind_dnssec_validation }};
 };
+{%    if bind_rndc_key_secret | length > 0 %}
+
+// Set up the RNDC key for remote administration, but only from within the
+// server itself via localhost
+key "{{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-access-key" {
+  algorithm hmac-sha512;
+  secret "{{ bind_rndc_key_secret }}";
+};
+
+controls {
+  inet ::1 port 953
+    allow { ::1; }
+    keys {
+      "{{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-access-key";
+    };
+};
+{%    endif %}
 
 // Create a dedicated view which can prevent the use of information commands in
 // DNS amplified reflection DoS attacks, or just general excessive querying

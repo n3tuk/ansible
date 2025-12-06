@@ -1,0 +1,12 @@
+// {{ ansible_managed }}
+
+key "{{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-access-key" {
+	algorithm hmac-sha512;
+	secret "{{ bind_rndc_key_secret }}";
+};
+
+options {
+	default-key "{{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-access-key";
+	default-server ::1;
+	default-port 953;
+};

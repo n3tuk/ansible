@@ -48,6 +48,8 @@ None other than the Ansible Role.
 | `bind_forwarders`            | `[]`      | (**optional**) A list of IP addresses of upstream DNS servers for `bind` to forward requests to when it cannot resolve them itself.       |
 | `bind_views`                 | `[]`      | (**optional**) A list of dictionaries containing the structure of the views and zones to create in `bind`. See below for an example.      |
 | `bind_dnssec_validation`     | `true`    | (**optional**) Whether to enable DNSSEC validation in `bind` when forwarding and resolving DNS requests upstream from downstream clients. |
+| `bind_rndc_key_secret`       | `""`      | (**optional**) The secret key to use for the `rndc` control channel.                                                                      |
+| `bind_rndc_group_members`    | `[]`      | (**optional**) A list of users that should have access to the `rndc` control channel configuration file, and hence can use `rndc`.        |
 
 ## Dependencies
 
