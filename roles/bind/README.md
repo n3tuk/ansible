@@ -50,6 +50,7 @@ None other than the Ansible Role.
 | `bind_dnssec_validation`     | `true`    | (**optional**) Whether to enable DNSSEC validation in `bind` when forwarding and resolving DNS requests upstream from downstream clients. |
 | `bind_rndc_key_secret`       | `""`      | (**optional**) The secret key to use for the `rndc` control channel.                                                                      |
 | `bind_rndc_group_members`    | `[]`      | (**optional**) A list of users that should have access to the `rndc` control channel configuration file, and hence can use `rndc`.        |
+| `bind_tsig_group_members`    | `[]`      | (**optional**) A list of users that should have access to the TSIG keys and hence can use `nsupdate` on the master servers.               |
 
 ## Dependencies
 

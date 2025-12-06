@@ -14,6 +14,12 @@ bind_views: []
 #   comment: Comment goes here...
 #   domains:
 #     - name: example.com
+#     - name: example.org
+#       rfc2136: # master and slaves always has access via TSIG
+#         - external-dns
+#     - name: example.net
+#       forwarders:
+#         - 1.1.1.1
 #   cidrs:
 #     - 192.0.2.0/24
 #     - 198.51.100.0/24
@@ -24,15 +30,27 @@ bind_views: []
 #   servers:
 #     master: dns-01.example.com
 #     slaves:
-#       - dns-02.example.com
-#       - dns-03.example.com
-#   secrets:
-#     transfer: ...
-#     update: ...
+#       - name: dns-02.example.com
+#         secret: ...
+#       - name: dns-03.example.com
+#         secret: ...
+#   tsig:
+#     master:
+#       secret: ...
+#     rfc2136:
+#       - name: external-dns
+#         grants:
+#           - zonesub A AAAA CNAME TXT
+#         cidrs:
+#            - 10.0.0.0/8
+#         secret: ...
 
 bind_dnssec_validation: auto
 
 bind_rndc_key_secret:
 bind_rndc_group_members: []
+# - user: jonathan
+#   enabled: false
+bind_tsig_group_members: []
 # - user: jonathan
 #   enabled: false
