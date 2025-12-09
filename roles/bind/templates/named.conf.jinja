@@ -282,7 +282,7 @@ view {{ view.name }} {
 {%        endif %}
 
     masterfile-format text;
-    file "{{ view.name }}/{{ domain.name }}.db";
+    file "{{ view.name }}/{{ domain.name }}.zone";
 {%      elif inventory_hostname == view.servers.master %}
     type master; // upstream master
 {%        if ( view.tsig is defined and
@@ -342,7 +342,7 @@ view {{ view.name }} {
     };
 
     masterfile-format text;
-    file "{{ view.name }}/{{ domain.name }}.db";
+    file "{{ view.name }}/{{ domain.name }}.zone";
 {%      elif inventory_hostname is in ( view.servers.slaves | map(attribute='name') ) %}
     type slave; // downstream slave
 
@@ -356,11 +356,11 @@ view {{ view.name }} {
     };
 
     masterfile-format text;
-    file "{{ view.name }}/{{ domain.name }}.db";
+    file "{{ view.name }}/{{ domain.name }}.zone";
 {%      else %}
     type slave; // unconfigured slave
     masterfile-format text;
-    file "{{ view.name }}/{{ domain.name }}.db";
+    file "{{ view.name }}/{{ domain.name }}.zone";
 {%      endif %}
   };
 {%    endfor %}
