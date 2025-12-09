@@ -1,4 +1,11 @@
 ---
+- name: Gather Facts from ACME Hosts
+  hosts: ca
+  # This play is purely to gather the facts from the ACME hosts for use in
+  # helping generate the necessary firewall rules for HTTP-01 validation in the
+  # following play
+  gather_facts: true
+
 - name: Configure Authentik Hosts
   hosts: authentik
   become: true
@@ -7,12 +14,15 @@
     - role: ufw
       tags:
         - ufw
-    - role: postgresql
-      tags:
-        - postgresql
     - role: caddy
       tags:
         - caddy
+    - role: lego
+      tags:
+        - lego
+    - role: postgresql
+      tags:
+        - postgresql
     - role: authentik
       tags:
         - authentik

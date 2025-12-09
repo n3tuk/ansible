@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=ACME Client for the %i Certificate
+Requires=network-online.target
+# Ensure that the path where certificates are managed exists before running,
+# with each set of certificates having its own directory, and that the
+# configuration override for this certificate set exists
+ConditionPathExists={{ lego_etc_path }}/%i.conf
+ConditionPathExists={{ lego_lib_path }}/%i
+
+[Service]
+Type=oneshot
+EnvironmentFile={{ lego_etc_path }}/defaults.conf
+EnvironmentFile={{ lego_etc_path }}/%i.conf
+WorkingDirectory={{ lego_lib_path }}
+ExecStart={{ lego_usr_path }}/run %i
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=basic.target

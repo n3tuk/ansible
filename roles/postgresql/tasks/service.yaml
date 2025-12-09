@@ -11,3 +11,10 @@
   # is done.
   when: >-
     not ansible_check_mode
+
+- name: Enable the Lego certificate renewal timer
+  ansible.builtin.systemd:
+    name: "lego@{{ postgresql_service_name }}.timer"
+    enabled: true
+    state: started
+  when: postgresql_tls_enabled

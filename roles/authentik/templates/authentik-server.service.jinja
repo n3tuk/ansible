@@ -19,6 +19,9 @@ ExecStart=/usr/bin/podman run \
   --replace \
   --sdnotify=conmon \
   --detach \
+{% if authentik_ssl_path is defined and authentik_ssl_path != '' %}
+  --volume {{ authentik_ssl_path }}:/certs:ro \
+{% endif %}
   --env-file=/etc/default/{{ authentik_service_prefix }} \
   --network=host \
   --publish {{ authentik_listen_http }}:{{ authentik_listen_http }} \

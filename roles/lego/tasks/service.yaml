@@ -1,0 +1,26 @@
+---
+# service-specific tasks file for lego
+
+# NOTE: It is not expected that any service is activated, only and the required
+#       files are installed and systemd is reloaded (if needed). When a service
+#       requires a certificate, they will install the required configuration
+#       (and script) and then enable the lego@{name}.timer to monitor renewals.
+
+- name: Create or update the Lego systemd files
+  ansible.builtin.template:
+    src: "{{ file }}.jinja"
+    dest: "/etc/systemd/system/{{ file }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - lego@.service
+    - lego@.timer
+  loop_control:
+    label: "/etc/systemd/system/{{ file }}"
+    loop_var: file
+  notify:
+    - Reload systemd
+  tags:
+    - lego
+    - service

@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=ACME Client Timer for the %I Certificate
+
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=30m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

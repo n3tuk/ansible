@@ -8,6 +8,14 @@ postgresql_listen_addresses:
   - "*"
 postgresql_port: 5432
 
+postgresql_tls_enabled: false
+# Path to the CA certificate bundle. This default is for Arch Linux. For other
+# distributions, it will need to be set explicitly to the appropriate path. For
+# example:
+#   - /etc/ssl/certs/ca-certificates.crt for Debian/Ubuntu,
+#   - /etc/pki/tls/certs/ca-bundle.crt for Red Hat/CentOS
+postgresql_tls_ca_crt: /etc/ssl/certs/ca-certificates.crt
+
 postgresql_max_connections: 100
 
 postgresql_replication_role: standalone

@@ -18,21 +18,16 @@ scram_iterations = 4096
 
 # - SSL -
 
+{% if not postgresql_tls_enabled %}
 ssl = off
-#ssl_ca_file = ''
-#ssl_cert_file = 'server.crt'
-#ssl_crl_file = ''
-#ssl_crl_dir = ''
-#ssl_key_file = 'server.key'
-#ssl_ciphers = 'HIGH:MEDIUM:+3DES:!aNULL'	# allowed TLSv1.2 ciphers
-#ssl_tls13_ciphers = ''	# allowed TLSv1.3 cipher suites, blank for default
-#ssl_prefer_server_ciphers = on
-#ssl_groups = 'X25519:prime256v1'
-#ssl_min_protocol_version = 'TLSv1.2'
-#ssl_max_protocol_version = ''
-#ssl_dh_params_file = ''
-#ssl_passphrase_command = ''
-#ssl_passphrase_command_supports_reload = off
+{% else %}
+ssl = on
+ssl_cert_file = 'server.crt'
+ssl_key_file = 'server.key'
+ssl_ca_file = '{{ postgresql_tls_ca_crt }}'
+ssl_prefer_server_ciphers = on
+ssl_min_protocol_version = 'TLSv1.3'
+{% endif %}
 
 # - Memory -
 
@@ -100,7 +95,7 @@ synchronized_standby_slots = ''
 
 # - Replication Standby Servers -
 
-primary_conninfo = 'user={{ postgresql_replication_username }} password={{ postgresql_replication_password }} host={{ hostvars[postgresql_replication_primary].ansible_facts.default_ipv6.address }} port={{ postgresql_port }}'
+primary_conninfo = 'user={{ postgresql_replication_username }} password={{ postgresql_replication_password }} host={{ hostvars[postgresql_replication_primary].ansible_facts.default_ipv6.address }} port={{ postgresql_port }}{% if postgresql_tls_enabled %} sslmode=verify-full sslrootcert={{ postgresql_tls_ca_crt | urlencode }}{% endif %}'
 primary_slot_name = '{{ ansible_facts.hostname | replace("-", "_") }}'
 hot_standby = on
 hot_standby_feedback = on
@@ -142,7 +137,7 @@ autovacuum_analyze_threshold = 50
 autovacuum_vacuum_scale_factor = 0.2
 autovacuum_vacuum_insert_scale_factor = 0.2
 autovacuum_analyze_scale_factor = 0.1
-autovacuum_vacuum_max_threshold = 10000000    # max number of row updates
+autovacuum_vacuum_max_threshold = 10000000
 
 # - Locale and Formatting -
 

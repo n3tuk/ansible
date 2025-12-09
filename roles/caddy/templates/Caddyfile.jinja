@@ -2,7 +2,7 @@
 
 {
   email {{ caddy_acme_email }}
-{% if caddy_auto_https | length > 0 %}
+{% if caddy_auto_https is defined and caddy_auto_https | length > 0 %}
   auto_https {{ caddy_auto_https }}
 {% endif %}
 }
