@@ -22,7 +22,7 @@ All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
 
 ```console
-$ task play:bootstrap limit=proxmox-01.services.kub3.uk
+$ task play:bootstrap limit=proxmox-01.services.n3t.uk
 task: [bootstrap] ansible-playbook \
   --syntax-check plays/bootstrap.yaml
 ...

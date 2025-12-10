@@ -14,7 +14,7 @@ development:
 
 services:
   hosts:
-    proxmox-[01:02].services.kub3.uk:
+    proxmox-[01:02].services.n3t.uk:
   children:
     authentik:
     dns:
@@ -25,27 +25,27 @@ services:
 proxmox:
   hosts:
     proxmox-[01:03].development.kub3.uk:
-    proxmox-[01:02].services.kub3.uk:
+    proxmox-[01:02].services.n3t.uk:
 
 authentik:
   hosts:
-    authentik-[01:02].services.kub3.uk:
+    authentik-[01:02].services.n3t.uk:
 
 dns:
   hosts:
-    dns-[01:02].services.kub3.uk:
+    dns-[01:02].services.n3t.uk:
 
 ca:
   hosts:
-    ca-[01:02].services.kub3.uk:
+    ca-[01:02].services.n3t.uk:
 
 cache:
   hosts:
-    cache-[01:02].services.kub3.uk:
+    cache-[01:02].services.n3t.uk:
 
 netdata:
   hosts:
-    netdata-[01:02].services.kub3.uk:
+    netdata-[01:02].services.n3t.uk:
 
 arch:
   children:

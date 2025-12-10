@@ -1,0 +1,3 @@
+---
+postgresql_replication_role: standby
+postgresql_replication_primary: authentik-01.services.n3t.uk

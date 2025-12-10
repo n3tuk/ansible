@@ -141,23 +141,23 @@ stepca_listen_trusted_proxy_cidrs:
   # node or the private IP address of the other node if it's being sent to there
   # by Tailscale, therefore ensure that all relevant addresses are trusted.
   # yamllint disable rule:line-length
-  - "{{ hostvars['ca-01.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
-  - "{{ hostvars['ca-01.services.kub3.uk'].ansible_facts.default_ipv6.address }}/128"
-  - "{{ hostvars['ca-02.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
-  - "{{ hostvars['ca-02.services.kub3.uk'].ansible_facts.default_ipv6.address }}/128"
+  - "{{ hostvars['ca-01.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
+  - "{{ hostvars['ca-01.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
+  - "{{ hostvars['ca-02.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
+  - "{{ hostvars['ca-02.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
   # yamllint enable rule:line-length
 
 stepca_x509_allow_dns:
   # Localhost addresses for local services
   - localhost
-  # Internal/external addresses for services in n3t.uk and kub3.u
+  # Internal/external addresses for services in n3t.uk and kub3.uk
   - "*.n3t.uk"
   - "ca.n3t.uk"
   - "*.ca.n3t.uk"
+  - "*.services.n3t.uk"
   - "*.kub3.uk"
-  - "*.production.kub3.uk"
   - "*.development.kub3.uk"
-  - "*.services.kub3.uk"
+  - "*.production.kub3.uk"
   # Tailscale Tailnet addresses and custom domain
   - "*.icefish-vibe.ts.net"
 stepca_x509_allow_email:
@@ -167,7 +167,7 @@ stepca_x509_allow_ip:
   # Localhost addresses for local services
   - "::1"
   - "127.0.0.1/32"
-  # Internal/external addresses for services in n3t.uk and kub3.u
+  # Internal/external addresses for services in n3t.uk and kub3.uk
   - "2a02:8010:8006::/48"
   - "172.23.0.0/16"
   - "172.27.0.0/16"

@@ -349,9 +349,9 @@ bind_views:
       - 100.64.0.0/10
       - 127.0.0.0/8
     servers:
-      master: dns-01.services.kub3.uk
+      master: dns-01.services.n3t.uk
       slaves:
-        - name: dns-02.services.kub3.uk
+        - name: dns-02.services.n3t.uk
           algorithm: hmac-sha512
           secret: !vault |
             $ANSIBLE_VAULT;1.1;AES256
@@ -454,9 +454,9 @@ bind_views:
       - 172.23.0.0/16
       - 172.27.0.0/16
     servers:
-      master: dns-01.services.kub3.uk
+      master: dns-01.services.n3t.uk
       slaves:
-        - name: dns-02.services.kub3.uk
+        - name: dns-02.services.n3t.uk
           algorithm: hmac-sha512
           secret: !vault |
             $ANSIBLE_VAULT;1.1;AES256
@@ -526,9 +526,9 @@ bind_views:
       - ::/0
       - 0.0.0.0/0
     servers:
-      master: dns-01.services.kub3.uk
+      master: dns-01.services.n3t.uk
       slaves:
-        - name: dns-02.services.kub3.uk
+        - name: dns-02.services.n3t.uk
           algorithm: hmac-sha512
           secret: !vault |
             $ANSIBLE_VAULT;1.1;AES256

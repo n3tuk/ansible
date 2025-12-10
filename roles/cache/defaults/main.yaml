@@ -1,11 +1,10 @@
 ---
 # defaults file for cache
 
-cache_vhost_name: cache.s.cym-south-1.kub3.uk
+cache_vhost_name: cache.example.com
 cache_vhost_names:
-  - 1.cache.s.cym-south-1.kub3.uk
-  - 2.cache.s.cym-south-1.kub3.uk
-  - 3.cache.s.cym-south-1.kub3.uk
+  - 1.cache.example.com
+  - 2.cache.example.com
 
 cache_volume_size: 64G
 
