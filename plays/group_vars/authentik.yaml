@@ -117,13 +117,13 @@ postgresql_pg_hba_entries:
     database: "{{ authentik_postgresql_database | default('authentik') }}"
     user: "{{ authentik_postgresql_username | default('authentik') }}"
     # yamllint disable-line rule:line-length
-    address: "{{ hostvars['authentik-01.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
+    address: "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
     method: scram-sha-256
   - type: host
     database: "{{ authentik_postgresql_database | default('authentik') }}"
     user: "{{ authentik_postgresql_username | default('authentik') }}"
     # yamllint disable-line rule:line-length
-    address: "{{ hostvars['authentik-02.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
+    address: "{{ hostvars['authentik-02.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
     method: scram-sha-256
 
 postgresql_walg_enabled: true
@@ -166,10 +166,10 @@ authentik_listen_trusted_proxy_cidrs:
   # by Cloudflare or Tailscale, therefore ensure that all relevant addresses are
   # trusted.
   # yamllint disable rule:line-length
-  - "{{ hostvars['authentik-01.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
-  - "{{ hostvars['authentik-01.services.kub3.uk'].ansible_facts.default_ipv6.address }}/128"
-  - "{{ hostvars['authentik-02.services.kub3.uk'].ansible_facts.default_ipv4.address }}/32"
-  - "{{ hostvars['authentik-02.services.kub3.uk'].ansible_facts.default_ipv6.address }}/128"
+  - "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
+  - "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
+  - "{{ hostvars['authentik-02.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
+  - "{{ hostvars['authentik-02.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
   # yamllint enable rule:line-length
 
 authentik_email_from: no-reply@n3t.uk
@@ -218,7 +218,7 @@ authentik_secret_key: !vault |
   33663362653531356363363637356363336363653930633739653737353231323763376338373365
   33666466313939656333373938393130353134313661396136366230623635333761
 
-authentik_postgresql_host: authentik-01.services.kub3.uk
+authentik_postgresql_host: authentik-01.services.n3t.uk
 authentik_postgresql_username: authentik
 authentik_postgresql_password: !vault |
   $ANSIBLE_VAULT;1.1;AES256
@@ -251,7 +251,7 @@ cloudflared_tunnel_id: !vault |
   6134376634643461610a623231313032666665383166633736323137613030343839313730663466
   32383462306365336439393939326136383638393066653631333364356533626166303837636334
   3235316133383633666238323335373836316134633561303039
-cloudflared_tunnel_name: kub3-services-authentik
+cloudflared_tunnel_name: n3t-services-authentik
 cloudflared_tunnel_token: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   35393939356439396661306231303663303036393230333461623563313238613366663664393565

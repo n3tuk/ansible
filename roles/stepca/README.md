@@ -30,9 +30,9 @@ Authority certificate.
 
 Nonetheless, the underlying [Caddy][caddy] load balancer that operates on each
 node, receiving traffic from both internal and external networks, is configured
-to service traffic via `ca-01.services.kub3.uk` in the first instance. In the
+to service traffic via `ca-01.services.n3t.uk` in the first instance. In the
 event of any major issue with the first server which prevents connectivity, we
-will failover to `ca-02.services.kub3.uk`. Both Cloudflare (through Argo
+will failover to `ca-02.services.n3t.uk`. Both Cloudflare (through Argo
 Tunnels) and Tailscale (through Tailscale Services) will also automatically
 redirect their routing to the alternate server on connectivity issues as well.
 
