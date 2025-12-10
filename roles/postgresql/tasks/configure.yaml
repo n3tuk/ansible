@@ -28,3 +28,46 @@
   tags:
     - postgresql
     - configuration
+
+- name: Create directory for Lego certificates
+  ansible.builtin.file:
+    path: "{{ lego_lib_path }}/{{ postgresql_service_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  when: postgresql_tls_enabled
+  tags:
+    - postgresql
+    - lego
+    - configuration
+
+- name: Create or update the Lego configuration file
+  ansible.builtin.template:
+    src: lego.conf.jinja
+    dest: "{{ lego_etc_path }}/{{ postgresql_service_name }}.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  when: postgresql_tls_enabled
+  notify:
+    - Trigger Lego for PostgreSQL certificate renewal
+  tags:
+    - postgresql
+    - lego
+    - configuration
+
+- name: Create or update the Lego post-run hook
+  ansible.builtin.template:
+    src: lego.sh.jinja
+    dest: "{{ lego_usr_path }}/{{ postgresql_service_name }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  when: postgresql_tls_enabled
+  notify:
+    - Trigger Lego for PostgreSQL certificate renewal
+  tags:
+    - postgresql
+    - lego
+    - configuration

@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for lego
+
+- name: Install Lego
+  community.general.pacman:
+    name: "{{ lego_packages_arch }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - lego
+    - packages

@@ -19,7 +19,7 @@
     label: >-
       allow from
       {{ hostvars[host.0].ansible_facts[host.1].address }}
-      to { postgresql_port }}/tcp
+      to {{ postgresql_port }}/tcp
     loop_var: host
   tags:
     - postgresql

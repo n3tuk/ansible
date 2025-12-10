@@ -1,0 +1,13 @@
+---
+# vars file for lego
+
+# This is fixed as it is a required port for HTTP-01 challenge
+lego_listen_http: 80
+
+lego_packages_arch:
+  - lego
+
+lego_srv_path: /srv/http/lego
+lego_etc_path: /etc/lego
+lego_lib_path: /var/lib/lego
+lego_usr_path: /usr/lib/lego

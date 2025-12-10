@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+
+set -euo pipefail
+
+# Ensure required environment variables are set
+: "${LEGO_CERT_PATH:?LEGO_CERT_PATH must be set}"
+: "${LEGO_CERT_KEY_PATH:?LEGO_CERT_KEY_PATH must be set}"
+
+# Check if certificate files exist
+if [[ ! -f "${LEGO_CERT_PATH}" || ! -f "${LEGO_CERT_KEY_PATH}" ]]; then
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [ERROR] Certificate files not found. Cannot continue." >&2
+  exit 1
+fi
+
+for cert in \
+  "${LEGO_CERT_PATH}={{ postgresql_data_path }}/server.crt" \
+  "${LEGO_CERT_KEY_PATH}={{ postgresql_data_path }}/server.key"; do
+  tmp="${cert/*=/}.tmp.${$}"
+
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Copying ${cert/=*/} to ${cert/*=/} (via ${tmp})"
+
+  cp "${cert/=*/}" "${tmp}"
+  chown "postgres:postgres" "${tmp}"
+  chmod 0600 "${tmp}"
+  mv -f "${tmp}" "${cert/*=/}"
+done
+
+echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Reloading the PostgreSQL service ({{ postgresql_service_name }}.service)"
+
+systemctl reload "{{ postgresql_service_name }}.service"

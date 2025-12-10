@@ -1,0 +1,57 @@
+---
+# configuration-specific tasks file for lego
+
+- name: Create the Lego system directories
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  loop:
+    - "{{ lego_etc_path }}"
+    - "{{ lego_lib_path }}"
+    - "{{ lego_usr_path }}"
+    - "{{ lego_srv_path }}"
+  loop_control:
+    label: "{{ directory }}"
+    loop_var: directory
+  tags:
+    - lego
+    - configuration
+
+- name: Create or update the Lego run script
+  ansible.builtin.template:
+    src: run.sh.jinja
+    dest: "{{ lego_usr_path }}/run"
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  tags:
+    - lego
+    - configuration
+
+- name: Create or update the Lego defaults configuration
+  ansible.builtin.template:
+    src: defaults.conf.jinja
+    dest: "{{ lego_etc_path }}/defaults.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  tags:
+    - lego
+    - configuration
+
+- name: Create or update the Lego Caddy override
+  ansible.builtin.template:
+    src: Caddyfile.jinja
+    dest: "{{ caddy_config_path }}/{{ caddy_config_file }}.d/acme"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rw,g=r,o=
+  when: >-
+    lego_acme_mode == "caddy"
+  tags:
+    - lego
+    - caddy
+    - configuration

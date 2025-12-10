@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+
+LEGO_CERT_DOMAINS={{ ansible_facts.fqdn }}
+{%- for address in ansible_facts.all_ipv6_addresses %}
+{%-   if address is not regex('^fe80::') %}
+ {{ address }}
+{%-   endif %}
+{%- endfor %}
+{%- for address in ansible_facts.all_ipv4_addresses %}
+{%-   if address != '127.0.0.1' %}
+ {{ address }}
+{%-   endif %}
+{%- endfor %}
+
+LEGO_RENEW_HOOK={{ lego_usr_path }}/{{ postgresql_service_name }}

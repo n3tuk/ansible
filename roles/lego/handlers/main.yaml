@@ -1,0 +1,10 @@
+---
+# handlers file for lego
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: not ansible_check_mode
+  tags:
+    - lego
+    - service

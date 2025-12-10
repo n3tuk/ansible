@@ -32,6 +32,8 @@ authentik_email_use_ssl: false
 authentik_email_username: ""
 authentik_email_password: ""
 
+authentik_ssl_path: ""
+
 authentik_postgresql_manager: false
 authentik_postgresql_host: localhost
 authentik_postgresql_port: 5432
@@ -42,6 +44,8 @@ authentik_postgresql_conn_max_age: 0
 authentik_postgresql_conn_health_checks: true
 
 authentik_postgresql_ssl_mode: disable
-authentik_postgresql_ssl_root_cert: /etc/ssl/certs/ca.crt
-authentik_postgresql_ssl_cert:
-authentik_postgresql_ssl_key:
+# NOTE: This must be relative to the container's filesystem, not the host's
+#       filesystem. authentik_ssl_path can be used to mount a certificate
+#       directory in to the container, and you can use that path here (but
+#       prefixed with /certs)
+authentik_postgresql_ssl_root_cert: /certs/cert.pem

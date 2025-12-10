@@ -1,0 +1,9 @@
+---
+# defaults file for lego
+
+lego_acme_mode: standalone
+lego_acme_server: https://acme-v02.api.letsencrypt.org/directory
+lego_acme_email: admin@{{ ansible_facts.fqdn | default('localhost') }}
+lego_acme_servers_group: ca
+
+lego_cert_key_type: ec384

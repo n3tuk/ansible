@@ -20,6 +20,9 @@ ExecStart=/usr/bin/podman run \
   --sdnotify=conmon \
   --detach \
   --network=host \
+{% if authentik_ssl_path is defined and authentik_ssl_path != '' %}
+  --volume {{ authentik_ssl_path }}:/certs:ro \
+{% endif %}
   --env-file=/etc/default/{{ authentik_service_prefix }} \
   {{ authentik_image }}:{{ authentik_version }} worker
 ExecStop=/usr/bin/podman stop \

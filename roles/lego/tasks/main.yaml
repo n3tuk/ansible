@@ -1,0 +1,32 @@
+---
+# tasks file for lego
+
+- name: Run pre-flight checks
+  ansible.builtin.include_tasks:
+    file: pre-flight.yaml
+
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
+  when: >-
+    ansible_facts.distribution == 'Archlinux'
+
+- name: Configure the Lego firewall rules
+  ansible.builtin.include_tasks:
+    file: firewall.yaml
+  when: >-
+    groups[lego_acme_servers_group] | default([]) | length > 0
+  loop: >-
+    {{ groups[lego_acme_servers_group] | unique
+       | difference([inventory_hostname]) }}
+  loop_control:
+    label: "{{ host }}"
+    loop_var: host
+
+- name: Configure the Lego service
+  ansible.builtin.include_tasks:
+    file: configure.yaml
+
+- name: Set up the Lego service
+  ansible.builtin.include_tasks:
+    file: service.yaml

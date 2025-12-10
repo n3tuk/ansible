@@ -98,6 +98,19 @@ filesystems_logical_volumes:
     mount_opts:
       - nosuid
 
+lego_acme_email: admin@n3t.uk
+lego_acme_server: https://ca.n3t.uk/acme/n3tuk/directory
+lego_acme_servers_group: ca
+# Caddy is used to serve HTTP and HTTPS requests for Authentik, therefore we
+# must configure Lego to use Caddy for ACME certificate management, and set
+# Caddy to disable automatic HTTPS redirects as we must serve these files via
+# HTTP only
+lego_acme_mode: caddy
+caddy_auto_https: disable_redirects
+
+postgresql_tls_enabled: true
+postgresql_tls_ca_crt: /etc/ssl/private/n3tuk-ca-root-r1.pem
+
 postgresql_replication_hosts: "{{ groups['authentik'] | default([]) }}"
 postgresql_replication_username: replicator
 postgresql_replication_password: !vault |
@@ -113,13 +126,13 @@ postgresql_replication_password: !vault |
   65626364346332303134393034393237313236373434386565313430653235366335
 
 postgresql_pg_hba_entries:
-  - type: host
+  - type: hostssl
     database: "{{ authentik_postgresql_database | default('authentik') }}"
     user: "{{ authentik_postgresql_username | default('authentik') }}"
     # yamllint disable-line rule:line-length
     address: "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
     method: scram-sha-256
-  - type: host
+  - type: hostssl
     database: "{{ authentik_postgresql_database | default('authentik') }}"
     user: "{{ authentik_postgresql_username | default('authentik') }}"
     # yamllint disable-line rule:line-length
@@ -218,7 +231,12 @@ authentik_secret_key: !vault |
   33663362653531356363363637356363336363653930633739653737353231323763376338373365
   33666466313939656333373938393130353134313661396136366230623635333761
 
+authentik_ssl_path: /etc/ssl/private
+
 authentik_postgresql_host: authentik-01.services.n3t.uk
+authentik_postgresql_ssl_mode: verify-full
+# This is relative to the container's filesystem, not the host's filesystem
+authentik_postgresql_ssl_root_cert: /certs/n3tuk-ca-root-r1.pem
 authentik_postgresql_username: authentik
 authentik_postgresql_password: !vault |
   $ANSIBLE_VAULT;1.1;AES256

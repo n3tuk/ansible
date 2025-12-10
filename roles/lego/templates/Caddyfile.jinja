@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+# This Caddyfile is used solely for serving the ACME HTTP-01 challenge responses
+# back to the internal ACME server running as part of the step-ca service. It
+# explicitly only services the .well-known/acme-challenge/ path, and requires
+# that auto_https be set to disable_redirects to work correctly.
+
+:80 {
+  handle /.well-known/acme-challenge/* {
+    root * {{ lego_srv_path }}
+    file_server
+  }
+}

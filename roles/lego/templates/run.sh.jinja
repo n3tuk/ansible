@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+
+set -ueo pipefail
+
+LEGO_CERT_GROUP=${1:-localhost}
+
+# Extract the ACME server domain (i.e. strip protocol and path) and the first
+# domain from the LEGO_DOMAINS variable
+LEGO_ACME_SERVER_DOMAIN=$(echo "${LEGO_ACME_SERVER}" | sed -E 's~^[a-zA-Z]+://~~' | cut -d/ -f1)
+LEGO_CERT_FIRST_DOMAIN=$(echo "${LEGO_CERT_DOMAINS}" | awk '{print $1}')
+
+# Pre-set the list of domains provided in to arguments for Lego
+LEGO_CERT_DOMAIN_ARGS=""
+for domain in ${LEGO_CERT_DOMAINS}; do
+  if [[ -n "${LEGO_CERT_DOMAIN_ARGS}" ]]; then
+    LEGO_CERT_DOMAIN_ARGS+=" "
+  fi
+  LEGO_CERT_DOMAIN_ARGS+="--domains ${domain}"
+done
+
+# Test that the account has been set up and the initial certificate obtained,
+# and if not, we'll need to complete the initial run rather than a renewal
+if [[ ! -f "{{ lego_lib_path }}/${LEGO_CERT_GROUP}/accounts/${LEGO_ACME_SERVER_DOMAIN}/${LEGO_ACME_EMAIL}/account.json" ||
+  ! -f "{{ lego_lib_path }}/${LEGO_CERT_GROUP}/certificates/${LEGO_CERT_FIRST_DOMAIN}.crt" ]]; then
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Creating new certificate for ${LEGO_CERT_GROUP} (${LEGO_CERT_DOMAINS// /, /})"
+  /usr/bin/lego \
+    --accept-tos --email "${LEGO_ACME_EMAIL}" \
+    --path "/var/lib/lego/${LEGO_CERT_GROUP}" \
+    --server "${LEGO_ACME_SERVER}" \
+    --key-type "${LEGO_CERT_KEY_TYPE}" \
+    --http --http.${LEGO_ACME_MODE} \
+    ${LEGO_CERT_DOMAIN_ARGS} \
+    run --run-hook="${LEGO_RENEW_HOOK}"
+else
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Renewing certificate for ${LEGO_CERT_GROUP} (${LEGO_CERT_DOMAINS// /, /})"
+  /usr/bin/lego \
+    --accept-tos --email "${LEGO_ACME_EMAIL}" \
+    --path "/var/lib/lego/${LEGO_CERT_GROUP}" \
+    --server "${LEGO_ACME_SERVER}" \
+    --key-type "${LEGO_CERT_KEY_TYPE}" \
+    --http --http.${LEGO_ACME_MODE} \
+    ${LEGO_CERT_DOMAIN_ARGS} \
+    renew --days 2 \
+    --no-random-sleep \
+    --renew-hook="${LEGO_RENEW_HOOK}"
+fi

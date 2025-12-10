@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+
+LEGO_ACME_SERVER={{ lego_acme_server }}
+LEGO_ACME_EMAIL={{ lego_acme_email }}
+
+LEGO_CERT_PATH={{ lego_lib_path }}
+LEGO_CERT_DOMAINS={{ ansible_facts.fqdn }}
+LEGO_CERT_KEY_TYPE={{ lego_cert_key_type }}
+
+{% if lego_acme_mode == 'caddy' %}
+LEGO_ACME_MODE=webroot={{ lego_srv_path }}
+{% else %}
+LEGO_ACME_MODE=port={{ lego_listen_http }}
+{% endif %}
+
+LEGO_RENEW_HOOK=

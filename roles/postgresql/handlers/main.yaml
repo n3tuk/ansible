@@ -12,3 +12,9 @@
     name: "{{ postgresql_service_name }}.service"
     state: reloaded
   when: not ansible_check_mode
+
+- name: Trigger Lego for PostgreSQL certificate renewal
+  ansible.builtin.systemd:
+    name: "lego@{{ postgresql_service_name }}.service"
+    state: started
+  when: not ansible_check_mode
