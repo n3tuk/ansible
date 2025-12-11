@@ -30,7 +30,8 @@ certs.{{ stepca_public_hostname }}:80 {
 certs.{{ stepca_public_hostname }}:443 {
   tls {
     issuer acme {
-      dir https://[::1]:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      dir https://{{ stepca_public_hostname }}:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      disable_tlsalpn_challenge
       trusted_roots "{{ stepca_acme_trusted_roots }}"
       email {{ caddy_acme_email }}
     }
@@ -84,7 +85,8 @@ c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}:80 {
 c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}:443 {
   tls {
     issuer acme {
-      dir https://[::1]:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      dir https://{{ stepca_public_hostname }}:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      disable_tlsalpn_challenge
       trusted_roots "{{ stepca_acme_trusted_roots }}"
       email {{ caddy_acme_email }}
     }
@@ -101,7 +103,8 @@ c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}:443 {
 {{ stepca_public_hostname }}:443 {
   tls {
     issuer acme {
-      dir https://[::1]:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      dir https://{{ stepca_public_hostname }}:{{ stepca_listen_https }}/acme/{{ stepca_acme_provisioner_name }}/directory
+      disable_tlsalpn_challenge
       trusted_roots "{{ stepca_acme_trusted_roots }}"
       email {{ caddy_acme_email }}
     }
@@ -128,7 +131,9 @@ c{{ stepca_intermediate_ca_id }}.{{ stepca_public_hostname }}:443 {
     transport http {
       # The step-ca service uses mTLS for all connections, so ensure we use root
       # certificate as the Certificate Authority for the proxied connections
-      tls_trusted_ca_certs "{{ stepca_srv_path }}/r1.crt"
+      tls_trust_pool file {
+        pem_file "{{ stepca_srv_path }}/r1.crt"
+      }
     }
 
     trusted_proxies {{ stepca_listen_trusted_proxy_cidrs | join(' ') }}
