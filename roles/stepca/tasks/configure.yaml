@@ -74,7 +74,9 @@
   become: true
   become_user: "{{ postgresql_service_user }}"
   when: >-
-    not ansible_check_mode
+    not ansible_check_mode and
+    stepca_postgresql_manager is defined and
+    stepca_postgresql_manager
 
 - name: Create the step-ca database in PostgreSQL
   community.postgresql.postgresql_db:
@@ -85,4 +87,6 @@
   become: true
   become_user: "{{ postgresql_service_user }}"
   when: >-
-    not ansible_check_mode
+    not ansible_check_mode and
+    stepca_postgresql_manager is defined and
+    stepca_postgresql_manager

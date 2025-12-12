@@ -16,7 +16,7 @@ host all all {{ ansible_facts.default_ipv6.address }}/128 scram-sha-256
 # Allowed remote connections for database access
 {%    for entry in postgresql_pg_hba_entries %}
 {%      if entry.comment is defined %}# {{ entry.comment }}{% endif -%}
-{{ 'host' if entry.type == 'host' else 'hostssl' }} {{ entry.database | default('template0') }} {{ entry.user }} {{ entry.address | default('127.0.0.1/32') }} {{ entry.method | default('scram-sha-256') }}
+{{ 'host' if entry.type == 'host' and not postgresql_tls_enabled else 'hostssl' }} {{ entry.database | default('template0') }} {{ entry.user }} {{ entry.address | default('127.0.0.1/32') }} {{ entry.method | default('scram-sha-256') }}
 {%    endfor %}
 {%  endif %}
 {%  if postgresql_replication_hosts | length > 0 %}
