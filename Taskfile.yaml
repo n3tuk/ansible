@@ -146,7 +146,61 @@ tasks:
           done
 
   play:bootstrap:
-    desc: Run the {{ name }} Ansible Playbook
+    desc: Run the bootstrap Ansible Playbook
+    summary: |-
+      Run the bootstrap Ansible Playbook from within the plays/ directory.
+
+      This will first perform a syntax check on the playbook to ensure it is
+      valid, and then run it against the hosts defined within the playbook.
+      Ansible can be limited to execution on those hosts defined by the
+      `--limit` parameter (by passing the argument limit={{ .limit }}), which
+      defaults to `all`.
+
+      $ task play:bootstrap limit=arch
+
+      NOTE: The bootstrap playbook is intended to be used only during the
+            initial installation of a host, or when re-installing it. Hosts must
+            be explicitly added to the `bootstrap` inventory group, and do not
+            keep hosts within the `bootstrap` inventory group except during
+            these times, as running the bootstrap playbook against a configured
+            host may result in data loss or misconfiguration.
+    silent: true
+    deps:
+      - task: jsonschema:ansible
+    env:
+      ANSIBLE_FORCE_COLOR: true
+    cmds:
+      - cmd: |-
+          ansible-playbook \
+            --syntax-check \
+            plays/bootstrap.yaml
+          echo -e '{{ .cg }}Checked{{ .cc }}'
+      - cmd: |-
+          ansible-playbook \
+            --limit {{ .limit }} \
+            --ask-pass \
+            plays/bootstrap.yaml
+
+  test:bootstrap:
+    desc: Test the bootstrap Ansible Playbook in check mode
+    summary: |-
+      Run the bootstrap Ansible Playbook from within the plays/ directory in
+      check mode, without making any changes.
+
+      This will first perform a syntax check on the playbook to ensure it is
+      valid, and then run it against the hosts defined within the playbook in
+      check and diff mode. Ansible can be limited to execution on those hosts
+      defined by the `--limit` parameter (by passing the argument limit={{
+      .limit }}), which defaults to `all`.
+
+      $ task test:bootstrap limit=arch
+
+      NOTE: The bootstrap playbook is intended to be used only during the
+            initial installation of a host, or when re-installing it. Hosts must
+            be explicitly added to the `bootstrap` inventory group, and do not
+            keep hosts within the `bootstrap` inventory group except during
+            these times, as running the bootstrap playbook against a configured
+            host may result in data loss or misconfiguration.
     silent: true
     deps:
       - task: jsonschema:ansible
@@ -174,10 +228,10 @@ tasks:
       $ task play:baseline
 
       This will first perform a syntax check on the playbook to ensure it is
-      valid, and then run it against the hosts defined within the playbook in
-      check mode. Ansible can be limited to execution on those hosts defined by
-      the `--limit` parameter (by passing the argument limit={{ .limit }}),
-      which defaults to `all`.
+      valid, and then run it against the hosts defined within the playbook.
+      Ansible can be limited to execution on those hosts defined by the
+      `--limit` parameter (by passing the argument limit={{ .limit }}), which
+      defaults to `all`.
 
       $ task play:baseline limit=arch
 
@@ -227,9 +281,9 @@ tasks:
 
       This will first perform a syntax check on the playbook to ensure it is
       valid, and then run it against the hosts defined within the playbook in
-      check mode. Ansible can be limited to execution on those hosts defined by
-      the `--limit` parameter (by passing the argument limit={{ .limit }}),
-      which defaults to `all`.
+      check and diff mode. Ansible can be limited to execution on those hosts
+      defined by the `--limit` parameter (by passing the argument limit={{
+      .limit }}), which defaults to `all`.
 
       All tasks will be dry-run in diff mode to show what changes would be made
       without making any changes.
