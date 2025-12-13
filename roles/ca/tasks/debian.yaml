@@ -1,0 +1,26 @@
+---
+# debian-specific tasks file for ca
+
+- name: Check this role is not being run under bootstrap_mount_base
+  ansible.builtin.fail:
+    msg: |
+      This role does not support being run when bootstrapping hosts with
+      `bootstrap_mount_base`. Failing.
+  when: >-
+    bootstrap_mount_base | default('') | length > 0
+  tags:
+    - ca
+    - pre-flight
+
+- name: Copy the n3t.uk Certificate Authority R1 certificate
+  ansible.builtin.copy:
+    src: n3tuk-ca-root-r1.pem
+    dest: "{{ ca_root_path.debian }}/{{ ca_root_file.debian }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Install n3t.uk CA Root R1 with update-ca-certificates
+  tags:
+    - ca
+    - configuration
