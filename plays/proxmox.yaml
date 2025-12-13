@@ -1,6 +1,6 @@
 ---
 - name: Configure Proxmox Hosts
-  hosts: proxmox
+  hosts: proxmox:manager
   become: true
   become_user: root
   roles:

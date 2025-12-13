@@ -1,5 +1,5 @@
 ---
-# vars file for networking
+# vars file for proxmox/networking
 
 networking_packages_debian:
   - lldpd

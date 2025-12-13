@@ -1,5 +1,5 @@
 ---
-# frr-specific tasks for networking role
+# frr-specific tasks for proxmox/networking role
 
 # Enable FRR daemons
 

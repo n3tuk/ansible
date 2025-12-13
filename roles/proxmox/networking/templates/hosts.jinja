@@ -3,9 +3,14 @@
 127.0.0.1 localhost
 ::1 localhost
 
-{% for host in groups[env_name] | sort %}
-{%   if host in groups['proxmox'] %}
+{% if proxmox_node_type == 'cluster' %}
+{%   for host in groups[env_name] %}
+{%     if host in (groups['proxmox'] | sort) %}
 {{ hostvars[host].ansible_facts.default_ipv4.address }} {{ hostvars[host].ansible_facts.fqdn }} {{ hostvars[host].ansible_facts.hostname }}
 {{ hostvars[host].ansible_facts.default_ipv6.address }} {{ hostvars[host].ansible_facts.fqdn }} {{ hostvars[host].ansible_facts.hostname }}
-{%   endif %}
-{% endfor %}
+{%     endif %}
+{%   endfor %}
+{% else %}
+{{ ansible_facts.default_ipv4.address }} {{ ansible_facts.fqdn }} {{ ansible_facts.hostname }}
+{{ ansible_facts.default_ipv6.address }} {{ ansible_facts.fqdn }} {{ ansible_facts.hostname }}
+{% endif %}

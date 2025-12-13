@@ -8,14 +8,16 @@ high-speed network between nodes.
 
 ## Requirements
 
-This role can only run on Debian-based systems, specifically Proxmox VE hosts.
+This role can only run on Debian-based systems, specifically Proxmox VE hosts,
+or Proxmox Datacenter Manager virtual machines.
 
 ## Role Variables
 
-| Variable                          | Default                | Description                                                                                                          |
-| :-------------------------------- | :--------------------- | :------------------------------------------------------------------------------------------------------------------- |
-| `networking_loopback_address`     | `fc00::1`              | The IPv6 loopback address to assign to the `lo` interface to be used for Proxmox and Ceph inter-node communications. |
-| `networking_openfabric_router_id` | `49.0000.0000.0001.00` | The OpenFabric Router ID to assign to this Proxmox Node for sharing routes between nodes.                            |
+| Variable                          | Default                | Description                                                                                                                       |
+| :-------------------------------- | :--------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| `proxmox_node_type`               | `""`                   | The type of Proxmox Node being configured, either `cluster` (a Proxmox VE Node) or `manager` (a Proxmox Datacenter Manager Node). |
+| `networking_loopback_address`     | `fc00::1`              | The IPv6 loopback address to assign to the `lo` interface to be used for Proxmox and Ceph inter-node communications.              |
+| `networking_openfabric_router_id` | `49.0000.0000.0001.00` | The OpenFabric Router ID to assign to this Proxmox Node for sharing routes between nodes.                                         |
 
 ## Dependencies
 
@@ -29,5 +31,5 @@ None.
   hosts: all
   remote_user: root
   roles:
-    - role: networking
+    - role: proxmox/networking
 ```

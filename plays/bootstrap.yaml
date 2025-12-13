@@ -41,7 +41,7 @@
     - role: ssh
 
 - name: Bootstrap new Proxmox machines
-  hosts: bootstrap:&proxmox
+  hosts: bootstrap:&debian
   remote_user: root
   roles:
     - role: proxmox/networking

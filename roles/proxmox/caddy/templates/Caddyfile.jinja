@@ -1,17 +1,23 @@
 # {{ ansible_managed }}
 
-proxmox.{{ env_name }}.kub3.uk {
+{{ 'manager' if proxmox_node_type == 'manager' else 'proxmox' }}.{{ ansible_facts.domain }} {
 {% if caddy_acme_cloudflare_enabled %}
   tls {
     dns cloudflare {{ caddy_acme_cloudflare_api_token }}
-    resolvers 1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001
+    resolvers {{ caddy_tls_resolvers | join(" ") }}
   }
 
 {% endif %}
   reverse_proxy
 {%- for host in groups[env_name] %}
-{%-   if host in groups['proxmox'] %}
+{%-   if proxmox_node_type == 'cluster' %}
+{%-     if host in groups['proxmox'] | sort %}
  [{{ hostvars[host].ansible_facts.default_ipv6.address }}]:8006
+{%-     endif %}
+{%-   else %}
+{%-     if host in groups['manager'] | sort %}
+ [{{ hostvars[host].ansible_facts.default_ipv6.address }}]:8443
+{%-     endif %}
 {%-   endif %}
 {%- endfor %} {
     transport http {
@@ -42,7 +48,7 @@ proxmox.{{ env_name }}.kub3.uk {
   }
 
 {% endif %}
-  reverse_proxy [{{ ansible_facts.default_ipv6.address }}]:8006 {
+  reverse_proxy [{{ ansible_facts.default_ipv6.address }}]:{{ '8006' if proxmox_node_type == 'cluster' else '8443' }} {
     transport http {
       tls_insecure_skip_verify
     }

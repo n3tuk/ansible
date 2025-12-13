@@ -1,5 +1,5 @@
 ---
-# grub-specific tasks for networking role
+# grub-specific tasks for proxmox/networking role
 
 - name: Enable IOMMU via Grub
   ansible.builtin.lineinfile:

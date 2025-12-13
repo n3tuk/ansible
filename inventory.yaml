@@ -7,6 +7,7 @@ all:
     ca:
     cache:
     netdata:
+    manager:
 
 development:
   hosts:
@@ -21,11 +22,16 @@ services:
     ca:
     cache:
     netdata:
+    manager:
 
 proxmox:
   hosts:
     proxmox-[01:03].development.kub3.uk:
     proxmox-[01:02].services.n3t.uk:
+
+manager:
+  hosts:
+    manager-01.services.n3t.uk:
 
 authentik:
   hosts:
@@ -58,6 +64,7 @@ arch:
 debian:
   children:
     proxmox:
+    manager:
 
 bootstrap:
   # WARNING: Do not keep any hosts in this group except during initial
@@ -76,6 +83,7 @@ virtual:
     ca:
     cache:
     netdata:
+    manager:
 
 physical:
   children:
