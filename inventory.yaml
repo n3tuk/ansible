@@ -11,7 +11,7 @@ all:
 
 development:
   hosts:
-    proxmox-[01:03].development.kub3.uk:
+    proxmox-[01:03].development.n3t.uk:
 
 services:
   hosts:
@@ -26,7 +26,7 @@ services:
 
 proxmox:
   hosts:
-    proxmox-[01:03].development.kub3.uk:
+    proxmox-[01:03].development.n3t.uk:
     proxmox-[01:02].services.n3t.uk:
 
 manager:
