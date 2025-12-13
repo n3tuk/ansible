@@ -9,4 +9,4 @@
 - name: Config users and groups locally
   ansible.builtin.include_tasks:
     file: local.yaml
-  when: not bootstrap_mount_base | default('') | length == 0
+  when: bootstrap_mount_base | default('') | length == 0
