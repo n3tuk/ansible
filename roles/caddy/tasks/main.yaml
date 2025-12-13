@@ -147,6 +147,12 @@
     proto: tcp
     port: 80,443
     comment: Allow HTTP(S) for Caddy
+  # UFW is only available on Arch Linux virtual machines
+  when: >-
+    ansible_facts.distribution == 'Archlinux'
+  tags:
+    - caddy
+    - firewall
 
 - name: Start and enable Caddy service
   ansible.builtin.systemd:

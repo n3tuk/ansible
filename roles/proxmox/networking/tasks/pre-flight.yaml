@@ -1,0 +1,42 @@
+---
+# pre-flight specific tasks file for proxmox/networking
+
+- name: Check this role is not being run under bootstrap conditions
+  ansible.builtin.fail:
+    msg: |
+      This role does not support being run when bootstrapping hosts using
+      bootstrap_mount_base. Failing.
+  when: >-
+    bootstrap_mount_base | default('') | length > 0
+  tags:
+    - proxmox
+    - networking
+    - pre-flight
+
+- name: Check for supported distributions
+  ansible.builtin.fail:
+    msg: >-
+      This Ansible role is intended to run on Debian-based systems only as it is
+      explicitly to configure Proxmox networking only.
+  when: >-
+    not ansible_facts.distribution == 'Debian'
+  tags:
+    - proxmox
+    - networking
+    - pre-flight
+
+- name: Check values for proxmox_node_type
+  ansible.builtin.fail:
+    msg: >-
+      The proxmox_node_type variable must be set to either 'cluster' (a Proxmox
+      VE Node in either standalone or cluster setup) or 'manager' (a Proxmox
+      Datacenter Manager Node).
+  when: >-
+    not (
+      proxmox_node_type is defined and
+      proxmox_node_type in ['cluster', 'manager']
+    )
+  tags:
+    - proxmox
+    - networking
+    - pre-flight

@@ -5,6 +5,7 @@ iface lo inet loopback
 
 # Ethernet Network Interfaces
 
+{% if proxmox_node_type == 'cluster' %}
 iface enp86s0 inet manual
   mtu 9000
 
@@ -23,6 +24,18 @@ iface vmbr0 inet static
 iface vmbr0 inet6 static
   address {{ device_ipv6_address }}
   gateway {{ device_ipv6_gateway }}
+{% else %}
+auto nic0
+iface nic0 inet static
+  address {{ device_ipv4_address }}
+  gateway {{ device_ipv4_gateway }}
+  mtu 9000
+
+iface nic0 inet6 static
+  address {{ device_ipv6_address }}
+  gateway {{ device_ipv6_gateway }}
+{% endif %}
+{% if proxmox_node_type == 'cluster' %}
 
 # Dummy Interface
 
@@ -51,5 +64,6 @@ iface ent1 inet static
 #25GbE Thunderbolt
 
 iface ent1 inet6 static
+{% endif %}
 
 source /etc/network/interfaces.d/*

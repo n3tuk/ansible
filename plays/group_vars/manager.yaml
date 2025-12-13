@@ -1,5 +1,5 @@
 ---
-env_purpose: proxmox-node
+env_purpose: proxmox-datacenter-manager
 
 users_root:
   # Keep the root user using bash to ensure that inter-node commands work under
@@ -17,7 +17,7 @@ users_users:
 
 filesystems_physical_drives: []
 
-proxmox_node_type: cluster
+proxmox_node_type: manager
 
 # Login via root over SSH is required for Proxmox clustering
 ssh_server_permit_root_login: prohibit-password

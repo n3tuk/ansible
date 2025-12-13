@@ -4,6 +4,9 @@
 bash_packages:
   - bash
   - bash-completion
+  - eza
+  - fzf
+  - bat
 
 bash_config_dirs:
   - root

@@ -18,3 +18,9 @@
   when: >
     not ansible_check_mode and
     (bootstrap_mount_base | default('') | length == 0)
+
+- name: Install n3t.uk CA Root R1 with update-ca-certificates
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: update-ca-certificates
+  when: >
+    not ansible_check_mode

@@ -1,20 +1,24 @@
 ---
-# tasks file for networking
+# tasks file for proxmox/networking
 
-- name: Check role is bring run on Debian only
-  ansible.builtin.fail:
-    msg: >-
-      This Ansible role is intended to run on Debian-based systems only as it is
-      explicitly to configure Proxmox networking only.
-  when: ansible_facts['os_family'] != 'Debian'
+- name: Run pre-flight checks
+  ansible.builtin.include_tasks:
+    file: pre-flight.yaml
 
 - name: Configure Grub
   ansible.builtin.include_tasks:
     file: grub.yaml
+  when: proxmox_node_type == 'cluster'
 
 - name: Configure sysctl settings
   ansible.builtin.include_tasks:
     file: sysctl.yaml
+  when: proxmox_node_type == 'cluster'
+
+- name: Configure Thunderbolt Interfaces
+  ansible.builtin.include_tasks:
+    file: thunderbolt.yaml
+  when: proxmox_node_type == 'cluster'
 
 - name: Configure Debian Networking
   ansible.builtin.include_tasks:
@@ -23,3 +27,4 @@
 - name: Configure FRR daemon
   ansible.builtin.include_tasks:
     file: frr.yaml
+  when: proxmox_node_type == 'cluster'
