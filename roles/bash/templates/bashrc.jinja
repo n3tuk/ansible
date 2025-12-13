@@ -1,19 +1,44 @@
 # {{ ansible_managed }}
 # ~/.bashrc
 
-# If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
+shopt -s histappend
+
+HISTCONTROL=ignoreboth
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+shopt -s checkwinsize
+shopt -s globstar
+
+if test -x /usr/bin/dircolors; then
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  alias ls='ls --color=auto'
+  alias dir='dir --color=auto'
+  alias vdir='vdir --color=auto'
+
+  alias grep='grep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  alias egrep='egrep --color=auto'
+fi
+
+if test -x /usr/bin/eza; then
+  alias la='eza --all --long --bytes --color-scale-mode gradient --smart-group --group-directories-first --time-style relative --git --icons --no-quotes'
+  alias ll='eza --long --bytes --color-scale-mode gradient --smart-group --group-directories-first --time-style relative --git --icons --no-quotes'
+  alias ls='eza --across --group-directories-first --icons --no-quotes'
+  alias tree='eza --tree --long --bytes --color-scale-mode gradient --smart-group --group-directories-first --time-style relative --git --icons --no-quotes'
+fi
 
 PS1='[\u@\h \W]\$ '
 if test -x /usr/bin/starship; then
   eval "$(starship init bash)"
 fi
 
-EDITOR=/usr/bin/nvim
-export EDITOR
+if test -x /usr/bin/fzf; then
+  [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+fi
 
-export HISTFILESIZE=500
-shopt -s histappend
+if test -x /usr/bin/bat; then
+  alias cat='bat --paging=never'
+fi
