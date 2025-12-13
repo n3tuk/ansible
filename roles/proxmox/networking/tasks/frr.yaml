@@ -18,9 +18,9 @@
   ansible.builtin.template:
     src: frr.conf.jinja
     dest: /etc/frr/{{ config }}
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
+    owner: frr
+    group: frr
+    mode: u=rw,g=r,o=
   loop:
     - frr.conf
     - frr.conf.local
