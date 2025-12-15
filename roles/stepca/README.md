@@ -323,6 +323,33 @@ Slot 83 (RETIRED2):
 
 All the keys are now ready to use for the `step-ca` service on each server.
 
+## Bootstrapping PostgreSQL TLS connections
+
+The encryption of the connections between PostgreSQL instances, and `step-ca`
+and PostgreSQL are managed by `step-ca` itself. This creates a bootstrapping
+situation, where the database cannot be started until `step-ca` is running, but
+`step-ca` cannot start until it can connect to the database.
+
+Therefore, if `step-ca` needs to be recreated from scratch, a number of steps
+must be completed first:
+
+1. Temporarily disable TLS connections in PostgreSQL by setting
+   `postgresql_tls_enabled: false` for the hosts of the applicable group, and
+   ensure that `postgresql_tls_bootstrap` is set to `true` to allow Lego to
+   source the certificate for PostgreSQL.
+1. Ensure that all `pg_hba.conf` entries for the `step-ca` PostgreSQL user are
+   set to the `host` connection type, and not `hostssl`. (Normally they can be
+   left as `host`, and `postgresql_tls_enabled`, when enabled, will
+   automatically upgrade them to `hostssl` to force TLS-terminated connections.)
+1. Run the playbook to create the PostgreSQL user and database for `step-ca` and
+   to deploy `step-ca`. If it is fully operational, Caddy should self-serve its
+   own TLS certificates through `step-ca`.
+1. Re-add, if removed, or not yet set, the `lego` role to the playbook to allow
+   it to obtain TLS certificates for PostgreSQL once more. Verify that
+   `server.crt` and `server.key` are present is in the PostgreSQL data
+   directory.
+1. Re-enable `postgresql_tls_enabled` for the hosts of the applicable group.
+
 ## Requirements
 
 None other than the Ansible Role.

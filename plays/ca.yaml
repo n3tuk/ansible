@@ -1,18 +1,32 @@
 ---
-- name: Configure Certificate Authority Hosts
+- name: Configure Certificate Authority hosts
   hosts: ca
   become: true
   become_user: root
+
+  # Each CA node must know about the configuration of all other CA nodes, so
+  # force the gathering of facts for all nodes, regardless of any limits set
+  pre_tasks:
+    - name: Gather facts from Certificate Authority hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: hostvars[item].ansible.default_ipv4 is not defined
+      with_items: "{{ groups['ca'] }}"
+
   roles:
     - role: ufw
       tags:
         - ufw
-    - role: postgresql
-      tags:
-        - postgresql
     - role: caddy
       tags:
         - caddy
+    - role: lego
+      tags:
+        - lego
+    - role: postgresql
+      tags:
+        - postgresql
     - role: stepca
       tags:
         - step-ca

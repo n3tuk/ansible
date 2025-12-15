@@ -2,9 +2,6 @@
 postgresql_replication_role: standby
 postgresql_replication_primary: ca-01.services.n3t.uk
 
-stepca_postgresql_host: >-
-  {{ ansible_facts.default_ipv6.address }}
-
 stepca_yubikey_serial: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   64356233336132386130643433633962373464326439353032323766323830316366346263336532

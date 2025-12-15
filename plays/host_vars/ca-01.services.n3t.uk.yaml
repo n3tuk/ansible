@@ -1,8 +1,6 @@
 ---
 postgresql_replication_role: primary
 
-stepca_postgresql_host: >-
-  {{ ansible_facts.default_ipv6.address }}
 # This node will be responsible for managing the stepca database, including both
 # the user and the database itself
 stepca_postgresql_manager: true

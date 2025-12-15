@@ -1,15 +1,19 @@
 ---
-- name: Gather Facts from ACME Hosts
-  hosts: ca
-  # This play is purely to gather the facts from the ACME hosts for use in
-  # helping generate the necessary firewall rules for HTTP-01 validation in the
-  # following play
-  gather_facts: true
-
-- name: Configure Authentik Hosts
+- name: Configure Authentik nodes
   hosts: authentik
   become: true
   become_user: root
+
+  # Each Authentik node must know about the configuration of the CA nodes, in
+  # order to permit the necessary firewall rules for HTTP-01 validation
+  pre_tasks:
+    - name: Gather facts from all Certificate Authority hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: hostvars[item].ansible.default_ipv4 is not defined
+      with_items: "{{ groups['ca'] }}"
+
   roles:
     - role: ufw
       tags:
