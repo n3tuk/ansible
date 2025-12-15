@@ -17,8 +17,8 @@ stepca_postgresql_port: 5432
 stepca_postgresql_username:
 stepca_postgresql_password:
 stepca_postgresql_database: stepca
-stepca_postgresql_options:
-  - sslmode=disable
+stepca_postgresql_options: []
+stepca_postgresql_ca_cert: /etc/ssl/certs/ca-certificates.crt
 
 stepca_crl_enabled: true
 stepca_crl_cache_duration: 24h

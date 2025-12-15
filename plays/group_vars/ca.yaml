@@ -155,6 +155,8 @@ stepca_x509_allow_dns:
   - "ca.n3t.uk"
   - "*.ca.n3t.uk"
   - "*.services.n3t.uk"
+  - "*.development.n3t.uk"
+  - "*.production.n3t.uk"
   - "*.kub3.uk"
   - "*.development.kub3.uk"
   - "*.production.kub3.uk"
@@ -175,6 +177,9 @@ stepca_x509_allow_ip:
   - "fd7a:115c:a1e0::/48"
   - "100.64.0.0/10"
 
+stepca_postgresql_host: >-
+  {{ hostvars['ca-01.services.n3t.uk'].ansible_facts.default_ipv6.address }}
+stepca_postgresql_database: stepca
 stepca_postgresql_username: stepca
 stepca_postgresql_password: !vault |
   $ANSIBLE_VAULT;1.1;AES256
@@ -187,7 +192,18 @@ stepca_postgresql_password: !vault |
   35396466373132623930643466336531643637383962666264333437626563393965663361653063
   33646632316562336332663038353439333061366162323964633833646662663930626238313737
   32373639613331336364373463313639613762613866386131316466383738666432
-stepca_postgresql_database: stepca
+
+lego_acme_email: admin@n3t.uk
+lego_acme_server: https://ca.n3t.uk/acme/n3tuk/directory
+lego_acme_servers_group: ca
+lego_acme_mode: caddy
+
+# This must be disabled (and postgresql_tls_bootstrap enabled) during
+# bootstrapping step-ca to allow the initial connections to be set up without
+# TLS, after which it can be re-enabled and the database connections upgraded
+postgresql_tls_enabled: true
+stepca_postgresql_ca_cert: /etc/ssl/private/n3tuk-ca-root-r1.pem
+
 postgresql_replication_hosts: "{{ groups['ca'] | default([]) }}"
 postgresql_replication_username: replicator
 postgresql_replication_password: !vault |

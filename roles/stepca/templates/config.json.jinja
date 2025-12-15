@@ -20,7 +20,11 @@
   },
   "db": {
     "type": "postgresql",
+{% if postgresql_tls_enabled %}
+    "dataSource": "postgresql://{{ stepca_postgresql_username }}:{{ stepca_postgresql_password }}@{% if stepca_postgresql_host is ansible.utils.ipv6 %}[{{ stepca_postgresql_host }}]{% else %}{{ stepca_postgresql_host }}{% endif %}:{{ stepca_postgresql_port }}/{{ stepca_postgresql_database }}?sslmode=verify-full&sslrootcert={{ stepca_postgresql_ca_cert }}{% if stepca_postgresql_options | length > 0 %}&{{ stepca_postgresql_options | join('&') }}{% endif %}"
+{% else %}
     "dataSource": "postgresql://{{ stepca_postgresql_username }}:{{ stepca_postgresql_password }}@{% if stepca_postgresql_host is ansible.utils.ipv6 %}[{{ stepca_postgresql_host }}]{% else %}{{ stepca_postgresql_host }}{% endif %}:{{ stepca_postgresql_port }}/{{ stepca_postgresql_database }}{% if stepca_postgresql_options | length > 0 %}?{{ stepca_postgresql_options | join('&') }}{% endif %}"
+{% endif %}
   },
   "crl": {
 {%  if stepca_crl_enabled %}
