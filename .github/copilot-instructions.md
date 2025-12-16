@@ -136,8 +136,12 @@ locally.
 
 ### Missing Tools
 
-**task**: `curl -sL https://taskfile.dev/install.sh | sh && sudo mv task
-/usr/local/bin/`  
+**task**:
+
+```bash
+curl -sL https://taskfile.dev/install.sh | sh && sudo mv task /usr/local/bin/
+```
+
 **npm tools**: `npm install -g prettier markdownlint-cli`
 
 ### Expected Behaviors
