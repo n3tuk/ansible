@@ -19,29 +19,19 @@ for domain in ${LEGO_CERT_DOMAINS}; do
   LEGO_CERT_DOMAIN_ARGS+="--domains ${domain}"
 done
 
-# Test that the account has been set up and the initial certificate obtained,
-# and if not, we'll need to complete the initial run rather than a renewal
+LEGO_RENEW_TYPE="Renewing"
 if [[ ! -f "{{ lego_lib_path }}/${LEGO_CERT_GROUP}/accounts/${LEGO_ACME_SERVER_DOMAIN}/${LEGO_ACME_EMAIL}/account.json" ||
   ! -f "{{ lego_lib_path }}/${LEGO_CERT_GROUP}/certificates/${LEGO_CERT_FIRST_DOMAIN}.crt" ]]; then
-  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Creating new certificate for ${LEGO_CERT_GROUP} (${LEGO_CERT_DOMAINS// /, /})"
-  /usr/bin/lego \
-    --accept-tos --email "${LEGO_ACME_EMAIL}" \
-    --path "/var/lib/lego/${LEGO_CERT_GROUP}" \
-    --server "${LEGO_ACME_SERVER}" \
-    --key-type "${LEGO_CERT_KEY_TYPE}" \
-    --http --http.${LEGO_ACME_MODE} \
-    ${LEGO_CERT_DOMAIN_ARGS} \
-    run --run-hook="${LEGO_RENEW_HOOK}"
-else
-  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Renewing certificate for ${LEGO_CERT_GROUP} (${LEGO_CERT_DOMAINS// /, /})"
-  /usr/bin/lego \
-    --accept-tos --email "${LEGO_ACME_EMAIL}" \
-    --path "/var/lib/lego/${LEGO_CERT_GROUP}" \
-    --server "${LEGO_ACME_SERVER}" \
-    --key-type "${LEGO_CERT_KEY_TYPE}" \
-    --http --http.${LEGO_ACME_MODE} \
-    ${LEGO_CERT_DOMAIN_ARGS} \
-    renew --days 2 \
-    --no-random-sleep \
-    --renew-hook="${LEGO_RENEW_HOOK}"
+  LEGO_RENEW_TYPE="Obtaining initial"
 fi
+
+echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] ${LEGO_RENEW_TYPE} certificate for ${LEGO_CERT_GROUP} (${LEGO_CERT_DOMAINS// /, })"
+
+/usr/bin/lego run \
+  --accept-tos --email "${LEGO_ACME_EMAIL}" \
+  --path "/var/lib/lego/${LEGO_CERT_GROUP}" \
+  --server "${LEGO_ACME_SERVER}" \
+  --key-type "${LEGO_CERT_KEY_TYPE}" \
+  --http --http.${LEGO_ACME_MODE} \
+  ${LEGO_CERT_DOMAIN_ARGS} \
+  --deploy-hook="${LEGO_RENEW_HOOK}"
