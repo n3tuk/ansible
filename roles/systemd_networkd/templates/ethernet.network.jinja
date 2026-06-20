@@ -1,23 +1,36 @@
 # {{ ansible_managed }}
 
 [Match]
+{% if ansible_facts.default_ipv4.interface is defined %}
 MACAddress={{ ansible_facts.default_ipv4.macaddress }}
+{% elif ansible_facts.default_ipv6.interface is defined %}
+MACAddress={{ ansible_facts.default_ipv6.macaddress }}
+{% endif %}
 
 [Link]
+{% if ansible_facts.default_ipv4.interface is defined %}
 MTUBytes={{ ansible_facts.default_ipv4.mtu }}
+{% elif ansible_facts.default_ipv6.interface is defined %}
+MTUBytes={{ ansible_facts.default_ipv6.mtu }}
+{% endif %}
 
 [Network]
 DHCP=no
 LLMNR=no
 MulticastDNS=no
 IPForward=no
+{%- if ansible_facts.default_ipv6.interface is defined %}
 IPv6PrivacyExtensions=no
+{%- endif %}
+{%- if ansible_facts.default_ipv4.interface is defined %}
 
 [Address]
 Address={{ ansible_facts.default_ipv4.address }}/{{ ansible_facts.default_ipv4.prefix }}
 
 [Route]
 Gateway={{ ansible_facts.default_ipv4.gateway }}
+{%- endif %}
+{%- if ansible_facts.default_ipv6.interface is defined %}
 
 [Address]
 Address={{ ansible_facts.default_ipv6.address }}/{{ ansible_facts.default_ipv6.prefix }}
@@ -25,3 +38,4 @@ Address={{ ansible_facts.default_ipv6.address }}/{{ ansible_facts.default_ipv6.p
 [Route]
 Gateway={{ ansible_facts.default_ipv6.gateway }}
 GatewayOnLink=yes
+{%- endif %}

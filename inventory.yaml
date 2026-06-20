@@ -8,6 +8,7 @@ all:
     cache:
     netdata:
     manager:
+    test:
 
 development:
   hosts:
@@ -23,6 +24,7 @@ services:
     cache:
     netdata:
     manager:
+    test:
 
 proxmox:
   hosts:
@@ -53,6 +55,10 @@ netdata:
   hosts:
     netdata-[01:02].services.n3t.uk:
 
+test:
+  hosts:
+    cynon.bridgend.n3t.uk:
+
 arch:
   children:
     authentik:
@@ -60,6 +66,7 @@ arch:
     ca:
     cache:
     netdata:
+    test:
 
 debian:
   children:
@@ -84,6 +91,7 @@ virtual:
     cache:
     netdata:
     manager:
+    test:
 
 physical:
   children:

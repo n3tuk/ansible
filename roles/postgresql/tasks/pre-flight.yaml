@@ -29,15 +29,11 @@
       is enabled.
   when: >-
     postgresql_walg_enabled and
-    (
-      postgresql_walg_aws_region is not defined or
-      postgresql_walg_aws_region == "" or
-      postgresql_walg_aws_access_key_id is not defined or
-      postgresql_walg_aws_access_key_id == "" or
-      postgresql_walg_aws_secret_access_key is not defined or
-      postgresql_walg_aws_secret_access_key == "" or
-      postgresql_walg_aws_s3_prefix is not defined or
-      postgresql_walg_aws_s3_prefix == ""
+    not (
+      postgresql_walg_aws_region and
+      postgresql_walg_aws_access_key_id and
+      postgresql_walg_aws_secret_access_key and
+      postgresql_walg_aws_s3_prefix
     )
   tags:
     - postgresql

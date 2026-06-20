@@ -1,0 +1,13 @@
+---
+- name: Configure test servers
+  hosts: test
+  become: true
+  become_user: root
+
+  roles:
+    - role: ufw
+      tags:
+        - ufw
+    - role: tailscale
+      tags:
+        - tailscale
