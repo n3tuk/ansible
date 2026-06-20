@@ -7,6 +7,8 @@ bind_listen_ipv6_addresses:
   - any
 bind_port_dns: 53
 
+bind_dns64_hosts: []
+
 bind_forwarders: []
 
 bind_views: []

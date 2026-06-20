@@ -9,6 +9,14 @@ options {
 
   notify explicit;
   allow-transfer { none; };
+{%  if bind_dns64_hosts | length > 0 %}
+
+  dns64 64:ff9b::/96 {
+    clients { dns64-hosts-acl; };
+    mapped { any; };
+    break-dnssec yes;
+  };
+{%  endif %}
 
   forward only;
   forwarders {
@@ -19,6 +27,17 @@ options {
 
   dnssec-validation {{ bind_dnssec_validation }};
 };
+{%  if bind_dns64_hosts | length > 0 %}
+
+acl dns64-hosts-acl {
+{%    for host in bind_dns64_hosts %}
+{%      if host.comment is defined %}
+  // {{ host.comment }}
+{%      endif %}
+  {{ host.address }};
+{%    endfor %}
+};
+{%  endif %}
 {%  if bind_rndc_key_secret | length > 0 %}
 
 // Set up the RNDC key for remote administration, but only from within the

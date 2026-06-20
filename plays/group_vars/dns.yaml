@@ -110,6 +110,19 @@ bind_rndc_group_members:
 bind_tsig_group_members:
   - user: jonathan
 
+bind_dns64_hosts:
+  - address: 2a02:8010:8006:3a36::/64
+    comment: >-
+      n3tuk Network for Development Proxmox Cluster Nodes
+  - address: 2a02:8010:8006:3a37::/64
+    comment: >-
+      n3tuk Networks for Talos Nodes in the Development Kubernetes Cluster
+  - address: 2a02:8010:8006:3a38::/64
+  - address: 2a02:8010:8006:3a42::/64
+  - address: fd7a:115c:a1e0::4834:c565
+    comment: >-
+      cynon.bridgend.n3t.uk (cynon) Tailscale Node
+
 bind_views:
   - name: tailnet
     comment: |-

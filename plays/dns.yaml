@@ -3,6 +3,18 @@
   hosts: dns
   become: true
   become_user: root
+
+  # Each DNS node must know about the configuration of the other DNS nodes, in
+  # order to correctly configure the BIND server for replication and permit the
+  # necessary firewall rules
+  pre_tasks:
+    - name: Gather facts from all DNS hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: hostvars[item].ansible.ansible_hostname is not defined
+      with_items: "{{ groups['dns'] }}"
+
   roles:
     - role: ufw
       tags:
