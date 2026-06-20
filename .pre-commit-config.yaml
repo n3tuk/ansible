@@ -25,7 +25,7 @@ repos:
         name: Check all files end in a new-line only
 
   - repo: https://github.com/zricethezav/gitleaks.git
-    rev: v8.29.0
+    rev: v8.30.0
     hooks:
       - id: gitleaks
         name: Check for hard-coded secrets, keys, and credentials
@@ -49,7 +49,7 @@ repos:
           - -sr
 
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         name: Lint YAML files for correctness and formatting
@@ -58,7 +58,7 @@ repos:
           - .yamllint.yaml
 
   - repo: https://github.com/python-jsonschema/check-jsonschema.git
-    rev: 0.34.1
+    rev: 0.37.3
     hooks:
       - name: Check the Dependabot configuration for correctness
         id: check-dependabot
@@ -66,7 +66,7 @@ repos:
         id: check-github-workflows
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v25.9.2
+    rev: v26.4.0
     hooks:
       - id: ansible-lint
         name: Lint Ansible files for correctness and formatting
@@ -76,7 +76,7 @@ repos:
           - ansible
 
   - repo: https://github.com/igorshubovych/markdownlint-cli.git
-    rev: v0.45.0
+    rev: v0.49.0
     hooks:
       - id: markdownlint
         name: Check Markdown correctness and formatting

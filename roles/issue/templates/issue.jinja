@@ -44,9 +44,12 @@
 {%- if ansible_facts.distribution != "Archlinux" %} ({{ ansible_facts.distribution_version }}){% endif %}
 
   \e{halfbright}          Kernel\e{reset}: \r
-
+{%  if ansible_facts.default_ipv6.address is defined %}
   \e{halfbright}    IPv6 Address\e{reset}: {{ ansible_facts.default_ipv6.address | split('/') | first }}
+{%  endif %}
+{%  if ansible_facts.default_ipv4.address is defined %}
   \e{halfbright}    IPv4 Address\e{reset}: {{ ansible_facts.default_ipv4.address | split('/') | first }}
+{%  endif %}
 
 \e{halfbright}──> \e{reset}Login
 {{ '\n' }}

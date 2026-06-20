@@ -9,6 +9,14 @@
     proto: "{{ rule.proto | default(omit) }}"
     port: "{{ rule.port | default(omit) }}"
     comment: "{{ rule.comment | default(omit) }}"
+  when: >-
+    ( rule.from_ip is not defined and rule.to_ip is not defined ) or
+    ( ( ( rule.from_ip is defined and rule.from_ip is ansible.utils.ipv4 ) or
+        ( rule.to_ip is defined and rule.to_ip is ansible.utils.ipv4 ) )
+          and ansible_facts.default_ipv4.address is defined ) or
+    ( ( ( rule.from_ip is defined and rule.from_ip is ansible.utils.ipv6 ) or
+        ( rule.to_ip is defined and rule.to_ip is ansible.utils.ipv6 ) )
+          and ansible_facts.default_ipv6.address is defined )
   loop: "{{ ufw_default_rules }}"
   loop_control:
     label: >-
@@ -27,6 +35,14 @@
     port: "{{ rule.port | default(omit) }}"
     comment: "{{ rule.comment | default(omit) }}"
     state: '{{ "enabled" if rule.enabled | default(true) else "disabled" }}'
+  when: >-
+    ( rule.from_ip is not defined and rule.to_ip is not defined ) or
+    ( ( ( rule.from_ip is defined and rule.from_ip is ansible.utils.ipv4 ) or
+        ( rule.from_ip is defined and rule.from_ip is ansible.utils.ipv4 ) )
+          and ansible_facts.default_ipv4.address is defined ) or
+    ( ( ( rule.from_ip is defined and rule.from_ip is ansible.utils.ipv6 ) or
+        ( rule.from_ip is defined and rule.from_ip is ansible.utils.ipv6 ) )
+          and ansible_facts.default_ipv6.address is defined )
   loop: "{{ ufw_extra_rules }}"
   loop_control:
     label: >-
