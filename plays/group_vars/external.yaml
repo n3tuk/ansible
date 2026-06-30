@@ -111,6 +111,8 @@ ufw_default_rules:
     port: 22
     comment: Allow SSH from anywhere
 
+tailscale_exit_node: true
+tailscale_peer_relay: true
 tailscale_auth_key: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   39353861626532386266626139663164313461336330663538393136353233663133376534373637
