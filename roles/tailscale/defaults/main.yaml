@@ -5,7 +5,11 @@ tailscale_auth_key: ""
 tailscale_args: ""
 tailscale_up_timeout: 120
 
+tailscale_port: 41641
 tailscale_exit_node: false
 tailscale_accept_routes: true
 tailscale_hostname: ""
-tailscale_ssh: false
+tailscale_ssh: true
+
+tailscale_peer_relay: false
+tailscale_peer_relay_port: 41642

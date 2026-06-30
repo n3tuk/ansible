@@ -43,8 +43,11 @@
     {% if tailscale_hostname is defined and tailscale_hostname | length > 0 %}
       --hostname={{ tailscale_hostname | trim }}
     {% endif %}
-    {% if tailscale_exit_node %}
+    {% if tailscale_peer_relay %}
       --exit-node=true
+    {% endif %}
+    {% if tailscale_exit_node %}
+      --advertise-exit-node=true
     {% endif %}
     {% if tailscale_accept_routes %}
       --accept-routes=true
@@ -82,6 +85,18 @@
     (not ansible_check_mode) and
     (tailscale_start is failed) and
     (tailscale_start.stdout | length > 0)
+  tags:
+    - tailscale
+    - setup
+
+- name: Bring up Tailscale Relay Node
+  ansible.builtin.command: >-
+    tailscale set
+      --relay-server-port {{ tailscale_peer_relay_port }}
+  changed_when: true
+  when: >-
+    (not ansible_check_mode) and
+    tailscale_peer_relay
   tags:
     - tailscale
     - setup
