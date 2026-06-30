@@ -2,7 +2,7 @@
 # defaults file for authentik
 
 authentik_image: ghcr.io/goauthentik/server
-authentik_version: "2025.10.1"
+authentik_version: "2026.5.3"
 
 authentik_public_hostname: ""
 

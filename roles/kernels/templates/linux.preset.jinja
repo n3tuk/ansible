@@ -9,5 +9,7 @@ PRESETS=('default')
 
 default_config="/etc/mkinitcpio.conf"
 default_image="/boot/initramfs-{{ kernel }}.img"
+{%  if kernels_bootloader == "bootctl" %}
 default_uki="/efi/EFI/Linux/{{ kernel }}.efi"
+{%  endif %}
 default_options=""

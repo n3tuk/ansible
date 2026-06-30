@@ -3,6 +3,7 @@
 
 kernels_install:
   - linux-lts
+kernels_bootloader: bootctl
 
 kernels_cmdline_extras: []
 
