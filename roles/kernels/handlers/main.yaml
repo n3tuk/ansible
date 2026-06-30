@@ -6,7 +6,7 @@
   # specifically inside non-chroot'd environments
   ansible.builtin.command: # noqa no-changed-when
     cmd: mkinitcpio -P
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
 
 - name: Run sbctl sign-all locally
   # This handler is signing kernels specifically inside non-chroot'd
@@ -14,5 +14,24 @@
   ansible.builtin.command: # noqa no-changed-when
     cmd: sbctl sign-all
   when: >-
-    not bootstrap_mount_base | default('') | length and
+    bootstrap_mount_base | default('') | length == 0 and
     device_type | default("virtual") == "physical"
+
+- name: Run grub-install locally
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: |-
+      grub-install \
+        --target=i386-pc \
+        --dev /dev/{{ filesystems_physical_drives | first }}
+  when: >-
+    bootstrap_mount_base | default('') | length == 0 and
+    device_type | default("virtual") == "virtual"
+    kernels_bootloader == "grub"
+
+- name: Run grub-mkconfig locally
+  ansible.builtin.command: # noqa no-changed-when
+    cmd: grub-mkconfig -o /boot/grub/grub.cfg
+  when: >-
+    bootstrap_mount_base | default('') | length == 0 and
+    device_type | default("virtual") == "virtual"
+    kernels_bootloader == "grub"
