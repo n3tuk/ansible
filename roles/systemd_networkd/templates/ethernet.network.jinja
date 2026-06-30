@@ -19,18 +19,18 @@ DHCP=no
 LLMNR=no
 MulticastDNS=no
 IPForward=no
-{%- if ansible_facts.default_ipv6.interface is defined %}
+{%  if ansible_facts.default_ipv6.interface is defined %}
 IPv6PrivacyExtensions=no
-{%- endif %}
-{%- if ansible_facts.default_ipv4.interface is defined %}
+{%  endif %}
+{%  if ansible_facts.default_ipv4.interface is defined %}
 
 [Address]
 Address={{ ansible_facts.default_ipv4.address }}/{{ ansible_facts.default_ipv4.prefix }}
 
 [Route]
 Gateway={{ ansible_facts.default_ipv4.gateway }}
-{%- endif %}
-{%- if ansible_facts.default_ipv6.interface is defined %}
+{%  endif %}
+{%  if ansible_facts.default_ipv6.interface is defined %}
 
 [Address]
 Address={{ ansible_facts.default_ipv6.address }}/{{ ansible_facts.default_ipv6.prefix }}
