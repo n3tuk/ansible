@@ -14,7 +14,7 @@ bind_tsig_group: tsig
 
 bind_etc_path: /etc
 bind_etc_name: named.conf
-bind_var_path: /var/named
+bind_var_path: /var/lib/named
 bind_tsig_path: "{{ bind_var_path }}/keys"
 bind_run_path: /run/named
 bind_log_path: /var/log/named

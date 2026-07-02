@@ -16,7 +16,8 @@ n3tuk.
 | [`upgrade.yaml`][play-upgrade]     | [`upgrade`][taskfile]        | A play which will update and upgrade all Arch Linux packages of using `pacman`.                                                                  |
 | [`authentik.yaml`][play-authentik] | [`play:authentik`][taskfile] | A play which will deploy and configure the Authentik identity provider alongside PostgreSQL, `cloudflared`, and Tailscale.                       |
 | [`ca.yaml`][play-ca]               | [`play:ca`][taskfile]        | A play which will deploy and configure the `step-ca` Certificate Authority alongside PostgreSQL and Tailscale.                                   |
-| [`dns.yaml`][play-dns]             | [`play:dns`][taskfile]       | A play which will deploy and configure the `bind` DNS service.                                                                                   |
+| [`dns.yaml`][play-dns]             | [`play:dns`][taskfile]       | A play which will deploy and configure the DNS servers.                                                                                          |
+| [`bind.yaml`][play-bind]           | [`play:bind`][taskfile]      | A play which will deploy and configure the `bind` DNS service.                                                                                   |
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -36,6 +37,7 @@ task: [bootstrap] ansible-playbook \
 [play-authentik]: https://github.com/n3tuk/ansible/blob/main/plays/authentik.yaml
 [play-ca]: https://github.com/n3tuk/ansible/blob/main/plays/ca.yaml
 [play-dns]: https://github.com/n3tuk/ansible/blob/main/plays/dns.yaml
+[play-bind]: https://github.com/n3tuk/ansible/blob/main/plays/bind.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 

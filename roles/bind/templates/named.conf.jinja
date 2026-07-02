@@ -3,9 +3,14 @@
 options {
   directory "{{ bind_var_path }}";
   pid-file "{{ bind_run_path }}/named.pid";
+  version "0.0.0"; // Hide the version of BIND for security reasons
 
   listen-on port {{ bind_port_dns }} { {{ bind_listen_ipv4_addresses | join('; ') }}; };
   listen-on-v6 port {{ bind_port_dns }} { {{ bind_listen_ipv6_addresses | join('; ') }}; };
+
+  recursion yes;
+  allow-recursion { recursive-hosts-acl; };
+  allow-query-cache { recursive-hosts-acl; };
 
   notify explicit;
   allow-transfer { none; };
@@ -27,6 +32,18 @@ options {
 
   dnssec-validation {{ bind_dnssec_validation }};
 };
+
+acl recursive-hosts-acl {
+  // Always support the loopback interface for recursive queries
+  127.0.0.1;
+  ::1;
+{%  for host in bind_recursive_hosts %}
+{%    if host.comment is defined %}
+  // {{ host.comment }}
+{%    endif %}
+  {{ host.address }};
+{%  endfor %}
+};
 {%  if bind_dns64_hosts | length > 0 %}
 
 acl dns64-hosts-acl {
@@ -41,7 +58,7 @@ acl dns64-hosts-acl {
 {%  if bind_rndc_key_secret | length > 0 %}
 
 // Set up the RNDC key for remote administration, but only from within the
-// server itself via localhost
+// server itself via the loopback interface (::1) for security reasons
 key {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-access-key {
   algorithm hmac-sha512;
   secret "{{ bind_rndc_key_secret }}";
@@ -85,9 +102,9 @@ view override_bind chaos {
 };
 {%  for view in bind_views %}
 
-// {{ view.name }} View
+// {{ view.name }} View {{ '-' * ( 80 - 9 - view.name | length ) }}
 {%    if view.comment is defined %}
-//
+
 {%      for line in view.comment.splitlines() %}
 // {{ line }}
 {%      endfor %}
@@ -107,53 +124,65 @@ key {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-
 };
 
 acl {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-master-acl {
-  // Immediately check and reject requests from any source address not allowed
-  // for the master server associated with the following key (i.e. ::1 only),
-  // and if the source address matches, ensure that the request is signed by the
-  // master key
-  !{
-    !any;
-    ::1;
-  };
-
+  // Check and reject requests from any source address not permitted, and verify
+  // that any request made is also signed by the key for this server and view.
+  !{ !::1; any; };
   key {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-master-key;
 };
 {%    endif %}
 {%    if ( view.servers is defined and
            view.servers.master is defined and
-           view.servers.slaves is defined ) %}
+           view.servers.slaves is defined ) and
+         inventory_hostname == view.servers.master %}
 {%      for slave in view.servers.slaves %}
-{%        if ( inventory_hostname == view.servers.master or
-               inventory_hostname == slave.name ) and
-             slave.secret is defined %}
+{%        if slave.secret is defined %}
 
-{%          if inventory_hostname == view.servers.master  %}
-// An RFC2136 key for the {{ slave.name }} downstream slave server
-// to transfer zones in this view from this master server
-{%          else %}
-// An RFC2136 key for this server to transfer zones from the upstream
-// master server ({{ view.servers.master }}) for this view
-{%          endif %}
+// The RFC2136 key for the downstream server {{ slave.name }} to
+// communicate with this server, validating notifications from this server and
+// requesting zone transfers.
 key {{ slave.name | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key {
   algorithm {{ slave.algorithm | default('hmac-sha256') }};
   secret "{{ slave.secret }}";
 };
 
 acl {{ slave.name | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-acl {
-  // Immediately check and reject requests from any source address not allowed
-  // for the slave server associated with the following key, and if the source
-  // address matches, ensure that the request is signed by the slave server's key
   !{
-    !any;
-    {{ hostvars[slave.name].ansible_facts.default_ipv6.address }};
-{%          if hostvars[slave.name].ansible_facts.tailscale0 is defined and
+{%-         if hostvars[slave.name].ansible_facts.tailscale0 is defined and
                hostvars[slave.name].ansible_facts.tailscale0.ipv6 is defined and
                hostvars[slave.name].ansible_facts.tailscale0.ipv6 | length > 0 %}
-    {{ hostvars[slave.name].ansible_facts.tailscale0.ipv6[0].address }};
-{%          endif %}
-  };
-
+ !{{ hostvars[slave.name].ansible_facts.tailscale0.ipv6[0].address }};
+{%-         else %}
+ !{{ hostvars[slave.name].ansible_facts.default_ipv6.address }};
+{%-         endif %} any; };
   key {{ slave.name | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key;
+};
+{%        endif %}
+{%      endfor %}
+{%    else %}
+{%      for slave in view.servers.slaves %}
+{%        if ( slave.secret is defined and
+               inventory_hostname == slave.name ) %}
+
+// The {{ view.name}} RFC2136 key for this server to communicate with the upstream
+// server ({{ view.servers.master }}) to validate notifications and request
+// zone transfers
+key {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key {
+  algorithm {{ slave.algorithm | default('hmac-sha256') }};
+  secret "{{ slave.secret }}";
+};
+
+acl {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-acl {
+  // Check and reject requests from any source address not permitted, and verify
+  // that any request made is also signed by the key for this server and view.
+  !{
+{%-         if hostvars[view.servers.master].ansible_facts.tailscale0 is defined and
+               hostvars[view.servers.master].ansible_facts.tailscale0.ipv6 is defined and
+               hostvars[view.servers.master].ansible_facts.tailscale0.ipv6 | length > 0 %}
+ !{{ hostvars[view.servers.master].ansible_facts.tailscale0.ipv6[0].address }};
+{%-         else %}
+ !{{ hostvars[view.servers.master].ansible_facts.default_ipv6.address }};
+{%-         endif %} any; };
+  key {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key;
 };
 {%        endif %}
 {%      endfor %}
@@ -165,8 +194,8 @@ acl {{ slave.name | split('.') | reverse | join('-') }}-{{ view.name }}-transfer
            view.tsig.rfc2136 is defined ) %}
 {%      for rfc2136 in view.tsig.rfc2136 %}
 
-// An RFC2136 key for the {{ rfc2136.name }} service to review and
-// update selected zones in this view on this master server
+// The {{ view.name }} RFC2136 key for the {{ rfc2136.name }} service
+// to review and update selected zones on this master server
 key service-{{ rfc2136.name }}-{{ view.name }}-update-key {
   algorithm {{ rfc2136.algorithm | default('hmac-sha256') }};
   secret "{{ rfc2136.secret }}";
@@ -174,74 +203,89 @@ key service-{{ rfc2136.name }}-{{ view.name }}-update-key {
 
 acl service-{{ rfc2136.name }}-{{ view.name }}-update-acl {
 {%        if rfc2136.cidrs is defined and rfc2136.cidrs | length > 0 %}
-  // Immediately check and reject requests from any source address not allowed
-  // for the service associated with the following key, and if the source
-  // address matches, ensure that the request is signed by the service's key
+  // Check and reject requests from any source address not permitted, and verify
+  // that any request made is also signed by the key for this server and view.
   !{
-    !any;
 {%          for cidr in rfc2136.cidrs %}
-    {{ cidr }};
+{%            if cidr.comment is defined %}
+    // {{ cidr.comment }}
+{%            endif %}
+    !{{ cidr.address }};
 {%          endfor %}
+    any; // i.e. block any sources other than the above CIDR blocks
   };
-
 {%        else %}
-  // Check that the request is signed by the service's key, regardless of the
-  // source of the request, as no source restrictions have been defined
+  // Verify only that any request made is signed by the key for this server and
+  // view, regardless of the source address of the request.
 {%        endif %}
   key service-{{ rfc2136.name }}-{{ view.name }}-update-key;
 };
 {%      endfor %}
 {%    endif %}
 
-// An ACL of the allowed client CIDR blocks configured which can be allowed
-// to make requests and recursive queries against this DNS server and this view
+// An ACL of the client CIDR blocks which will be allowed to make requests and
+// recursive queries against this server and this view
 acl {{ view.name }}-clients-acl {
-{%    for cidr in view.cidrs %}
-  {{ cidr }};
-{%    endfor %}
+{%    if view.cidrs is defined %}
+{%      for cidr in view.cidrs %}
+{%        if cidr.comment is defined %}
+  // {{ cidr.comment }}
+{%        endif %}
+  {{ cidr.address }};
+{%      endfor %}
+{%    else %}
+  // No clients are defined for this view, so no clients will be allowed to
+  // make requests or recursive queries against this DNS server and this view
+  !any;
+{%    endif %}
 };
 
 view {{ view.name }} {
   match-clients {
-    {{ view.name }}-clients-acl;
 {%    if ( view.servers is defined and
            view.servers.master is defined and
-           inventory_hostname == view.servers.master) and
-         ( view.tsig is defined and
-           view.tsig.master is defined and
-           view.tsig.master.secret is defined ) %}
+           inventory_hostname == view.servers.master) %}
+{%      if ( view.tsig is defined and
+             view.tsig.master is defined and
+             view.tsig.master.secret is defined ) %}
     {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-master-acl;
-{%    endif %}
-{%    if ( view.servers is defined and
-           view.servers.master is defined and
-           view.servers.slaves is defined ) %}
-{%      for slave in view.servers.slaves %}
-{%        if slave.secret is defined %}
+{%      endif %}
+{%      if view.servers.slaves is defined %}
+{%        for slave in view.servers.slaves %}
+{%          if slave.secret is defined %}
+{%        for _view in bind_views %}
+{%          if _view.name != view.name %}
+    !{{ slave.name | split('.') | reverse | join('-') }}-{{ _view.name }}-transfer-acl;
+{%          endif %}
+{%        endfor %}
     {{ slave.name | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-acl;
-{%        endif %}
-{%      endfor %}
-{%    endif %}
-{%    if ( view.servers is defined and
-           view.servers.master is defined and
-           inventory_hostname == view.servers.master) and
-         ( view.tsig is defined and
-           view.tsig.rfc2136 is defined ) %}
-{%      for rfc2136 in view.tsig.rfc2136 %}
+{%          endif %}
+{%        endfor %}
+{%      endif %}
+{%      if ( view.tsig is defined and
+             view.tsig.rfc2136 is defined ) %}
+{%        for rfc2136 in view.tsig.rfc2136 %}
     service-{{ rfc2136.name }}-{{ view.name }}-update-acl;
-{%      endfor %}
+{%        endfor %}
+{%      endif %}
+{%    else %}
+{%      if ( view.servers is defined and
+             view.servers.master is defined ) %}
+    // Ensure that only the valid upstream server and the upstream RFC2136 key
+    // for this server and view are permitted as clients to this view
+{%        for _view in bind_views %}
+{%          if _view.name != view.name %}
+    !{{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ _view.name }}-transfer-acl;
+{%          endif %}
+{%        endfor %}
+    {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-acl;
+{%      endif %}
 {%    endif %}
+    {{ view.name }}-clients-acl;
   };
 
   allow-recursion {
     {{ view.name }}-clients-acl;
-{%    if ( view.servers is defined and
-           view.servers.master is defined and
-           inventory_hostname == view.servers.master) and
-         ( view.tsig is defined and
-           view.tsig.master is defined and
-           view.tsig.master.secret is defined ) %}
-    {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-master-acl;
-{%    endif %}
   };
 {%    for domain in view.domains %}
 
@@ -350,11 +394,12 @@ view {{ view.name }} {
     also-notify {
 {%        for slave in view.servers.slaves %}
 {%          if slave.secret is defined %}
-      {{ hostvars[slave.name].ansible_facts.default_ipv6.address }} key {{ slave.name | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key;
 {%            if hostvars[slave.name].ansible_facts.tailscale0 is defined and
                  hostvars[slave.name].ansible_facts.tailscale0.ipv6 is defined and
                  hostvars[slave.name].ansible_facts.tailscale0.ipv6 | length > 0 %}
-      {{ hostvars[slave.name].ansible_facts.tailscale0.ipv6[0].address }};
+      {{ hostvars[slave.name].ansible_facts.tailscale0.ipv6[0].address }} key {{ slave.name | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key;
+{%            else %}
+      {{ hostvars[slave.name].ansible_facts.default_ipv6.address }} key {{ slave.name | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key;
 {%            endif %}
 {%          endif %}
 {%        endfor %}
@@ -366,11 +411,12 @@ view {{ view.name }} {
     type slave; // downstream slave
 
     masters {
-      {{ hostvars[view.servers.master].ansible_facts.default_ipv6.address }} key {{ inventory_hostname | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key;
 {%        if hostvars[view.servers.master].ansible_facts.tailscale0 is defined and
              hostvars[view.servers.master].ansible_facts.tailscale0.ipv6 is defined and
              hostvars[view.servers.master].ansible_facts.tailscale0.ipv6 | length > 0 %}
-      {{ hostvars[view.servers.master].ansible_facts.tailscale0.ipv6[0].address }};
+      {{ hostvars[view.servers.master].ansible_facts.tailscale0.ipv6[0].address }} key {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key;
+{%        else %}
+      {{ hostvars[view.servers.master].ansible_facts.default_ipv6.address }} key {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-{{ view.name }}-transfer-key;
 {%        endif %}
     };
 
@@ -387,55 +433,78 @@ view {{ view.name }} {
 {%  endfor %}
 
 logging {
-  channel update-log {
-    file "{{ bind_log_path }}/update.log";
+  channel debug-log {
+    file "{{ bind_log_path }}/debug.log" versions 2 size 8m;
+    print-time yes;
+    print-category yes;
+    print-severity yes;
+    severity dynamic;
+  };
+
+  channel general-log {
+    file "{{ bind_log_path }}/named.log" versions 3 size 32m;
     print-time yes;
     print-category yes;
     print-severity yes;
     severity warning;
   };
 
-  category update { update-log; };
+  category default { general-log; debug-log; };
+  category config { general-log; debug-log; };
+  category dispatch { general-log; debug-log; };
+  category network { general-log; debug-log; };
+  category general { general-log; debug-log; };
+
+  channel update-log {
+    file "{{ bind_log_path }}/update.log" versions 3 size 32m;
+    print-time yes;
+    print-category yes;
+    print-severity yes;
+    severity warning;
+  };
+
+  category update { update-log; debug-log; };
 
   channel dnssec-log {
-    file "{{ bind_log_path }}/dnssec.log";
+    file "{{ bind_log_path }}/dnssec.log" versions 3 size 4m;
     print-time yes;
     print-category yes;
     print-severity yes;
     severity warning;
   };
 
-  category dnssec { dnssec-log; };
+  category dnssec { dnssec-log; debug-log; };
 
   channel security-log {
-    file "{{ bind_log_path }}/security.log";
+    file "{{ bind_log_path }}/security.log" versions 3 size 16m;
     print-time yes;
     print-category yes;
     print-severity yes;
-    severity warning;
+    severity info;
   };
 
-  category security { security-log; };
+  category security { security-log; debug-log; };
+  category update-security { security-log; debug-log; };
 
   channel client-log {
-    file "{{ bind_log_path }}/client.log";
+    file "{{ bind_log_path }}/client.log" versions 3 size 4m;
     print-time yes;
     print-category yes;
     print-severity yes;
-    severity warning;
+    severity info;
   };
 
-  category client { client-log; };
+  category client { client-log; debug-log; };
 
   channel xfer-log {
-    file "{{ bind_log_path }}/xfer.log";
+    file "{{ bind_log_path }}/xfer.log" versions 3 size 16m;
     print-time yes;
     print-category yes;
     print-severity yes;
-    severity warning;
+    severity info;
   };
 
-  category xfer-in { xfer-log; };
-  category xfer-out { xfer-log; };
-  category notify { xfer-log; };
+  category xfer-in { xfer-log; debug-log; };
+  category xfer-out { xfer-log; debug-log; };
+  category notify { xfer-log; debug-log; };
 };
