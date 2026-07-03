@@ -19,13 +19,13 @@
 
 - name: Run grub-install locally
   ansible.builtin.command: # noqa no-changed-when
-    cmd: |-
-      grub-install \
-        --target=i386-pc \
-        --dev /dev/{{ filesystems_physical_drives | first }}
+    argv:
+      - grub-install
+      - --target=i386-pc
+      - /dev/{{ filesystems_physical_drives | first }}
   when: >-
     bootstrap_mount_base | default('') | length == 0 and
-    device_type | default("virtual") == "virtual"
+    device_type | default("virtual") == "virtual" and
     kernels_bootloader == "grub"
 
 - name: Run grub-mkconfig locally
@@ -33,5 +33,5 @@
     cmd: grub-mkconfig -o /boot/grub/grub.cfg
   when: >-
     bootstrap_mount_base | default('') | length == 0 and
-    device_type | default("virtual") == "virtual"
+    device_type | default("virtual") == "virtual" and
     kernels_bootloader == "grub"

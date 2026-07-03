@@ -8,7 +8,7 @@
   # Work on the assumption that the utility will have been pre-installed as part
   # of the bootstrap role when initialising the initial system, so only attempt
   # installation or update when bootstrap_mount_base is not set.
-  when: not bootstrap_mount_base | default('') | length
+  when: bootstrap_mount_base | default('') | length == 0
   notify:
     - Run grub-install locally
     - Run grub-mkconfig locally

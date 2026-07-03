@@ -49,8 +49,7 @@
   loop_control:
     label: /efi/{{ directory }}
     loop_var: directory
-  when:
-    kernels_bootloader == "bootctl"
+  when: kernels_bootloader == "bootctl"
   tags:
     - kernel
     - configuration

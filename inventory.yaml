@@ -106,7 +106,7 @@ physical:
 
 # Bootstrapping
 
-# WARNING: Do not keep any hosts in this group, except those added temporally
+# WARNING: Do not keep any hosts in this group, except those added temporarily
 #          during their initial installation (or re-installation), when the host
 #          requires bootstrapping.
 #

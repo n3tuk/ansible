@@ -23,4 +23,4 @@ ufw_default_rules:
     from_ip: 2a00:1098:5bf::2
     proto: tcp
     port: 22
-    comment: Allow SSH from extenal-02.amsterdam.n3t.uk
+    comment: Allow SSH from external-02.amsterdam.n3t.uk
