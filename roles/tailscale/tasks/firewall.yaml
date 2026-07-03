@@ -1,0 +1,40 @@
+---
+# firewall-specific tasks file for tailscale
+
+- name: Enable firewall access for Tailscale Clients
+  community.general.ufw:
+    rule: allow
+    proto: udp
+    port: "{{ tailscale_port }}"
+    comment: Allow Tailscale Client Access
+  tags:
+    - tailscale
+    - firewall
+
+- name: Enable firewall access for Tailscale Peer Relays
+  community.general.ufw:
+    rule: allow
+    proto: udp
+    port: "{{ tailscale_peer_relay_port }}"
+    comment: Allow Tailscale Peer Relay Access
+  when: tailscale_peer_relay
+  tags:
+    - tailscale
+    - firewall
+
+- name: Install sysctl settings for Tailscale Exit Nodes
+  ansible.builtin.copy:
+    src: "{{ config }}"
+    dest: /etc/sysctl.d/{{ config }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  loop:
+    - 10-ip-forwarding.conf
+  loop_control:
+    label: /etc/sysctl.d/{{ config }}
+    loop_var: config
+  when: tailscale_exit_node
+  tags:
+    - networking
+    - configuration

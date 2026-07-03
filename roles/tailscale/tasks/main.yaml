@@ -15,6 +15,10 @@
     file: debian.yaml
   when: ansible_facts.distribution == 'Debian'
 
+- name: Set up the Tailscale firewall rules
+  ansible.builtin.include_tasks:
+    file: firewall.yaml
+
 - name: Set up Tailscale
   ansible.builtin.include_tasks:
     file: setup.yaml
