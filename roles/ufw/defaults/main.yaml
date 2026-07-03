@@ -2,3 +2,25 @@
 # defaults file for ufw
 
 ufw_extra_rules: []
+
+ufw_default_rules:
+  - rule: allow
+    from_ip: 172.27.4.128/26
+    proto: tcp
+    port: 22
+    comment: Allow SSH from @private
+  - rule: allow
+    from_ip: 2a02:8010:8006:7a22::/64
+    proto: tcp
+    port: 22
+    comment: Allow SSH from @private
+  - rule: allow
+    from_ip: 2a00:1098:5bf::1
+    proto: tcp
+    port: 22
+    comment: Allow SSH from external-01.london.n3t.uk
+  - rule: allow
+    from_ip: 2a00:1098:5bf::2
+    proto: tcp
+    port: 22
+    comment: Allow SSH from external-02.amsterdam.n3t.uk

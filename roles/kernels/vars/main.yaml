@@ -5,5 +5,8 @@ kernels_packages:
   - efivar
   - efibootmgr
 
+kernels_grub_packages:
+  - grub
+
 kernels_ucode:
   - intel-ucode

@@ -64,6 +64,9 @@
     dest: "{{ bootstrap_mount_base | default('') }}/efi/loader/loader.conf"
     owner: root
     group: root
+    # This file is installed on a FAT32 filesystem, so the executable bit is
+    # required to prevent "configuration drift" from constantly trying to reset
+    # the file permissions.
     mode: u=rwx,g=rx,o=rx
   tags:
     - kernel

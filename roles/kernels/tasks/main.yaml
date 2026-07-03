@@ -49,6 +49,7 @@
   loop_control:
     label: /efi/{{ directory }}
     loop_var: directory
+  when: kernels_bootloader == "bootctl"
   tags:
     - kernel
     - configuration
@@ -67,7 +68,15 @@
 
 - name: Prepare the systemd-boot bootloader
   ansible.builtin.include_tasks: bootctl.yaml
-  when: device_type | default("virtual") == "virtual"
+  when: >-
+    device_type | default("virtual") == "virtual" and
+    kernels_bootloader == "bootctl"
+
+- name: Prepare the GRUB bootloader
+  ansible.builtin.include_tasks: grub.yaml
+  when: >-
+    device_type | default("virtual") == "virtual" and
+    kernels_bootloader == "grub"
 
 - name: Install the Intel Microcode package locally
   community.general.pacman:

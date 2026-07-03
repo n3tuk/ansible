@@ -1,0 +1,45 @@
+---
+# grub tasks for kernels
+
+- name: Install GRUB packages locally
+  community.general.pacman:
+    name: "{{ kernels_grub_packages }}"
+    state: latest
+  # Work on the assumption that the utility will have been pre-installed as part
+  # of the bootstrap role when initialising the initial system, so only attempt
+  # installation or update when bootstrap_mount_base is not set.
+  when: bootstrap_mount_base | default('') | length == 0
+  notify:
+    - Run grub-install locally
+    - Run grub-mkconfig locally
+  tags:
+    - kernel
+    - grub
+    - packages
+
+- name: Force running grub-install in the chroot
+  ansible.builtin.command: # noqa no-changed-when
+    # yamllint disable rule:line-length
+    cmd: >-
+      /usr/bin/arch-chroot {{ bootstrap_mount_base | default('') }}
+        /usr/bin/fish -c 'grub-install --target=i386-pc /dev/{{ filesystems_physical_drives | first }}'
+    # yamllint enable rule:line-length
+  when: bootstrap_mount_base | default('') | length > 0
+  tags:
+    - kernel
+    - grub
+    - configuration
+
+- name: Configure the GRUB defaults file
+  ansible.builtin.template:
+    src: grub.default.jinja
+    dest: "{{ bootstrap_mount_base | default('') }}/etc/default/grub"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Run grub-mkconfig locally
+  tags:
+    - kernel
+    - grub
+    - configuration
