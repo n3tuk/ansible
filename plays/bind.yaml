@@ -1,6 +1,6 @@
 ---
-- name: Configure DNS Hosts
-  hosts: dns
+- name: Configure Bind Services
+  hosts: bind
   become: true
   become_user: root
 
@@ -16,12 +16,6 @@
       with_items: "{{ groups['bind'] }}"
 
   roles:
-    - role: ufw
-      tags:
-        - ufw
     - role: bind
       tags:
         - bind
-    - role: tailscale
-      tags:
-        - tailscale

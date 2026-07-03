@@ -70,6 +70,13 @@ test:
   hosts:
     cynon.bridgend.n3t.uk:
 
+# Services
+
+bind:
+  children:
+    dns:
+    external:
+
 # Operating Systems
 
 arch:

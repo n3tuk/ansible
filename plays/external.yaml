@@ -1,6 +1,6 @@
 ---
-- name: Configure DNS Hosts
-  hosts: dns
+- name: Configure External Hosts
+  hosts: external
   become: true
   become_user: root
 

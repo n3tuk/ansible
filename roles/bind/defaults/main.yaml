@@ -8,6 +8,7 @@ bind_listen_ipv6_addresses:
 bind_port_dns: 53
 
 bind_dns64_hosts: []
+bind_recursive_hosts: []
 
 bind_forwarders: []
 

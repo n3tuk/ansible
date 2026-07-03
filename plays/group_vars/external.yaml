@@ -75,12 +75,12 @@ filesystems_logical_volumes:
     mount_opts:
       - nosuid
       - nodev
-  - name: bind
+  - name: named
     group: storage
-    path: /var/lib/bind
+    path: /var/lib/named
     size: 1G
     fs_type: ext4
-    fs_opts: -L BIND
+    fs_opts: -L NAMED
     mount_opts:
       - nosuid
   - name: openbao
@@ -122,3 +122,18 @@ tailscale_auth_key: !vault |
   38313662353631653030663964383262666139326162353738653137333465633032313738653437
   62376435333933343266343035356563316562643138383963313662663533393633656333663039
   343561386239333536316634663434636464
+
+bind_recursive_hosts:
+  - comment: >-
+      n3tuk IPv6 network
+    address: 2a02:8010:8006::/48
+  - comment: >-
+      n3t.uk Tailscale Network
+    address: fd7a:115c:a1e0::/64
+  - address: 100.64.0.0/10
+  - comment: >-
+      external-01.london.n3t.uk Server
+    address: 2a00:1098:5bf::1/128
+  - comment: >-
+      external-02.amsterdam.n3t.uk Server
+    address: 2a00:1098:5bf::2/128
