@@ -4,15 +4,29 @@
 - name: Enable firewall access for BIND
   community.general.ufw:
     rule: allow
-    proto: "{{ port.split('/') | last }}"
-    port: "{{ port.split('/') | first }}"
-    comment: Allow DNS
+    proto: "{{ port.proto }}"
+    port: "{{ port.port }}"
+    comment: "Allow {{ port.name }} to BIND"
   loop:
-    - "{{ bind_port_dns }}/udp"
-    - "{{ bind_port_dns }}/tcp"
+    - name: DNS
+      port: "{{ bind_port }}"
+      proto: udp
+      enable: true
+    - name: DNS
+      port: "{{ bind_port }}"
+      proto: tcp
+      enable: true
+    - name: DNS-over-HTTPS
+      port: "{{ bind_doh_port }}"
+      proto: tcp
+      enable: "{{ bind_doh_port }}"
+    - name: DNS-over-TLS
+      port: "{{ bind_dot_port }}"
+      proto: tcp
+      enable: "{{ bind_dot_port }}"
+  when: port.enable | bool
   loop_control:
-    label: >-
-      allow from any to {{ port }}
+    label: allow from any to {{ port.port }}/{{ port.proto }} ({{ port.name }})
     loop_var: port
   tags:
     - bind

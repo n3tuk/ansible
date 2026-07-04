@@ -15,7 +15,8 @@
 # Include a dedicated play for installing and managing the BIND service, as it
 # needs to some steps to configure the BIND service and firewall rules that are
 # specific to the BIND service
-# - include_play: plays/bind.yaml
-#   when: "'bind' in group_names"
-#   tags:
-#     - bind
+- name: Configure Bind Services
+  import_playbook: bind.yaml
+  when: "'bind' in group_names"
+  tags:
+    - bind

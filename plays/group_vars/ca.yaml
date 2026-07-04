@@ -154,6 +154,8 @@ stepca_x509_allow_dns:
   - "*.n3t.uk"
   - "ca.n3t.uk"
   - "*.ca.n3t.uk"
+  - "*.london.n3t.uk"
+  - "*.amsterdam.n3t.uk"
   - "*.services.n3t.uk"
   - "*.development.n3t.uk"
   - "*.production.n3t.uk"
@@ -169,6 +171,10 @@ stepca_x509_allow_ip:
   # Localhost addresses for local services
   - "::1"
   - "127.0.0.1/32"
+  # Mythic Beasts VPSes
+  - 2a00:1098:5bf::/64
+  - 176.126.245.211/32
+  - 176.126.245.212/32
   # Internal/external addresses for services in n3t.uk and kub3.uk
   - "2a02:8010:8006::/48"
   - "172.23.0.0/16"

@@ -21,7 +21,7 @@ for cert in \
   echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Copying ${cert/=*/} to ${cert/*=/} (via ${tmp})"
 
   cp "${cert/=*/}" "${tmp}"
-  chown "named:named" "${tmp}"
+  chown "{{ bind_service_user }}:{{ bind_service_group }}" "${tmp}"
   chmod 0600 "${tmp}"
   mv -f "${tmp}" "${cert/*=/}"
 done

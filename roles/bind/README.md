@@ -40,17 +40,24 @@ None other than the Ansible Role.
 
 ## Role Variables
 
-| Variable                     | Default   | Description                                                                                                                               |
-| :--------------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-| `bind_listen_ipv4_addresses` | `["any"]` | (**optional**) A list of IPv4 addresses for `bind` to listen on, on the ports selected.                                                   |
-| `bind_listen_ipv6_addresses` | `["any"]` | (**optional**) A list of IPv6 addresses for `bind` to listen on, on the ports selected .                                                  |
-| `bind_port_dns`              | `53`      | (**optional**) The port for `bind` to listen on for standard, unencrypted, DNS requests.                                                  |
-| `bind_forwarders`            | `[]`      | (**optional**) A list of IP addresses of upstream DNS servers for `bind` to forward requests to when it cannot resolve them itself.       |
-| `bind_views`                 | `[]`      | (**optional**) A list of dictionaries containing the structure of the views and zones to create in `bind`. See below for an example.      |
-| `bind_dnssec_validation`     | `true`    | (**optional**) Whether to enable DNSSEC validation in `bind` when forwarding and resolving DNS requests upstream from downstream clients. |
-| `bind_rndc_key_secret`       | `""`      | (**optional**) The secret key to use for the `rndc` control channel.                                                                      |
-| `bind_rndc_group_members`    | `[]`      | (**optional**) A list of users that should have access to the `rndc` control channel configuration file, and hence can use `rndc`.        |
-| `bind_tsig_group_members`    | `[]`      | (**optional**) A list of users that should have access to the TSIG keys and hence can use `nsupdate` on the master servers.               |
+| Variable                      | Default   | Description                                                                                                                                                 |
+| :---------------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bind_listen_ipv4_addresses`  | `["any"]` | (**optional**) A list of IPv4 addresses for `bind` to listen on, on the ports selected.                                                                     |
+| `bind_listen_ipv6_addresses`  | `["any"]` | (**optional**) A list of IPv6 addresses for `bind` to listen on, on the ports selected .                                                                    |
+| `bind_dot_enable`             | `false`   | (**optional**) Whether to enable DNS-over-TLS (DoT) support in `bind`.                                                                                      |
+| `bind_doh_enable`             | `false`   | (**optional**) Whether to enable DNS-over-HTTPS (DoH) support in `bind`.                                                                                    |
+| `bind_port_dns`               | `53`      | (**optional**) The port for `bind` to listen on for standard, unencrypted, DNS requests.                                                                    |
+| `bind_port_dot`               | `853`     | (**optional**) The port for `bind` to listen on for DNS-over-TLS (DoT) requests.                                                                            |
+| `bind_port_doh`               | `443`     | (**optional**) The port for `bind` to listen on for DNS-over-HTTPS (DoH) requests (a firewall port will only be opened for this port if port `443` is used. |
+| `bind_forwarders`             | `[]`      | (**optional**) A list of IP addresses of upstream DNS servers for `bind` to forward requests to when it cannot resolve them itself.                         |
+| `bind_forwarders_dot_enable`  | `false`   | (**optional**) Whether to enable DNS-over-TLS (DoT) support when forwarding requests to upstream DNS servers.                                               |
+| `bind_forwarders_dot_name`    | `""`      | (**optional**) The hostname of the upstream DNS server to use for DNS-over-TLS (DoT) forwarding.                                                            |
+| `bind_forwarders_dot_ca_cert` | `""`      | (**optional**) The CA root certificate to use for DNS-over-TLS (DoT) forwarding.                                                                            |
+| `bind_views`                  | `[]`      | (**optional**) A list of dictionaries containing the structure of the views and zones to create in `bind`. See below for an example.                        |
+| `bind_dnssec_validation`      | `true`    | (**optional**) Whether to enable DNSSEC validation in `bind` when forwarding and resolving DNS requests upstream from downstream clients.                   |
+| `bind_rndc_key_secret`        | `""`      | (**optional**) The secret key to use for the `rndc` control channel.                                                                                        |
+| `bind_rndc_group_members`     | `[]`      | (**optional**) A list of users that should have access to the `rndc` control channel configuration file, and hence can use `rndc`.                          |
+| `bind_tsig_group_members`     | `[]`      | (**optional**) A list of users that should have access to the TSIG keys and hence can use `nsupdate` on the master servers.                                 |
 
 ## Dependencies
 

@@ -34,10 +34,25 @@
     - bind
     - configuration
 
+- name: Create or update the forwarders CA root certificate
+  ansible.builtin.copy:
+    content: "{{ bind_forwarders_dot_ca_cert }}"
+    dest: "{{ bind_var_path }}/certs/ca.pem"
+    owner: "{{ bind_service_user }}"
+    group: "{{ bind_service_group }}"
+    mode: u=rw,g=r,o=
+  when: >-
+    bind_forwarders_dot_enable and
+    bind_forwarders_dot_ca_cert is defined
+  notify:
+    - Reload BIND
+  tags:
+    - bind
+    - configuration
+
 - name: Create or update the named.conf configuration file
   ansible.builtin.template:
     src: named.conf.jinja
-    # yamllint disable-line rule:line-length
     dest: "{{ bind_etc_path }}/{{ bind_etc_name }}"
     owner: "{{ bind_service_user }}"
     group: "{{ bind_service_group }}"

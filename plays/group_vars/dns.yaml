@@ -123,4 +123,4 @@ bind_recursive_hosts:
 lego_acme_email: admin@n3t.uk
 lego_acme_server: https://ca.n3t.uk/acme/n3tuk/directory
 lego_acme_servers_group: ca
-lego_acme_mode: port
+lego_acme_mode: standalone
