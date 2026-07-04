@@ -7,3 +7,11 @@
     state: reloaded
   when: >-
     not ansible_check_mode
+
+- name: Trigger Lego for BIND certificate renewal
+  ansible.builtin.systemd:
+    name: "lego@{{ bind_service_name }}.service"
+    state: started
+  when: >-
+    ( bind_doh_enable or bind_dot_enable ) and
+    not ansible_check_mode

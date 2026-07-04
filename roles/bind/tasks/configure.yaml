@@ -10,6 +10,7 @@
     mode: u=rwx,g=rx,o=
   loop:
     - "{{ bind_var_path }}"
+    - "{{ bind_var_path }}/certs"
     - "{{ bind_log_path }}"
   loop_control:
     label: "{{ directory }}"
@@ -145,4 +146,50 @@
     loop_var: view
   tags:
     - bind
+    - configuration
+
+- name: Create directory for Lego certificates
+  ansible.builtin.file:
+    path: "{{ lego_lib_path }}/{{ bind_service_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  when: >-
+    bind_doh_enable or bind_dot_enable
+  tags:
+    - bind
+    - lego
+    - configuration
+
+- name: Create or update the Lego configuration file
+  ansible.builtin.template:
+    src: lego.conf.jinja
+    dest: "{{ lego_etc_path }}/{{ bind_service_name }}.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  when: >-
+    bind_doh_enable or bind_dot_enable
+  notify:
+    - Trigger Lego for BIND certificate renewal
+  tags:
+    - bind
+    - lego
+    - configuration
+
+- name: Create or update the Lego post-run hook
+  ansible.builtin.template:
+    src: lego.sh.jinja
+    dest: "{{ lego_usr_path }}/{{ bind_service_name }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  when: >-
+    bind_doh_enable or bind_dot_enable
+  notify:
+    - Trigger Lego for BIND certificate renewal
+  tags:
+    - bind
+    - lego
     - configuration
