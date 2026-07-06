@@ -8,14 +8,27 @@
   # order to correctly configure the BIND server for replication and permit the
   # necessary traffic via the firewall rules
   pre_tasks:
+    - name: Gather facts from all CA hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
+      with_items: "{{ groups['ca'] }}"
     - name: Gather facts from all BIND hosts
       ansible.builtin.setup:
       delegate_to: "{{ item }}"
       delegate_facts: true
-      when: hostvars[item].ansible.ansible_hostname is not defined
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
       with_items: "{{ groups['bind'] }}"
 
   roles:
+    - role: lego
+      tags:
+        - lego
     - role: bind
       tags:
         - bind

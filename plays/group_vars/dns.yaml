@@ -119,3 +119,8 @@ bind_recursive_hosts:
       external-02.amsterdam.n3t.uk Server
     address: 2a00:1098:5bf::2/128
   - address: 176.126.245.212
+
+lego_acme_email: admin@n3t.uk
+lego_acme_server: https://ca.n3t.uk/acme/n3tuk/directory
+lego_acme_servers_group: ca
+lego_acme_mode: standalone

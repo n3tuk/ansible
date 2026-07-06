@@ -5,8 +5,26 @@ options {
   pid-file "{{ bind_run_path }}/named.pid";
   version "0.0.0"; // Hide the version of BIND for security reasons
 
-  listen-on port {{ bind_port_dns }} { {{ bind_listen_ipv4_addresses | join('; ') }}; };
-  listen-on-v6 port {{ bind_port_dns }} { {{ bind_listen_ipv6_addresses | join('; ') }}; };
+{%  if bind_listen_ipv4_addresses | length > 0 %}
+  listen-on port {{ bind_port }} { {{ bind_listen_ipv4_addresses | join('; ') }}; };
+{%    if bind_doh_enable %}
+  listen-on port {{ bind_doh_port }} tls {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-tls http default { {{ bind_listen_ipv4_addresses | join('; ') }}; };
+{%    endif %}
+{%    if bind_dot_enable %}
+  listen-on port {{ bind_dot_port }} tls {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-tls { {{ bind_listen_ipv4_addresses | join('; ') }}; };
+{%    endif %}
+{%  endif %}
+{%  if bind_listen_ipv6_addresses | length > 0 %}
+  listen-on-v6 port {{ bind_port }} { {{ bind_listen_ipv6_addresses | join('; ') }}; };
+{%    if bind_doh_enable %}
+  listen-on-v6 port {{ bind_doh_port }} tls {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-tls http default { {{ bind_listen_ipv6_addresses | join('; ') }}; };
+{%    endif %}
+{%    if bind_dot_enable %}
+  listen-on-v6 port {{ bind_dot_port }} tls {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-tls { {{ bind_listen_ipv6_addresses | join('; ') }}; };
+{%    endif %}
+{%  endif %}
+
+  allow-query { any; };
 
   recursion yes;
   allow-recursion { recursive-hosts-acl; };
@@ -24,7 +42,11 @@ options {
 {%  endif %}
 
   forward only;
+{%  if not bind_forwarders_dot_enable %}
   forwarders {
+{%  else %}
+  forwarders port {{ bind_forwarders_dot_port }} tls {{ bind_forwarders_dot_name | split('.') | reverse | join('-') }}-tls {
+{%  endif %}
 {%  for forwarder in bind_forwarders %}
     {{ forwarder }};
 {%  endfor %}
@@ -32,6 +54,23 @@ options {
 
   dnssec-validation {{ bind_dnssec_validation }};
 };
+{%  if bind_doh_enable or bind_dot_enable %}
+
+tls {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-tls {
+  cert-file "{{ bind_var_path }}/certs/server.crt";
+  key-file "{{ bind_var_path }}/certs/server.key";
+};
+{%  endif %}
+{%  if bind_forwarders_dot_enable %}
+
+tls {{ bind_forwarders_dot_name | split('.') | reverse | join('-') }}-tls {
+  remote-hostname "{{ bind_forwarders_dot_name }}";
+  ca-file "{{ bind_var_path }}/certs/ca.pem";
+  protocols { TLSv1.3; };
+  prefer-server-ciphers yes;
+  session-tickets yes;
+};
+{%  endif %}
 
 acl recursive-hosts-acl {
   // Always support the loopback interface for recursive queries
@@ -442,7 +481,7 @@ logging {
   };
 
   channel general-log {
-    file "{{ bind_log_path }}/named.log" versions 3 size 32m;
+    file "{{ bind_log_path }}/named.log" versions 3 size 8m;
     print-time yes;
     print-category yes;
     print-severity yes;
@@ -476,7 +515,7 @@ logging {
   category dnssec { dnssec-log; debug-log; };
 
   channel security-log {
-    file "{{ bind_log_path }}/security.log" versions 3 size 16m;
+    file "{{ bind_log_path }}/security.log" versions 3 size 4m;
     print-time yes;
     print-category yes;
     print-severity yes;
@@ -487,7 +526,7 @@ logging {
   category update-security { security-log; debug-log; };
 
   channel client-log {
-    file "{{ bind_log_path }}/client.log" versions 3 size 4m;
+    file "{{ bind_log_path }}/client.log" versions 7 size 32m;
     print-time yes;
     print-category yes;
     print-severity yes;
@@ -497,7 +536,7 @@ logging {
   category client { client-log; debug-log; };
 
   channel xfer-log {
-    file "{{ bind_log_path }}/xfer.log" versions 3 size 16m;
+    file "{{ bind_log_path }}/xfer.log" versions 3 size 4m;
     print-time yes;
     print-category yes;
     print-severity yes;

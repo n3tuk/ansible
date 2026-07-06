@@ -5,12 +5,22 @@ bind_listen_ipv4_addresses:
   - any
 bind_listen_ipv6_addresses:
   - any
-bind_port_dns: 53
+bind_port: 53
+
+bind_dot_enable: true
+bind_dot_port: 853
+
+bind_doh_enable: true
+bind_doh_port: 443
 
 bind_dns64_hosts: []
 bind_recursive_hosts: []
 
 bind_forwarders: []
+bind_forwarders_dot_enable: false
+bind_forwarders_dot_name:
+bind_forwarders_dot_port: 853
+bind_forwarders_dot_ca_cert:
 
 bind_views: []
 # - name: example
@@ -24,12 +34,13 @@ bind_views: []
 #       forwarders:
 #         - 1.1.1.1
 #   cidrs:
-#     - 192.0.2.0/24
-#     - 198.51.100.0/24
-#     - 203.0.113.0/24
-#     - 2001:db8:1::/48
-#     - 2001:db8:2::/48
-#     - 2001:db8:3::/48
+#     - comment: comment
+#       address; 192.0.2.0/24
+#     - address: 198.51.100.0/24
+#     - address: 203.0.113.0/24
+#     - address 2001:db8:1::/48
+#     - address 2001:db8:2::/48
+#     - address 2001:db8:3::/48
 #   servers:
 #     master: dns-01.example.com
 #     slaves:
@@ -45,7 +56,7 @@ bind_views: []
 #         grants:
 #           - zonesub A AAAA CNAME TXT
 #         cidrs:
-#            - 10.0.0.0/8
+#            - address: 10.0.0.0/8
 #         secret: ...
 
 bind_dnssec_validation: auto

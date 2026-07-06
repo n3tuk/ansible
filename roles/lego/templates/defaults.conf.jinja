@@ -10,7 +10,7 @@ LEGO_CERT_KEY_TYPE={{ lego_cert_key_type }}
 {% if lego_acme_mode == 'caddy' %}
 LEGO_ACME_MODE=webroot={{ lego_srv_path }}
 {% else %}
-LEGO_ACME_MODE=port={{ lego_listen_http }}
+LEGO_ACME_MODE=address=:{{ lego_listen_http }}
 {% endif %}
 
 LEGO_RENEW_HOOK=

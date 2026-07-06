@@ -12,3 +12,16 @@
     - bind
     - systemd
     - service
+
+- name: Enable the Lego certificate renewal timer
+  ansible.builtin.systemd:
+    name: "lego@{{ bind_service_name }}.timer"
+    enabled: true
+    state: started
+  when: >-
+    ( bind_doh_enable or bind_dot_enable ) and
+    not ansible_check_mode
+  tags:
+    - bind
+    - systemd
+    - service

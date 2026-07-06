@@ -10,6 +10,7 @@
     mode: u=rwx,g=rx,o=
   loop:
     - "{{ bind_var_path }}"
+    - "{{ bind_var_path }}/certs"
     - "{{ bind_log_path }}"
   loop_control:
     label: "{{ directory }}"
@@ -33,10 +34,25 @@
     - bind
     - configuration
 
+- name: Create or update the forwarders CA root certificate
+  ansible.builtin.copy:
+    content: "{{ bind_forwarders_dot_ca_cert }}"
+    dest: "{{ bind_var_path }}/certs/ca.pem"
+    owner: "{{ bind_service_user }}"
+    group: "{{ bind_service_group }}"
+    mode: u=rw,g=r,o=
+  when: >-
+    bind_forwarders_dot_enable and
+    bind_forwarders_dot_ca_cert is defined
+  notify:
+    - Reload BIND
+  tags:
+    - bind
+    - configuration
+
 - name: Create or update the named.conf configuration file
   ansible.builtin.template:
     src: named.conf.jinja
-    # yamllint disable-line rule:line-length
     dest: "{{ bind_etc_path }}/{{ bind_etc_name }}"
     owner: "{{ bind_service_user }}"
     group: "{{ bind_service_group }}"
@@ -145,4 +161,50 @@
     loop_var: view
   tags:
     - bind
+    - configuration
+
+- name: Create directory for Lego certificates
+  ansible.builtin.file:
+    path: "{{ lego_lib_path }}/{{ bind_service_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  when: >-
+    bind_doh_enable or bind_dot_enable
+  tags:
+    - bind
+    - lego
+    - configuration
+
+- name: Create or update the Lego configuration file
+  ansible.builtin.template:
+    src: lego.conf.jinja
+    dest: "{{ lego_etc_path }}/{{ bind_service_name }}.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  when: >-
+    bind_doh_enable or bind_dot_enable
+  notify:
+    - Trigger Lego for BIND certificate renewal
+  tags:
+    - bind
+    - lego
+    - configuration
+
+- name: Create or update the Lego post-run hook
+  ansible.builtin.template:
+    src: lego.sh.jinja
+    dest: "{{ lego_usr_path }}/{{ bind_service_name }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  when: >-
+    bind_doh_enable or bind_dot_enable
+  notify:
+    - Trigger Lego for BIND certificate renewal
+  tags:
+    - bind
+    - lego
     - configuration

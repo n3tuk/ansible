@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+
+set -euo pipefail
+
+# Ensure required environment variables are set
+: "${LEGO_HOOK_CERT_PATH:?LEGO_HOOK_CERT_PATH must be set}"
+: "${LEGO_HOOK_CERT_KEY_PATH:?LEGO_HOOK_CERT_KEY_PATH must be set}"
+
+# Check if certificate files exist
+if [[ ! -f "${LEGO_HOOK_CERT_PATH}" || ! -f "${LEGO_HOOK_CERT_KEY_PATH}" ]]; then
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [ERROR] Certificate files not found. Cannot continue." >&2
+  exit 1
+fi
+
+for cert in \
+  "${LEGO_HOOK_CERT_PATH}={{ bind_var_path }}/certs/server.crt" \
+  "${LEGO_HOOK_CERT_KEY_PATH}={{ bind_var_path }}/certs/server.key"; do
+  tmp="${cert/*=/}.tmp.${$}"
+
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Copying ${cert/=*/} to ${cert/*=/} (via ${tmp})"
+
+  cp "${cert/=*/}" "${tmp}"
+  chown "{{ bind_service_user }}:{{ bind_service_group }}" "${tmp}"
+  chmod 0600 "${tmp}"
+  mv -f "${tmp}" "${cert/*=/}"
+done
+
+echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Reloading the BIND service ({{ bind_service_name }}.service)"
+
+systemctl reload "{{ bind_service_name }}.service"

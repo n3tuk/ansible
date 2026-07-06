@@ -137,3 +137,14 @@ bind_recursive_hosts:
   - comment: >-
       external-02.amsterdam.n3t.uk Server
     address: 2a00:1098:5bf::2/128
+
+lego_firewall_ipv4_replace:
+  "172.23.41.4": "82.69.106.64"
+  # We'll skip this address as the above address will effectively install the
+  # external IP address for both of the CA servers by the one rule
+  "172.23.41.5": skipped
+
+lego_acme_email: admin@n3t.uk
+lego_acme_server: https://ca.n3t.uk/acme/n3tuk/directory
+lego_acme_servers_group: ca
+lego_acme_mode: standalone

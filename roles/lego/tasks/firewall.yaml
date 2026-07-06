@@ -4,16 +4,23 @@
 - name: Enable IPv4 firewall access for {{ host }}
   community.general.ufw:
     rule: allow
-    from_ip: "{{ address }}"
+    from_ip: "{{ lego_firewall_ipv4_replace[address] | default(address) }}"
     proto: tcp
     port: "{{ lego_listen_http }}"
     comment: >-
       Allow HTTP-01 ACME for Lego from {{ host }}
+  when: >-
+    lego_firewall_ipv4_replace[address] is not defined or
+    lego_firewall_ipv4_replace[address] != "skipped"
   loop: >-
     {{ hostvars[host].ansible_facts.all_ipv4_addresses }}
   loop_control:
     label: >-
-      allow from {{ address }} to {{ lego_listen_http }}/tcp
+      allow from {{ address }}
+      {% if lego_firewall_ipv4_replace[address] is defined -%}
+      ({{ lego_firewall_ipv4_replace[address] | default(address) }})
+      {% endif -%}
+      to {{ lego_listen_http }}/tcp
     loop_var: address
 
 - name: Enable IPv6 firewall access for {{ host }}
