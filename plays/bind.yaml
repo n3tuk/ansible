@@ -1,5 +1,5 @@
 ---
-- name: Configure Bind Services
+- name: Configure the BIND Service
   hosts: bind
   become: true
   become_user: root
@@ -26,6 +26,9 @@
       with_items: "{{ groups['bind'] }}"
 
   roles:
+    - role: ca
+      tags:
+        - ca
     - role: lego
       tags:
         - lego

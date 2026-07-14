@@ -1,8 +1,29 @@
 ---
-- name: Configure DNS Hosts
+- name: Configure DNS Servers
   hosts: dns
   become: true
   become_user: root
+
+  # Each BIND node must know about the configuration of the other BIND nodes in
+  # order to correctly configure the BIND server for replication and permit the
+  # necessary traffic via the firewall rules
+  pre_tasks:
+    - name: Gather facts from all CA hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
+      with_items: "{{ groups['ca'] }}"
+    - name: Gather facts from all BIND hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
+      with_items: "{{ groups['bind'] }}"
 
   roles:
     - role: ufw
@@ -11,12 +32,6 @@
     - role: tailscale
       tags:
         - tailscale
-
-# Include a dedicated play for installing and managing the BIND service, as it
-# needs to some steps to configure the BIND service and firewall rules that are
-# specific to the BIND service
-- name: Configure Bind Services
-  import_playbook: bind.yaml
-  when: "'bind' in group_names"
-  tags:
-    - bind
+    - role: bind
+      tags:
+        - bind
