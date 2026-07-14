@@ -11,6 +11,12 @@
   when: >-
     ansible_facts.distribution == 'Archlinux'
 
+- name: Install on Arch Linux
+  ansible.builtin.include_tasks:
+    file: arch.yaml
+  when: >-
+    ansible_facts.distribution == 'Archlinux'
+
 - name: Configure the Lego firewall rules
   ansible.builtin.include_tasks:
     file: firewall.yaml

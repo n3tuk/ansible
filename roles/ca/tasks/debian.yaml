@@ -12,10 +12,21 @@
     - ca
     - pre-flight
 
+- name: Load Debian Linux-specific variables
+  ansible.builtin.include_vars: >-
+    {{ lookup('ansible.builtin.first_found', params) }}
+  vars:
+    params:
+      files:
+        - debian.yaml
+        - main.yaml
+      paths:
+        - vars
+
 - name: Copy the n3t.uk Certificate Authority R1 certificate
   ansible.builtin.copy:
     src: n3tuk-ca-root-r1.pem
-    dest: "{{ ca_root_path.debian }}/{{ ca_root_file.debian }}"
+    dest: "{{ ca_root_path }}/{{ ca_root_file }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=r
