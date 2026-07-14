@@ -16,8 +16,11 @@ n3tuk.
 | [`upgrade.yaml`][play-upgrade]     | [`upgrade`][taskfile]        | A play which will update and upgrade all Arch Linux packages of using `pacman`.                                                                  |
 | [`authentik.yaml`][play-authentik] | [`play:authentik`][taskfile] | A play which will deploy and configure the Authentik identity provider alongside PostgreSQL, `cloudflared`, and Tailscale.                       |
 | [`ca.yaml`][play-ca]               | [`play:ca`][taskfile]        | A play which will deploy and configure the `step-ca` Certificate Authority alongside PostgreSQL and Tailscale.                                   |
-| [`dns.yaml`][play-dns]             | [`play:dns`][taskfile]       | A play which will deploy and configure the DNS servers.                                                                                          |
-| [`bind.yaml`][play-bind]           | [`play:bind`][taskfile]      | A play which will deploy and configure the `bind` DNS service.                                                                                   |
+| [`dns.yaml`][play-dns]             | [`play:dns`][taskfile]       | A play which will deploy and configure the DNS servers, including the `bind` service.                                                            |
+| [`bind.yaml`][play-bind]           | [`play:bind`][taskfile]      | A play which will deploy and configure the `bind` DNS service on all required hosts.                                                             |
+| [`external.yaml`][play-external]   | [`play:external`][taskfile]  | A play which will deploy and configure the external servers, including the `bind` and OpenBao services.                                          |
+| [`secrets.yaml`][play-secrets]     | [`play:secrets`][taskfile]   | A play which will deploy and configure the secrets servers.                                                                                      |
+| [`openbao.yaml`][play-openbao]     | [`play:openbao`][taskfile]   | A play which will deploy and configure the OpenBao service on all required hosts.                                                                |
 
 All Ansible plays run via `task` can be configured with limit overrides using
 `limit=` appended after the task:
@@ -38,6 +41,9 @@ task: [bootstrap] ansible-playbook \
 [play-ca]: https://github.com/n3tuk/ansible/blob/main/plays/ca.yaml
 [play-dns]: https://github.com/n3tuk/ansible/blob/main/plays/dns.yaml
 [play-bind]: https://github.com/n3tuk/ansible/blob/main/plays/bind.yaml
+[play-external]: https://github.com/n3tuk/ansible/blob/main/plays/external.yaml
+[play-secrets]: https://github.com/n3tuk/ansible/blob/main/plays/secrets.yaml
+[play-openbao]: https://github.com/n3tuk/ansible/blob/main/plays/openbao.yaml
 [taskfile]: https://github.com/n3tuk/ansible/blob/main/Taskfile.yaml
 [inventory]: https://github.com/n3tuk/ansible/blob/main/inventory.yaml
 
@@ -77,6 +83,7 @@ task: [bootstrap] ansible-playbook \
 | [`valkey`][role-valkey]                     | A role to install and configure Valkey on a virtual machine to manage in-memory data structures.                                                                                                              |
 | [`stepca`][role-stepca]                     | A role to install and configure `step-ca` on a virtual machine to provide Certificate Authority services.                                                                                                     |
 | [`bind`][role-bind]                         | A role to install and configure `bind` on a virtual machine to provide DNS services based on view configurations.                                                                                             |
+| [`openbao`][role-openbao]                   | A role to install and configure OpenBao on a virtual machine to provide secrets management services.                                                                                                          |
 
 [role-filesystems]: https://github.com/n3tuk/ansible/tree/main/roles/filesystems
 [role-bootstrap]: https://github.com/n3tuk/ansible/tree/main/roles/bootstrap
@@ -110,3 +117,4 @@ task: [bootstrap] ansible-playbook \
 [role-valkey]: https://github.com/n3tuk/ansible/tree/main/roles/valkey
 [role-stepca]: https://github.com/n3tuk/ansible/tree/main/roles/stepca
 [role-bind]: https://github.com/n3tuk/ansible/tree/main/roles/bind
+[role-openbao]: https://github.com/n3tuk/ansible/tree/main/roles/openbao

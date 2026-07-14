@@ -1,0 +1,14 @@
+---
+# vars file for openbao
+
+openbao_packages:
+  - openbao
+
+openbao_service_name: openbao
+openbao_service_user: openbao
+openbao_service_group: openbao
+
+openbao_usr_path: /usr/lib/openbao
+openbao_var_path: /var/lib/openbao
+openbao_etc_path: /etc/openbao
+openbao_etc_name: openbao.hcl

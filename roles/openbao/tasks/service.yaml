@@ -1,0 +1,14 @@
+---
+# service-specific tasks file for openbao
+
+- name: Start and enable the OpenBao service
+  ansible.builtin.systemd:
+    name: "{{ openbao_service_name }}.service"
+    enabled: true
+    state: started
+  when: >-
+    not ansible_check_mode
+  tags:
+    - openbao
+    - systemd
+    - service

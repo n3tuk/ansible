@@ -1,0 +1,11 @@
+---
+# arch-specific tasks file for openbao
+
+- name: Install OpenBao
+  community.general.pacman:
+    name: "{{ openbao_packages }}"
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - openbao
+    - packages

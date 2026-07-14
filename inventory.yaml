@@ -8,6 +8,7 @@ all:
     ca:
     cache:
     netdata:
+    secrets:
     external:
     test:
 
@@ -27,6 +28,7 @@ services:
     ca:
     cache:
     netdata:
+    secrets:
     external:
     test:
 
@@ -61,6 +63,10 @@ netdata:
   hosts:
     netdata-[01:02].services.n3t.uk:
 
+secrets:
+  hosts:
+    secrets-[01:03].services.n3t.uk:
+
 external:
   hosts:
     external-01.london.n3t.uk:
@@ -72,9 +78,18 @@ test:
 
 # Services
 
+# NOTE: These groups are to allow common settings to be configured for multiple
+#       groups of servers, such as BIND, which runs on the internal DNS servers
+#       and the external servers.
+
 bind:
   children:
     dns:
+    external:
+
+openbao:
+  children:
+    secrets:
     external:
 
 # Operating Systems
@@ -86,6 +101,7 @@ arch:
     ca:
     cache:
     netdata:
+    secrets:
     external:
     test:
 
@@ -104,6 +120,7 @@ virtual:
     ca:
     cache:
     netdata:
+    secrets:
     external:
     test:
 

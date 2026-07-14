@@ -1,0 +1,83 @@
+---
+# configuration-specific tasks file for openbao
+
+- name: Create the OpenBao system directories
+  ansible.builtin.file:
+    dest: "{{ directory }}"
+    state: directory
+    owner: "{{ openbao_service_user }}"
+    group: "{{ openbao_service_group }}"
+    mode: u=rwx,g=rx,o=
+  loop:
+    - "{{ openbao_var_path }}/vault"
+    - "{{ openbao_var_path }}/certs"
+  loop_control:
+    label: "{{ directory }}"
+    loop_var: directory
+  tags:
+    - openbao
+    - configuration
+
+- name: Create or update the openbao.hcl configuration file
+  ansible.builtin.template:
+    src: openbao.hcl.jinja
+    dest: "{{ openbao_etc_path }}/{{ openbao_etc_name }}"
+    owner: "{{ openbao_service_user }}"
+    group: "{{ openbao_service_group }}"
+    mode: u=rw,g=r,o=
+  notify:
+    - Reload OpenBao
+  tags:
+    - openbao
+    - configuration
+
+- name: Create or update the openbao.fish configuration file
+  ansible.builtin.template:
+    src: openbao.fish.jinja
+    dest: /root/.config/fish/conf.d/openbao.fish
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  tags:
+    - openbao
+    - configuration
+
+- name: Create directory for Lego certificates
+  ansible.builtin.file:
+    path: "{{ lego_lib_path }}/{{ openbao_service_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  tags:
+    - openbao
+    - lego
+    - configuration
+
+- name: Create or update the Lego configuration file
+  ansible.builtin.template:
+    src: lego.conf.jinja
+    dest: "{{ lego_etc_path }}/{{ openbao_service_name }}.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  notify:
+    - Trigger Lego for OpenBao certificate renewal
+  tags:
+    - openbao
+    - lego
+    - configuration
+
+- name: Create or update the Lego post-run hook
+  ansible.builtin.template:
+    src: lego.sh.jinja
+    dest: "{{ lego_usr_path }}/{{ openbao_service_name }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  notify:
+    - Trigger Lego for OpenBao certificate renewal
+  tags:
+    - openbao
+    - lego
+    - configuration

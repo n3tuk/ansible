@@ -1,0 +1,42 @@
+---
+# firewall-specific tasks file for openbao
+
+- name: Enable firewall access for OpenBao
+  community.general.ufw:
+    rule: allow
+    proto: tcp
+    port: "{{ openbao_service_port }}"
+    comment: "Allow {{ openbao_service_port }} to OpenBao"
+  tags:
+    - openbao
+    - firewall
+
+- name: Enable firewall access for the OpenBao Cluster
+  community.general.ufw:
+    rule: allow
+    src: >-
+      {{ (hostvars[node].ansible_facts.tailscale0.ipv6
+          | selectattr('scope', 'eq', 'global')
+          | list
+          | first).address
+      }}
+    proto: tcp
+    port: "{{ openbao_cluster_port }}"
+    comment: "Allow {{ openbao_cluster_port }} to OpenBao Cluster"
+  when: >-
+    node != inventory_hostname and
+    hostvars[node].ansible_facts.tailscale0.ipv6 is defined
+  loop: >-
+    {{ groups[openbao_group_name] }}
+  loop_control:
+    label: >-
+      allow from
+      {{ (hostvars[node].ansible_facts.tailscale0.ipv6
+          | selectattr('scope', 'eq', 'global')
+          | list
+          | first).address
+      }} to {{ openbao_cluster_port }}/tcp
+    loop_var: node
+  tags:
+    - openbao
+    - firewall

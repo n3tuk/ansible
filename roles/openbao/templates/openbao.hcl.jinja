@@ -1,0 +1,105 @@
+# {{ ansible_managed }}
+
+ui = true
+
+# Cluster Setup
+
+api_addr     = "https://{{ ansible_facts.fqdn }}:{{ openbao_service_port }}"
+cluster_addr = "https://[{{ (ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}]:{{ openbao_cluster_port }}"
+
+# Raft Storage Configuration
+
+storage "raft" {
+  path = "{{ openbao_var_path }}/vault"
+
+  min_quorum = {{ openbao_raft_min_quorum }}
+
+  node_id                 = "{{ ansible_facts.hostname }}"
+  retry_join_as_non_voter = {{ 'true' if openbao_raft_non_voter else 'false' }}
+{%  for node in groups[openbao_group_name] %}
+{%    if node != inventory_hostname %}
+
+  retry_join { # {{ hostvars[node].ansible_facts.fqdn }}
+    leader_api_addr = "https://[{{ (hostvars[node].ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}]:{{ openbao_service_port }}"
+
+    leader_ca_cert_file     = "{{ ca_root_path }}/{{ ca_root_file }}"
+    leader_client_cert_file = "{{ openbao_var_path }}/certs/server.crt"
+    leader_client_key_file  = "{{ openbao_var_path }}/certs/server.key"
+  }
+{%    endif %}
+{%  endfor %}
+}
+
+# HTTPS Listener Configuration
+
+listener "tcp" {
+  address         = "[::]:{{ openbao_service_port }}"
+  cluster_address = "[{{ (ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}]:{{ openbao_cluster_port }}"
+
+  tls_disable     = false
+  tls_min_version = "tls13"
+  tls_max_version = "tls13"
+
+  tls_cert_file = "{{ openbao_var_path }}/certs/server.crt"
+  tls_key_file  = "{{ openbao_var_path }}/certs/server.key"
+
+  tls_require_and_verify_client_cert = true
+  tls_client_ca_file                 = "{{ ca_root_path }}/{{ ca_root_file }}"
+
+  telemetry {
+    disallow_metrics = true
+  }
+
+  custom_response_headers {
+    "default" = {
+      # Enforce HTTPS and HSTS for all browser sessions for at least one year
+      "Strict-Transport-Security" = ["max-age=31536000"],
+
+      # Prevent clickjacking attacks by disallowing the site to be framed
+      "X-Frame-Options" = ["DENY"],
+
+      # Prevent the browser from sending the Referer header to other sites and
+      # on non-HTTPS requests, to avoid leaking sensitive information in the URL
+      "Referrer-Policy" = ["strict-origin"],
+
+      # Prevent the browser from caching sensitive data
+      "Cache-Control"                     = ["max-age=0", "no-store"],
+      "X-Permitted-Cross-Domain-Policies" = ["none"],
+      "X-DNS-Prefetch-Control"            = ["off"],
+      "X-Download-Options"                = ["noopen"],
+      "X-Powered-By"                      = ["none"],
+    },
+
+    "4xx" = {
+      "X-Frame-Options"                   = ["DENY"],
+      "Referrer-Policy"                   = ["strict-origin"],
+      "Cache-Control"                     = ["max-age=0", "no-store"],
+      "X-Permitted-Cross-Domain-Policies" = ["none"],
+      "X-DNS-Prefetch-Control"            = ["off"],
+      "X-Download-Options"                = ["noopen"],
+      "X-Powered-By"                      = ["none"],
+    },
+
+    "5xx" = {
+      "X-Frame-Options"                   = ["DENY"],
+      "Referrer-Policy"                   = ["strict-origin"],
+      "Cache-Control"                     = ["max-age=0", "no-store"],
+      "X-Permitted-Cross-Domain-Policies" = ["none"],
+      "X-DNS-Prefetch-Control"            = ["off"],
+      "X-Download-Options"                = ["noopen"],
+      "X-Powered-By"                      = ["none"],
+    },
+  }
+}
+
+# Create a dedicated, separate, listener for providing the metrics, both to
+# enable unauthenticated access via localhost only, and as metrics have been
+# disabled on the main listener to avoid exposing them to the public.
+listener "tcp" {
+  address = "[::1]:{{ openbao_metrics_port }}"
+
+  telemetry {
+    metrics_only                   = true
+    unauthenticated_metrics_access = true
+  }
+}

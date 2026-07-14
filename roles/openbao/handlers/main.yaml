@@ -1,0 +1,16 @@
+---
+# handlers file for openbao
+
+- name: Reload OpenBao
+  ansible.builtin.systemd:
+    name: "{{ openbao_service_name }}.service"
+    state: reloaded
+  when: >-
+    not ansible_check_mode
+
+- name: Trigger Lego for OpenBao certificate renewal
+  ansible.builtin.systemd:
+    name: "lego@{{ openbao_service_name }}.service"
+    state: started
+  when: >-
+    not ansible_check_mode
