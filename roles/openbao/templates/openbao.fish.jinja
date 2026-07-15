@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+
+set -Ux BAO_ADDR "https://{{ ansible_facts.fqdn }}:{{ openbao_service_port }}"
+set -Ux BAO_CAPATH "{{ ca_root_path }}/{{ ca_root_file }}"
+set -Ux BAO_CLIENT_CERT "{{ openbao_var_path }}/certs/server.crt"
+set -Ux BAO_CLIENT_KEY "{{ openbao_var_path }}/certs/server.key"

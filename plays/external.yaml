@@ -1,8 +1,26 @@
 ---
-- name: Configure External Hosts
+- name: Configure Externally-Hosted Servers
   hosts: external
   become: true
   become_user: root
+
+  pre_tasks:
+    # - name: Gather facts from all OpenBao hosts
+    #   ansible.builtin.setup:
+    #   delegate_to: "{{ item }}"
+    #   delegate_facts: true
+    #   when: >-
+    #     hostvars[item].ansible.default_ipv4 is not defined and
+    #     hostvars[item].ansible.default_ipv6 is not defined
+    #   with_items: "{{ groups['openbao'] }}"
+    - name: Gather facts from all CA hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
+      with_items: "{{ groups['ca'] }}"
 
   roles:
     - role: ufw
@@ -11,12 +29,12 @@
     - role: tailscale
       tags:
         - tailscale
-
-# Include a dedicated play for installing and managing the BIND service, as it
-# needs to some steps to configure the BIND service and firewall rules that are
-# specific to the BIND service
-- name: Configure Bind Services
-  import_playbook: bind.yaml
-  when: "'bind' in group_names"
-  tags:
-    - bind
+    - role: lego
+      tags:
+        - lego
+    - role: bind
+      tags:
+        - bind
+    # - role: openbao
+    #   tags:
+    #     - openbao

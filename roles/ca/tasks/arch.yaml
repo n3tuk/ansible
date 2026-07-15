@@ -1,14 +1,36 @@
 ---
 # arch-specific tasks file for ca
 
+- name: Load Arch Linux-specific variables
+  ansible.builtin.include_vars: >-
+    {{ lookup('ansible.builtin.first_found', params) }}
+  vars:
+    params:
+      files:
+        - arch.yaml
+        - main.yaml
+      paths:
+        - vars
+
+- name: Create the SSL share directory
+  ansible.builtin.file:
+    dest: "{{ ca_root_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rwx,o=rx
+  tags:
+    - ca
+    - configuration
+
 - name: Copy the n3t.uk Certificate Authority R1 certificate
   ansible.builtin.copy:
     src: n3tuk-ca-root-r1.pem
     # yamllint disable-line rule:line-length
-    dest: "{{ bootstrap_mount_base | default('') }}{{ ca_root_path.arch }}/{{ ca_root_file.arch }}"
+    dest: "{{ bootstrap_mount_base | default('') }}{{ ca_root_path }}/{{ ca_root_file }}"
     owner: root
     group: root
-    mode: u=rw,g=r,o=r
+    mode: u=r,g=r,o=r
   notify:
     - Install n3t.uk CA Root R1 locally
     - Install n3t.uk CA Root R1 in the chroot

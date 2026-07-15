@@ -1,0 +1,11 @@
+---
+# defaults file for openbao
+
+openbao_service_port: 8200
+openbao_cluster_port: 8201
+openbao_metrics_port: 9201
+
+openbao_group_name: openbao
+
+openbao_raft_non_voter: false
+openbao_raft_min_quorum: 2

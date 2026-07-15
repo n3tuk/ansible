@@ -111,6 +111,11 @@ ufw_default_rules:
     port: 22
     comment: Allow SSH from anywhere
 
+lego_acme_email: admin@n3t.uk
+lego_acme_server: https://ca.n3t.uk/acme/n3tuk/directory
+lego_acme_servers_group: ca
+lego_acme_mode: standalone
+
 tailscale_exit_node: true
 tailscale_peer_relay: true
 tailscale_auth_key: !vault |
@@ -143,8 +148,3 @@ lego_firewall_ipv4_replace:
   # We'll skip this address as the above address will effectively install the
   # external IP address for both of the CA servers by the one rule
   "172.23.41.5": skipped
-
-lego_acme_email: admin@n3t.uk
-lego_acme_server: https://ca.n3t.uk/acme/n3tuk/directory
-lego_acme_servers_group: ca
-lego_acme_mode: standalone
