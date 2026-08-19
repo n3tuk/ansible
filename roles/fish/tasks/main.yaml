@@ -24,7 +24,9 @@
     owner: root
     group: root
     mode: u=rwx,g=rx,o=rx
-  loop: "{{ fish_config_dirs | product(['.config', '.config/fish']) }}"
+  loop: >-
+    {{ fish_config_dirs
+        | product(['.config', '.config/fish', '.config/fish/conf.d']) }}
   loop_control:
     loop_var: directory
     label: /{{ directory.0 }}/{{ directory.1 }}

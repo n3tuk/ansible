@@ -5,14 +5,6 @@
   become_user: root
 
   pre_tasks:
-    # - name: Gather facts from all OpenBao hosts
-    #   ansible.builtin.setup:
-    #   delegate_to: "{{ item }}"
-    #   delegate_facts: true
-    #   when: >-
-    #     hostvars[item].ansible.default_ipv4 is not defined and
-    #     hostvars[item].ansible.default_ipv6 is not defined
-    #   with_items: "{{ groups['openbao'] }}"
     - name: Gather facts from all CA hosts
       ansible.builtin.setup:
       delegate_to: "{{ item }}"
@@ -21,8 +13,27 @@
         hostvars[item].ansible.default_ipv4 is not defined and
         hostvars[item].ansible.default_ipv6 is not defined
       with_items: "{{ groups['ca'] }}"
+    - name: Gather facts from all BIND hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
+      with_items: "{{ groups['bind'] }}"
+    - name: Gather facts from all OpenBao hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
+      with_items: "{{ groups['openbao'] }}"
 
   roles:
+    - role: ca
+      tags:
+        - ca
     - role: ufw
       tags:
         - ufw
@@ -32,9 +43,12 @@
     - role: lego
       tags:
         - lego
+    - role: caddy
+      tags:
+        - caddy
     - role: bind
       tags:
         - bind
-    # - role: openbao
-    #   tags:
-    #     - openbao
+    - role: openbao
+      tags:
+        - openbao

@@ -21,12 +21,17 @@ for cert in \
   echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Copying ${cert/=*/} to ${cert/*=/} (via ${tmp})"
 
   cp "${cert/=*/}" "${tmp}"
-  chown "{{ openbao_service_user }}:{{ openbao_service_group }}" "${tmp}"
-  chmod 0600 "${tmp}"
+  chown "{{ openbao_service_user }}:{{ caddy_group }}" "${tmp}"
+  chmod 0640 "${tmp}"
   mv -f "${tmp}" "${cert/*=/}"
 done
 
-echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Reloading the OpenBao service ({{ openbao_service_name }}.service)"
+if systemctl is-active --quiet "{{ openbao_service_name }}.service"; then
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Reloading the OpenBao service ({{ openbao_service_name }}.service)"
+  systemctl reload "{{ openbao_service_name }}.service"
+fi
 
-systemctl is-active "{{ openbao_service_name }}.service" \
-  && systemctl reload "{{ openbao_service_name }}.service"
+if systemctl is-active --quiet "{{ caddy_service_name }}.service"; then
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Reloading the Caddy service ({{ caddy_service_name }}.service)"
+  systemctl reload "{{ caddy_service_name }}.service"
+fi

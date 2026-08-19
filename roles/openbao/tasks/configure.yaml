@@ -1,45 +1,39 @@
 ---
 # configuration-specific tasks file for openbao
 
-- name: Create the OpenBao system directories
+- name: Create the OpenBao state directory
   ansible.builtin.file:
-    dest: "{{ directory }}"
+    dest: "{{ openbao_var_path }}"
+    state: directory
+    owner: "{{ openbao_service_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rwx,g=rx,o=
+  tags:
+    - openbao
+    - caddy
+    - configuration
+
+- name: Create the OpenBao data directory
+  ansible.builtin.file:
+    dest: "{{ openbao_var_path }}/vault"
     state: directory
     owner: "{{ openbao_service_user }}"
     group: "{{ openbao_service_group }}"
     mode: u=rwx,g=rx,o=
-  loop:
-    - "{{ openbao_var_path }}/vault"
-    - "{{ openbao_var_path }}/certs"
-  loop_control:
-    label: "{{ directory }}"
-    loop_var: directory
   tags:
     - openbao
     - configuration
 
-- name: Create or update the openbao.hcl configuration file
-  ansible.builtin.template:
-    src: openbao.hcl.jinja
-    dest: "{{ openbao_etc_path }}/{{ openbao_etc_name }}"
+- name: Create the OpenBao certificate directory
+  ansible.builtin.file:
+    dest: "{{ openbao_var_path }}/certs"
+    state: directory
     owner: "{{ openbao_service_user }}"
-    group: "{{ openbao_service_group }}"
-    mode: u=rw,g=r,o=
-  notify:
-    - Reload OpenBao
+    group: "{{ caddy_group }}"
+    mode: u=rwx,g=rx,o=
   tags:
     - openbao
-    - configuration
-
-- name: Create or update the openbao.fish configuration file
-  ansible.builtin.template:
-    src: openbao.fish.jinja
-    dest: /root/.config/fish/conf.d/openbao.fish
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=
-  tags:
-    - openbao
+    - caddy
     - configuration
 
 - name: Create directory for Lego certificates
@@ -80,4 +74,83 @@
   tags:
     - openbao
     - lego
+    - configuration
+
+- name: Check for the OpenBao certificate files
+  ansible.builtin.stat:
+    path: "{{ certificate_file }}"
+  loop:
+    - "{{ openbao_var_path }}/certs/server.crt"
+    - "{{ openbao_var_path }}/certs/server.key"
+  loop_control:
+    label: "{{ certificate_file }}"
+    loop_var: certificate_file
+  register: openbao_certificate_files
+  tags:
+    - openbao
+    - lego
+    - configuration
+
+- name: Request the initial OpenBao certificate
+  ansible.builtin.debug:
+    msg: The OpenBao certificate or key does not exist and will be requested
+  changed_when: >-
+    openbao_certificate_files.results
+    | selectattr('stat.exists', 'equalto', false)
+    | list
+    | length > 0
+  notify:
+    - Trigger Lego for OpenBao certificate renewal
+  tags:
+    - openbao
+    - lego
+    - configuration
+
+- name: Issue the OpenBao certificate before configuring services
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - openbao
+    - lego
+    - configuration
+
+- name: Set the OpenBao certificate file permissions
+  ansible.builtin.file:
+    path: "{{ certificate_file }}"
+    state: file
+    owner: "{{ openbao_service_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rw,g=r,o=
+  loop:
+    - "{{ openbao_var_path }}/certs/server.crt"
+    - "{{ openbao_var_path }}/certs/server.key"
+  loop_control:
+    label: "{{ certificate_file }}"
+    loop_var: certificate_file
+  tags:
+    - openbao
+    - caddy
+    - configuration
+
+- name: Create or update the openbao.hcl configuration file
+  ansible.builtin.template:
+    src: openbao.hcl.jinja
+    dest: "{{ openbao_etc_path }}/{{ openbao_etc_name }}"
+    owner: "{{ openbao_service_user }}"
+    group: "{{ openbao_service_group }}"
+    mode: u=rw,g=r,o=
+  notify:
+    - Reload OpenBao
+  tags:
+    - openbao
+    - configuration
+
+- name: Create or update the openbao.fish configuration file
+  ansible.builtin.template:
+    src: openbao.fish.jinja
+    dest: /root/.config/fish/conf.d/openbao.fish
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  tags:
+    - openbao
     - configuration

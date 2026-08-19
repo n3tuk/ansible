@@ -1,6 +1,8 @@
 ---
 env_location: Amsterdam, Netherlands
 
+openbao_raft_non_voter: true
+
 bind_rndc_key_secret: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   35386635316231353039663161666633613538316235613437356535323562663263346538333037

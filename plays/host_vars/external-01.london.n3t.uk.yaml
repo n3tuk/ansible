@@ -1,6 +1,8 @@
 ---
 env_location: London, England
 
+openbao_raft_non_voter: true
+
 bind_rndc_key_secret: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   37613731303065633632313763336165386662633764313136653131656563396530323765333461

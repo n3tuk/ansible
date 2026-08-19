@@ -10,7 +10,7 @@ bind_port: 53
 bind_dot_enable: true
 bind_dot_port: 853
 
-bind_doh_enable: true
+bind_doh_enable: false
 bind_doh_port: 443
 
 bind_dns64_hosts: []

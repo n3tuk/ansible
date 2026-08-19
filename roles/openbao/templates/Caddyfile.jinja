@@ -1,0 +1,108 @@
+# {{ ansible_managed }}
+
+{{ openbao_domain_name }} {
+  tls {
+    issuer acme {
+      dir {{ openbao_caddy_tls_acme_server }}
+      disable_tlsalpn_challenge
+      trusted_roots "{{ ca_root_path }}/{{ ca_root_file }}"
+      email {{ openbao_caddy_tls_acme_email }}
+{% if openbao_caddy_tls_dns_rfc2136_server is defined and
+      openbao_caddy_tls_dns_rfc2136_key_name is defined and
+      openbao_caddy_tls_dns_rfc2136_key_algorithm is defined and
+      openbao_caddy_tls_dns_rfc2136_key_secret is defined %}
+
+      dns rfc2136 {
+        server "{{ openbao_caddy_tls_dns_rfc2136_server }}"
+        key_name "{{ openbao_caddy_tls_dns_rfc2136_key_name }}"
+        key_alg "{{ openbao_caddy_tls_dns_rfc2136_key_algorithm }}"
+        key "{{ openbao_caddy_tls_dns_rfc2136_key_secret }}"
+      }
+{% endif %}
+    }
+
+    client_auth {
+      mode verify_if_given
+      trust_pool file {
+        pem_file "{{ ca_root_path }}/{{ ca_root_file }}"
+      }
+    }
+  }
+
+  @verified_client_cert expression `{http.request.tls.client.certificate_der_base64} != ""`
+
+  route {
+    request_header -Client-Cert
+    request_header @verified_client_cert Client-Cert ":{http.request.tls.client.certificate_der_base64}:"
+
+    # This virtual host is for the OpenBAO service and will forward all requests
+    # to the local instance in the cluster by default, and to other servers in
+    # the cluster if the local instance is not avilable (e.g. during upgrades)
+    reverse_proxy https://[{{ (ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}]:{{ openbao_service_port }}
+{%- for host in groups[openbao_group_name] | sort %}
+{%-   if host != inventory_hostname -%}
+    {{ " " }}https://[{{ (hostvars[host].ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}]:{{ openbao_service_port }}
+{%-   endif %}
+{%- endfor %} {
+      transport http {
+        tls_trust_pool file {
+          pem_file "{{ ca_root_path }}/{{ ca_root_file }}"
+        }
+      }
+
+      lb_policy first
+      lb_try_duration {{ openbao_caddy_retry_duration }}
+      lb_try_interval {{ openbao_caddy_retry_interval }}
+
+      fail_duration {{ openbao_caddy_passive_fail_duration }}
+      max_fails {{ openbao_caddy_passive_max_fails }}
+
+      health_uri /v1/sys/health?standbyok=true&perfstandbyok=true
+      health_status 200
+      health_interval {{ openbao_caddy_health_interval }}
+      health_timeout {{ openbao_caddy_health_timeout }}
+      health_fails {{ openbao_caddy_health_fails }}
+      health_headers {
+        Host {{ openbao_domain_name }}
+      }
+    }
+  }
+}
+
+{{ inventory_hostname }}, {{ (ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }} {
+  tls "{{ openbao_var_path }}/certs/server.crt" "{{ openbao_var_path }}/certs/server.key" {
+    client_auth {
+      mode verify_if_given
+      trust_pool file {
+        pem_file "{{ ca_root_path }}/{{ ca_root_file }}"
+      }
+    }
+  }
+
+  @verified_client_cert expression `{http.request.tls.client.certificate_der_base64} != ""`
+
+  route {
+    request_header -Client-Cert
+    request_header @verified_client_cert Client-Cert ":{http.request.tls.client.certificate_der_base64}:"
+
+    # This virtual host deals specifically with requests for the local instance
+    # of the OpenBao cluster, so only direct requests to the local instance.
+    reverse_proxy https://[{{ (ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}]:{{ openbao_service_port }} {
+      transport http {
+        tls_server_name {{ inventory_hostname }}
+        tls_trust_pool file {
+          pem_file "{{ ca_root_path }}/{{ ca_root_file }}"
+        }
+      }
+
+      health_uri /v1/sys/health?standbyok=true&perfstandbyok=true
+      health_status 200
+      health_interval {{ openbao_caddy_health_interval }}
+      health_timeout {{ openbao_caddy_health_timeout }}
+      health_fails {{ openbao_caddy_health_fails }}
+      health_headers {
+        Host {{ openbao_domain_name }}
+      }
+    }
+  }
+}

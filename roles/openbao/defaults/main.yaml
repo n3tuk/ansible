@@ -1,9 +1,27 @@
 ---
 # defaults file for openbao
 
+openbao_domain_name: secrets.services.n3t.uk
+
 openbao_service_port: 8200
 openbao_cluster_port: 8201
 openbao_metrics_port: 9201
+
+openbao_caddy_tls_acme_server: "{{ lego_acme_server }}"
+openbao_caddy_tls_acme_email: "{{ lego_acme_email }}"
+
+openbao_caddy_tls_dns_rfc2136_server: ""
+openbao_caddy_tls_dns_rfc2136_key_name: ""
+openbao_caddy_tls_dns_rfc2136_key_algorithm: ""
+openbao_caddy_tls_dns_rfc2136_key_secret: ""
+
+openbao_caddy_health_interval: 10s
+openbao_caddy_health_timeout: 2s
+openbao_caddy_health_fails: 2
+openbao_caddy_retry_duration: 5s
+openbao_caddy_retry_interval: 250ms
+openbao_caddy_passive_fail_duration: 30s
+openbao_caddy_passive_max_fails: 1
 
 openbao_group_name: openbao
 
