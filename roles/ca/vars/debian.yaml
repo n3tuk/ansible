@@ -1,0 +1,5 @@
+---
+# debian-specific vars file for ca
+
+ca_root_path: /usr/local/share/ca-certificates
+ca_root_file: n3tuk-ca-root-r1.crt
