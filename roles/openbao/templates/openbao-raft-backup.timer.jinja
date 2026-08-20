@@ -1,0 +1,10 @@
+[Unit]
+Description=OpenBao Raft Snapshot Backup Timer
+
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

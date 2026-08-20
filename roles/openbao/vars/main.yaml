@@ -3,6 +3,8 @@
 
 openbao_packages:
   - openbao
+  - jq
+  - aws-cli-v2
 
 openbao_service_name: openbao
 openbao_service_user: openbao

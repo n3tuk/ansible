@@ -154,3 +154,51 @@
   tags:
     - openbao
     - configuration
+
+- name: Create the OpenBao snapshots directory
+  ansible.builtin.file:
+    path: "{{ openbao_var_path }}/snapshots"
+    state: directory
+    owner: "{{ openbao_service_user }}"
+    group: "{{ openbao_service_group }}"
+    mode: u=rwx,g=rx,o=
+  tags:
+    - openbao
+    - backup
+    - configuration
+
+- name: Create the OpenBao AWS credentials directory
+  ansible.builtin.file:
+    path: "{{ openbao_var_path }}/.aws"
+    state: directory
+    owner: "{{ openbao_service_user }}"
+    group: "{{ openbao_service_group }}"
+    mode: u=rwx,g=,o=
+  tags:
+    - openbao
+    - backup
+    - configuration
+
+- name: Create or update the AWS credentials file
+  ansible.builtin.template:
+    src: credentials.jinja
+    dest: "{{ openbao_var_path }}/.aws/credentials"
+    owner: "{{ openbao_service_user }}"
+    group: "{{ openbao_service_group }}"
+    mode: u=rw,g=,o=
+  tags:
+    - openbao
+    - backup
+    - configuration
+
+- name: Deploy the OpenBao raft backup script
+  ansible.builtin.copy:
+    src: openbao-raft-backup
+    dest: /usr/local/bin/openbao-raft-backup
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  tags:
+    - openbao
+    - backup
+    - configuration

@@ -1,0 +1,28 @@
+[Unit]
+Description=OpenBao Raft Snapshot Backup
+After=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+User={{ openbao_service_user }}
+Group={{ openbao_service_group }}
+WorkingDirectory={{ openbao_var_path }}
+Environment=BAO_ADDR="https://[{{ (ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}]:8200"
+Environment=BAO_CAPATH="{{ ca_root_path }}/{{ ca_root_file }}"
+Environment=BAO_CLIENT_CERT="{{ openbao_var_path }}/certs/server.crt"
+Environment=BAO_CLIENT_KEY="{{ openbao_var_path }}/certs/server.key"
+Environment=BAO_BACKUP_APPROLE_PATH="{{ openbao_raft_backup_approle_path }}"
+Environment=BAO_BACKUP_APPROLE_ROLE_ID="{{ openbao_raft_backup_approle_role_id }}"
+Environment=BAO_BACKUP_APPROLE_SECRET_ID="{{ openbao_raft_backup_approle_secret_id }}"
+Environment=BAO_BACKUP_SNAPSHOT_DIR="{{ openbao_var_path }}/snapshots"
+Environment=BAO_BACKUP_CLUSTER_NAME="{{ openbao_raft_backup_cluster_name }}"
+Environment=BAO_BACKUP_BUCKET_NAME="{{ openbao_raft_backup_bucket_name }}"
+Environment=BAO_BACKUP_BUCKET_PREFIX="{{ openbao_raft_backup_bucket_prefix }}"
+ExecStart=/usr/local/bin/openbao-raft-backup
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openbao-raft-backup
+
+[Install]
+WantedBy=multi-user.target

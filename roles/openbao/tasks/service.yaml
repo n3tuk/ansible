@@ -1,9 +1,9 @@
 ---
 # service-specific tasks file for openbao
 
-- name: Start and enable the OpenBao Lego trigger
+- name: Start and enable the OpenBao Lego timer
   ansible.builtin.systemd:
-    name: "lego@{{ openbao_service_name }}.trigger"
+    name: "lego@{{ openbao_service_name }}.timer"
     enabled: true
   when: >-
     not ansible_check_mode
@@ -23,3 +23,43 @@
     - openbao
     - systemd
     - service
+
+- name: Deploy and enable the OpenBao raft backup service
+  ansible.builtin.template:
+    src: openbao-raft-backup.service.jinja
+    dest: /etc/systemd/system/openbao-raft-backup.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  notify:
+    - Reload systemd
+  tags:
+    - openbao
+    - backup
+    - systemd
+
+- name: Deploy and enable the OpenBao raft backup timer
+  ansible.builtin.template:
+    src: openbao-raft-backup.timer.jinja
+    dest: /etc/systemd/system/openbao-raft-backup.timer
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  notify:
+    - Reload systemd
+  tags:
+    - openbao
+    - backup
+    - systemd
+
+- name: Start and enable the OpenBao raft backup timer
+  ansible.builtin.systemd:
+    name: openbao-raft-backup.timer
+    enabled: true
+    state: started
+  when: >-
+    not ansible_check_mode
+  tags:
+    - openbao
+    - backup
+    - systemd

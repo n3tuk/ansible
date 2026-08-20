@@ -27,3 +27,10 @@ openbao_group_name: openbao
 
 openbao_raft_non_voter: false
 openbao_raft_min_quorum: 2
+
+openbao_raft_backup_cluster_name: ""
+openbao_raft_backup_approle_path: ""
+openbao_raft_backup_approle_role_id: ""
+openbao_raft_backup_approle_secret_id: ""
+openbao_raft_backup_bucket_name: ""
+openbao_raft_backup_bucket_prefix: openbao

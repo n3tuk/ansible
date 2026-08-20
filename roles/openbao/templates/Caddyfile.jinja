@@ -37,7 +37,7 @@
 
     # This virtual host is for the OpenBAO service and will forward all requests
     # to the local instance in the cluster by default, and to other servers in
-    # the cluster if the local instance is not avilable (e.g. during upgrades)
+    # the cluster if the local instance is not available (e.g. during upgrades)
     reverse_proxy https://[{{ (ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}]:{{ openbao_service_port }}
 {%- for host in groups[openbao_group_name] | sort %}
 {%-   if host != inventory_hostname -%}

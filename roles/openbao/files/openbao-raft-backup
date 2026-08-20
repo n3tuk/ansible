@@ -1,0 +1,88 @@
+#!/bin/bash
+set -euo pipefail
+
+INVOCATION_ID=$(uuidgen -r)
+
+log() {
+  local level="$1" _level
+  shift
+
+  case "$level" in
+    debug) _level="7" ;;
+    info) _level="6" ;;
+    warn|warning) _level="4" ;;
+    error) _level="3" ;;
+    crit|critical) _level="2" ;;
+    alert) _level="1" ;;
+    emerg|emergency) _level="0" ;;
+    *) _level="5" ;; # notice
+  esac
+
+  logger --journald <<EOF
+UNIT=openbao-raft-backup.service
+PRIORITY=${_level}
+INVOCATION_ID=${INVOCATION_ID}
+MESSAGE_ID=$(uuidgen --time)
+SYSLOG_PID=${$}
+SYSLOG_IDENTIFIER=openbao-raft-backup
+MESSAGE=${*}
+EOF
+}
+
+export BAO_ADDR BAO_CAPATH BAO_CLIENT_CERT BAO_CLIENT_KEY
+
+BAO_STATUS_OUTPUT=$(bao status -format json)
+BAO_CLUSTER_NAME=$(echo "$BAO_STATUS_OUTPUT" | jq -r '.cluster_name // empty')
+BAO_HA_ENABLED=$(echo "$BAO_STATUS_OUTPUT" | jq -r '.ha_enabled // false')
+BAO_HA_LEADER=$(echo "$BAO_STATUS_OUTPUT" | jq -r '.is_self // false')
+
+BAO_TOKEN=$(bao write "auth/${BAO_BACKUP_APPROLE_PATH}/login" \
+  role_id="${BAO_BACKUP_APPROLE_ROLE_ID}" \
+  secret_id="${BAO_BACKUP_APPROLE_SECRET_ID}" \
+  -format=json | jq -r '.auth.client_token')
+export BAO_TOKEN
+
+HOSTNAME=$(hostnamectl hostname)
+SNAPSHOT_DIR="${BAO_BACKUP_SNAPSHOT_DIR:-/var/lib/openbao/snapshots}"
+SNAPSHOT_FILE="$(date +%Y%m%d-%H%M%S)-${HOSTNAME}.snapshot.tar.gz"
+SNAPSHOT_RETENTION="${BAO_BACKUP_RETENTION:-2}"
+
+log "info" "Starting OpenBao Raft backup for ${BAO_CLUSTER_NAME:-unknown} cluster."
+
+log "info" "Creating snapshot at ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}."
+mkdir -p "${SNAPSHOT_DIR}"
+if ! bao operator raft snapshot save "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" >/dev/null; then
+  log "error" "Failed to create the snapshot for OpenBao."
+  exit 1
+fi
+
+REMOTE_UPLOAD_FAILED=false
+if [[ "${BAO_HA_ENABLED}" == "true" && "${BAO_HA_LEADER}" != "true" ]]; then
+  log "info" "This node is not the leader. Snapshot saved locally only."
+elif [[ -z "${BAO_BACKUP_BUCKET_NAME}" ]]; then
+  log "warning" "AWS S3 Bucket is not configured. Snapshot saved locally only."
+else
+  BAO_BACKUP_BUCKET_PATH="${BAO_BACKUP_BUCKET_PREFIX}/${BAO_BACKUP_CLUSTER_NAME:-${BAO_CLUSTER_NAME:-unknown}}/snapshots"
+  log "info" "Uploading snapshot to s3://${BAO_BACKUP_BUCKET_NAME}/${BAO_BACKUP_BUCKET_PATH}/${SNAPSHOT_FILE}"
+  if ! aws s3 cp "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" "s3://${BAO_BACKUP_BUCKET_NAME}/${BAO_BACKUP_BUCKET_PATH}/${SNAPSHOT_FILE}" >/dev/null; then
+    log "error" "Failed to upload the snapshot to the AWS S3 Bucket."
+    REMOTE_UPLOAD_FAILED=true
+  else
+    log "info" "Snapshot successfully uploaded to the AWS S3 Bucket."
+  fi
+fi
+
+log "info" "Rotating local snapshots (keeping the last ${SNAPSHOT_RETENTION})."
+cd "${SNAPSHOT_DIR}"
+ls -t *.snapshot.tar.gz 2> /dev/null \
+  | tail -n +$((SNAPSHOT_RETENTION + 1)) \
+  | while read -r snapshot; do
+    rm -f "$snapshot"
+    log "debug" "Snapshot ${snapshot} removed."
+  done
+
+if [[ "${REMOTE_UPLOAD_FAILED}" == true ]]; then
+  log "warning" "Local backup completed and rotated, but the S3 upload failed."
+else
+  log "info" "Backups completed and rotated successfully."
+fi
