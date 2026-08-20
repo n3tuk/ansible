@@ -19,11 +19,11 @@
     - name: DNS-over-HTTPS
       port: "{{ bind_doh_port }}"
       proto: tcp
-      enable: "{{ bind_doh_port }}"
+      enable: "{{ bind_doh_enable }}"
     - name: DNS-over-TLS
       port: "{{ bind_dot_port }}"
       proto: tcp
-      enable: "{{ bind_dot_port }}"
+      enable: "{{ bind_dot_enable }}"
   when: port.enable | bool
   loop_control:
     label: allow from any to {{ port.port }}/{{ port.proto }} ({{ port.name }})

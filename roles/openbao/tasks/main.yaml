@@ -22,3 +22,14 @@
 - name: Set up OpenBao
   ansible.builtin.include_tasks:
     file: service.yaml
+
+- name: Apply the OpenBao configuration before configuring Caddy
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - openbao
+    - caddy
+    - configuration
+
+- name: Configure Caddy for OpenBao
+  ansible.builtin.include_tasks:
+    file: caddy.yaml

@@ -29,6 +29,9 @@
     - role: lego
       tags:
         - lego
+    - role: caddy
+      tags:
+        - caddy
     - role: openbao
       tags:
         - openbao

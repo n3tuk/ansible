@@ -7,17 +7,23 @@ caddy_group: caddy
 caddy_url_base: https://caddyserver.com/api/download
 caddy_packages:
   - github.com/caddy-dns/cloudflare
+  - github.com/caddy-dns/rfc2136
 
 caddy_upgrade: false
 
 caddy_acme_email: admin@n3t.uk
 caddy_acme_cloudflare_enabled: true
 caddy_acme_cloudflare_api_token: ""
+caddy_acme_rfc2136_enabled: true
+caddy_acme_rfc2136_server: ""
+caddy_acme_rfc2136_key_name: ""
+caddy_acme_rfc2136_key_alg: ""
+caddy_acme_rfc2136_key: ""
 
 caddy_auto_https: ""
 
 caddy_tls_resolvers:
-  - 1.1.1.1
-  - 1.0.0.1
-  - 2606:4700:4700::1111
-  - 2606:4700:4700::1001
+  - fd7a:115c:a1e0::8401:2d82
+  - fd7a:115c:a1e0::8301:e914
+  - fd7a:115c:a1e0::9034:4132
+  - fd7a:115c:a1e0::9f34:946f

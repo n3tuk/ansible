@@ -1,0 +1,16 @@
+---
+# caddy-specific tasks file for openbao
+
+- name: Create or update the OpenBao Caddy configuration
+  ansible.builtin.template:
+    src: Caddyfile.jinja
+    dest: "{{ caddy_config_path }}/{{ caddy_config_file }}.d/openbao"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rw,g=r,o=
+  notify:
+    - Reload Caddy
+  tags:
+    - openbao
+    - caddy
+    - configuration
