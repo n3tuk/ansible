@@ -20,7 +20,7 @@ AUTHENTIK_EMAIL__USE_SSL={{ 'true' if authentik_email_use_ssl else 'false' }}
 AUTHENTIK_EMAIL__TIMEOUT={{ authentik_email_timeout }}
 AUTHENTIK_EMAIL__FROM={{ authentik_email_from }}
 
-AUTHENTIK_POSTGRESQL__HOST={{ hostvars[authentik_postgresql_host].ansible_facts.default_ipv4.address }}
+AUTHENTIK_POSTGRESQL__HOST={{ hostvars[authentik_postgresql_host].ansible_facts.default_ipv6.address }}
 AUTHENTIK_POSTGRESQL__PORT={{ authentik_postgresql_port }}
 AUTHENTIK_POSTGRESQL__SSLMODE={{ authentik_postgresql_ssl_mode }}
 AUTHENTIK_POSTGRESQL__SSLROOTCERT={{ authentik_postgresql_ssl_root_cert }}
