@@ -4,9 +4,9 @@
 authentik_image: ghcr.io/goauthentik/server
 authentik_version: "2026.5.5"
 
-authentik_public_hostname: ""
+authentik_public_hostnames: []
 
-authentik_listen_address: 0.0.0.0
+authentik_listen_address: "[::]"
 authentik_listen_http: 8080
 authentik_listen_https: 8443
 authentik_listen_ldap: 3389

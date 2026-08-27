@@ -1,7 +1,9 @@
 # {{ ansible_managed }}
 
-{{ authentik_public_hostname }} {
+{{ authentik_public_hostnames | join(', ') }} {
+  encode gzip
 {% if caddy_acme_cloudflare_enabled %}
+
   tls {
     dns cloudflare {{ caddy_acme_cloudflare_api_token }}
     resolvers 1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001
@@ -9,7 +11,7 @@
 
   log authentik {
     level info
-    output file {{ caddy_log_path }}/{{ authentik_public_hostname }}.log {
+    output file {{ caddy_log_path }}/{{ (authentik_public_hostnames | first) if (authentik_public_hostnames | length > 0) else 'authentik' }}.log {
        mode 0644
        roll_size 10MiB
        roll_keep_for 72h
@@ -24,15 +26,13 @@
 {% endif %}
   reverse_proxy
 {%- for host in groups['authentik'] %}
- [{{ hostvars[host].ansible_facts.default_ipv4.address }}]:{{ authentik_listen_https }}
+ [{{ hostvars[host].ansible_facts.default_ipv6.address }}]:{{ authentik_listen_https }}
 {%- endfor %} {
     transport http {
       # The Authentik servers currently do not have valid TLS certificates, so
       # skip checks until valid certificates have been created and loaded
       tls_insecure_skip_verify
     }
-
-    trusted_proxies {{ authentik_listen_trusted_proxy_cidrs | join(' ') }}
 
     header_down +Strict-Transport-Security "max-age=63072000; always"
 

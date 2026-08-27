@@ -108,6 +108,20 @@ lego_acme_servers_group: ca
 lego_acme_mode: caddy
 caddy_auto_https: disable_redirects
 
+caddy_trusted_proxies:
+  - "127.0.0.1/32"
+  - "::1/128"
+
+authentik_listen_trusted_proxy_cidrs:
+  # yamllint disable-line rule:line-length
+  - "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
+  # yamllint disable-line rule:line-length
+  - "{{ hostvars['authentik-02.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
+
+caddy_proxy_protocol_enabled: true
+caddy_proxy_protocol_allow:
+  - 127.0.0.1/32
+
 postgresql_tls_enabled: true
 postgresql_tls_ca_crt: /etc/ssl/private/n3tuk-ca-root-r1.pem
 
@@ -166,24 +180,11 @@ postgresql_walg_aws_s3_prefix: !vault |
   31653065616661353961653737333834643737393031316230363635343864363961333633336265
   326566646661393338333861383465313363
 
-authentik_public_hostname: auth.n3t.uk
+authentik_public_hostnames:
+  - accounts.services.n3t.uk
+  - auth.n3t.uk
 
 authentik_allowed_hosts: "{{ groups['authentik'] | default([]) }}"
-
-authentik_listen_trusted_proxy_cidrs:
-  - "127.0.0.1/32"
-  - "::1/128"
-  # Because we load balance between the two nodes from the nodes themselves,
-  # Authentik can see either local host for traffic coming through the current
-  # node or the private IP address of the other node if it's being sent to there
-  # by Cloudflare or Tailscale, therefore ensure that all relevant addresses are
-  # trusted.
-  # yamllint disable rule:line-length
-  - "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
-  - "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
-  - "{{ hostvars['authentik-02.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
-  - "{{ hostvars['authentik-02.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
-  # yamllint enable rule:line-length
 
 authentik_email_from: no-reply@n3t.uk
 authentik_email_host: !vault |

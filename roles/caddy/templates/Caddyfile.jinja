@@ -5,6 +5,30 @@
 {% if caddy_auto_https is defined and caddy_auto_https | length > 0 %}
   auto_https {{ caddy_auto_https }}
 {% endif %}
+
+{% if caddy_trusted_proxies | length > 0 or caddy_proxy_protocol_enabled %}
+  servers {
+{%   if caddy_trusted_proxies | length > 0 %}
+    trusted_proxies static {{ caddy_trusted_proxies | join(" ") }}
+    trusted_proxies_strict
+{%   endif %}
+{%   if caddy_proxy_protocol_enabled %}
+    listener_wrappers {
+      proxy_protocol {
+{%     if caddy_proxy_protocol_allow | length > 0 %}
+        allow {{ caddy_proxy_protocol_allow | join(" ") }}
+{%     endif %}
+{%     if caddy_proxy_protocol_deny | length > 0 %}
+        deny {{ caddy_proxy_protocol_deny | join(" ") }}
+{%     endif %}
+        fallback_policy {{ caddy_proxy_protocol_fallback_policy }}
+        timeout {{ caddy_proxy_protocol_timeout }}
+      }
+      tls
+    }
+{%   endif %}
+  }
+{% endif %}
 }
 
 # Import additional Caddyfile config files in /etc/caddy/conf.d/

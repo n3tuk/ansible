@@ -27,3 +27,13 @@ caddy_tls_resolvers:
   - fd7a:115c:a1e0::8301:e914
   - fd7a:115c:a1e0::9034:4132
   - fd7a:115c:a1e0::9f34:946f
+
+caddy_trusted_proxies:
+  - 127.0.0.1/32
+  - ::1/128
+
+caddy_proxy_protocol_enabled: false
+caddy_proxy_protocol_allow: []
+caddy_proxy_protocol_deny: []
+caddy_proxy_protocol_timeout: 250ms
+caddy_proxy_protocol_fallback_policy: ignore
