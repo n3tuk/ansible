@@ -36,14 +36,14 @@
 
 - name: Create or update the forwarders CA root certificate
   ansible.builtin.copy:
-    content: "{{ bind_forwarders_dot_ca_cert }}"
+    content: "{{ bind_forwarders_dot_ca_cert | default('') }}"
     dest: "{{ bind_var_path }}/certs/ca.pem"
     owner: "{{ bind_service_user }}"
     group: "{{ bind_service_group }}"
     mode: u=rw,g=r,o=
   when: >-
     bind_forwarders_dot_enable and
-    bind_forwarders_dot_ca_cert is defined
+    bind_forwarders_dot_ca_cert | length > 0
   notify:
     - Reload BIND
   tags:

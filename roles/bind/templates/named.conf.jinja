@@ -65,7 +65,9 @@ tls {{ ansible_facts.fqdn | split('.') | reverse | join('-') }}-tls {
 
 tls {{ bind_forwarders_dot_name | split('.') | reverse | join('-') }}-tls {
   remote-hostname "{{ bind_forwarders_dot_name }}";
+{%    if bind_forwarders_dot_ca_cert | length > 0 %}
   ca-file "{{ bind_var_path }}/certs/ca.pem";
+{%    endif %}
   protocols { TLSv1.3; };
   prefer-server-ciphers yes;
   session-tickets yes;
