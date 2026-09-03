@@ -20,7 +20,7 @@ bind_forwarders: []
 bind_forwarders_dot_enable: false
 bind_forwarders_dot_name:
 bind_forwarders_dot_port: 853
-bind_forwarders_dot_ca_cert: ''
+bind_forwarders_dot_ca_cert: ""
 
 bind_views: []
 # - name: example

@@ -1,10 +1,10 @@
 ---
 # configuration-specific tasks file for authentik
 
-- name: Create or update the environment file
+- name: Create or update the Server environment file
   ansible.builtin.template:
-    src: environment.jinja
-    dest: /etc/default/{{ authentik_service_prefix }}
+    src: environment-server.jinja
+    dest: /etc/default/{{ authentik_service_prefix }}-server
     owner: root
     group: root
     mode: u=rw,g=,o=
@@ -12,6 +12,20 @@
   no_log: true
   notify:
     - Restart Authentik Server
+  tags:
+    - authentik
+    - configuration
+
+- name: Create or update the Worker environment file
+  ansible.builtin.template:
+    src: environment-worker.jinja
+    dest: /etc/default/{{ authentik_service_prefix }}-worker
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  # This file contains secrets, including keys and passwords
+  no_log: true
+  notify:
     - Restart Authentik Worker
   tags:
     - authentik

@@ -1,7 +1,7 @@
 # n3t.uk Authentik Ansible Role
 
 An Ansible role for the installation and configuration of the Authentik
-authentication service, connecting with PostgreSQL and Redis backends.
+authentication service, connecting with the PostgreSQL backend.
 
 ## Requirements
 
@@ -34,7 +34,6 @@ None.
   roles:
     - role: ufw
     - role: postgresql
-    - role: redis
     - role: caddy
     - role: cloudflared
     - role: tailscale
