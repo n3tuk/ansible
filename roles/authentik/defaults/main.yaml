@@ -2,8 +2,9 @@
 # defaults file for authentik
 
 authentik_image: ghcr.io/goauthentik/server
-authentik_version: "2026.5.5"
+authentik_version: "2026.8.1"
 
+authentik_web_base_url: http://localhost:8080
 authentik_public_hostnames: []
 
 authentik_listen_address: "[::]"
@@ -15,6 +16,10 @@ authentik_listen_metrics: 9300
 authentik_listen_trusted_proxy_cidrs:
   - "127.0.0.1/32"
   - "::1/128"
+
+authentik_worker_listen_address: "[::]"
+authentik_worker_listen_http: 8081
+authentik_worker_listen_metrics: 9301
 
 authentik_allowed_hosts: []
 
@@ -49,3 +54,5 @@ authentik_postgresql_ssl_mode: disable
 #       directory in to the container, and you can use that path here (but
 #       prefixed with /certs)
 authentik_postgresql_ssl_root_cert: /certs/cert.pem
+
+authentik_worker_threads: 2

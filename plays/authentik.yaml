@@ -7,12 +7,20 @@
   # Each Authentik node must know about the configuration of the CA nodes, in
   # order to permit the necessary firewall rules for HTTP-01 validation
   pre_tasks:
+    - name: Gather facts from all Authentik hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: hostvars[item].ansible_facts.default_ipv4 is not defined
+      with_items: "{{ groups['authentik'] }}"
+      run_once: true
     - name: Gather facts from all Certificate Authority hosts
       ansible.builtin.setup:
       delegate_to: "{{ item }}"
       delegate_facts: true
-      when: hostvars[item].ansible.default_ipv4 is not defined
+      when: hostvars[item].ansible_facts.default_ipv4 is not defined
       with_items: "{{ groups['ca'] }}"
+      run_once: true
 
   roles:
     - role: ufw

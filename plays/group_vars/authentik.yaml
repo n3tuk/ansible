@@ -112,6 +112,8 @@ caddy_trusted_proxies:
   - "127.0.0.1/32"
   - "::1/128"
 
+authentik_web_base_url: https://accounts.services.n3t.uk
+
 authentik_listen_trusted_proxy_cidrs:
   # yamllint disable-line rule:line-length
   - "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
@@ -150,7 +152,19 @@ postgresql_pg_hba_entries:
     database: "{{ authentik_postgresql_database | default('authentik') }}"
     user: "{{ authentik_postgresql_username | default('authentik') }}"
     # yamllint disable-line rule:line-length
+    address: "{{ hostvars['authentik-01.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
+    method: scram-sha-256
+  - type: hostssl
+    database: "{{ authentik_postgresql_database | default('authentik') }}"
+    user: "{{ authentik_postgresql_username | default('authentik') }}"
+    # yamllint disable-line rule:line-length
     address: "{{ hostvars['authentik-02.services.n3t.uk'].ansible_facts.default_ipv4.address }}/32"
+    method: scram-sha-256
+  - type: hostssl
+    database: "{{ authentik_postgresql_database | default('authentik') }}"
+    user: "{{ authentik_postgresql_username | default('authentik') }}"
+    # yamllint disable-line rule:line-length
+    address: "{{ hostvars['authentik-02.services.n3t.uk'].ansible_facts.default_ipv6.address }}/128"
     method: scram-sha-256
 
 postgresql_walg_enabled: true

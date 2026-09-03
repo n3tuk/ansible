@@ -23,7 +23,7 @@ ExecStart=/usr/bin/podman run \
 {% if authentik_ssl_path is defined and authentik_ssl_path != '' %}
   --volume {{ authentik_ssl_path }}:/certs:ro \
 {% endif %}
-  --env-file=/etc/default/{{ authentik_service_prefix }} \
+  --env-file=/etc/default/{{ authentik_service_prefix }}-worker \
   {{ authentik_image }}:{{ authentik_version }} worker
 ExecStop=/usr/bin/podman stop \
   --cidfile=%t/%n.ctr-id \
