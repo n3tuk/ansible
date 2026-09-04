@@ -1,0 +1,29 @@
+---
+# service-specific tasks file for concourse/worker
+
+- name: Install the Concourse systemd service files
+  ansible.builtin.template:
+    src: worker.service.jinja
+    # yamllint disable-line rule:line-length
+    dest: "{{ concourse_worker_service_path }}/{{ concourse_worker_service_name }}.service"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify:
+    - Reload systemd
+    - Restart {{ concourse_worker_service_name }}.service
+  tags:
+    - authentik
+    - service
+
+- name: Start and enable the Concourse Web service
+  ansible.builtin.systemd:
+    name: "{{ concourse_worker_service_name }}.service"
+    enabled: true
+    state: started
+  when: >-
+    not ansible_check_mode
+  tags:
+    - concourse
+    - systemd
+    - service

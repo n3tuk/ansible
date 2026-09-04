@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+PATH=/usr/lib/concourse/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+
+CONCOURSE_NAME={{ concourse_worker_name }}
+CONCOURSE_WORK_DIR={{ concourse_worker_lib_path }}/workers
+
+CONCOURSE_TSA_HOST="{{ concourse_worker_tsa_host }}:{{concourse_worker_tsa_port }}"
+CONCOURSE_TSA_PUBLIC_KEY={{ concourse_worker_lib_path }}/keys/tsa_host_key.pub
+CONCOURSE_TSA_WORKER_PRIVATE_KEY={{ concourse_worker_lib_path }}/keys/worker_key
+CONCOURSE_BAGGAGECLAIM_DRIVER=overlay
+
+CONCOURSE_CONTAINERD_V6_ENABLE=true

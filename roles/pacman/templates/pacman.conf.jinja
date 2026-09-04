@@ -18,21 +18,23 @@ ParallelDownloads = 5
 SigLevel = Required DatabaseOptional
 LocalFileSigLevel = Optional
 RemoteFileSigLevel = Required
-
 {% if pacman_alhp_enable %}
+
 [core-x86-64-v3]
 Include = /etc/pacman.d/alhp
+{% endif %}
+
+[core]
+Include = /etc/pacman.d/arch
+{% if pacman_alhp_enable %}
 
 [extra-x86-64-v3]
 Include = /etc/pacman.d/alhp
-
 {% endif %}
-[core]
-Include = /etc/pacman.d/arch
 
 [extra]
 Include = /etc/pacman.d/arch
 
-[private]
-SigLevel = Never
-Include = /etc/pacman.d/private
+# [private]
+# SigLevel = Never
+# Include = /etc/pacman.d/private

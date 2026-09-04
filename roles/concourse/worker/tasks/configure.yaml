@@ -1,0 +1,58 @@
+---
+# configuration-specific tasks file for concourse/worker
+
+- name: Create the Concourse configuration directories
+  ansible.builtin.file:
+    dest: "{{ directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  loop:
+    - "{{ concourse_worker_lib_path }}"
+    - "{{ concourse_worker_lib_path }}/keys"
+    - "{{ concourse_worker_lib_path }}/certs"
+    - "{{ concourse_worker_lib_path }}/workers"
+  loop_control:
+    label: "{{ directory }}"
+    loop_var: directory
+  tags:
+    - concourse
+    - configuration
+
+- name: Create or update the Concourse keys
+  ansible.builtin.copy:
+    content: "{{ key.contents }}"
+    dest: "{{ concourse_worker_lib_path }}/keys/{{ key.filename }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=
+  no_log: true
+  loop:
+    - filename: tsa_host_key.pub
+      contents: "{{ concourse_worker_tsa_host_key_pub }}"
+    - filename: worker_key
+      contents: "{{ concourse_worker_key }}"
+  loop_control:
+    label: "{{ key.filename }}"
+    loop_var: key
+  notify:
+    - Reload {{ concourse_worker_service_name }}.service
+  tags:
+    - concourse
+    - configuration
+
+- name: Create or update the Concourse configuration file
+  ansible.builtin.template:
+    src: defaults.jinja
+    dest: /etc/default/{{ concourse_worker_service_name }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  # This file contains secrets, including encryption keys
+  no_log: false
+  notify:
+    - Reload {{ concourse_worker_service_name }}.service
+  tags:
+    - concourse
+    - configuration

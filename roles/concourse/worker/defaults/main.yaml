@@ -1,0 +1,11 @@
+---
+# defaults file for concourse/worker
+
+concourse_worker_version: 8.3.0
+
+concourse_worker_name: "{{ inventory_hostname }}"
+concourse_worker_key:
+
+concourse_worker_tsa_host:
+concourse_worker_tsa_port: 2222
+concourse_worker_tsa_host_key_pub:

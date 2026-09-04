@@ -1,0 +1,16 @@
+---
+# caddy-specific tasks file for concourse/web
+
+- name: Create or update the Concourse Caddy configuration
+  ansible.builtin.template:
+    src: Caddyfile.jinja
+    dest: "{{ caddy_config_path }}/{{ caddy_config_file }}.d/concourse"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: u=rw,g=r,o=
+  notify:
+    - Reload Caddy
+  tags:
+    - concourse
+    - caddy
+    - configuration

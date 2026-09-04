@@ -1,0 +1,157 @@
+---
+# configuration-specific tasks file for concourse/web
+
+- name: Create Group for Concourse
+  ansible.builtin.group:
+    name: "{{ concourse_web_group }}"
+    system: true
+  tags:
+    - concourse
+    - user
+
+- name: Create User for Concourse
+  ansible.builtin.user:
+    name: "{{ concourse_web_user }}"
+    system: true
+    group: "{{ concourse_web_group }}"
+    home: "{{ concourse_web_lib_path }}"
+    shell: /usr/sbin/nologin
+    create_home: true
+  tags:
+    - concourse
+    - user
+
+- name: Create the Concourse configuration directories
+  ansible.builtin.file:
+    dest: "{{ directory }}"
+    state: directory
+    owner: "{{ concourse_web_user }}"
+    group: "{{ concourse_web_group }}"
+    mode: u=rwx,g=rx,o=rx
+  loop:
+    - "{{ concourse_web_lib_path }}"
+    - "{{ concourse_web_lib_path }}/keys"
+    - "{{ concourse_web_lib_path }}/certs"
+    - "{{ concourse_web_lib_path }}/workers"
+  loop_control:
+    label: "{{ directory }}"
+    loop_var: directory
+  tags:
+    - concourse
+    - configuration
+
+- name: Create or update the Concourse keys
+  ansible.builtin.copy:
+    content: "{{ key.contents }}"
+    dest: "{{ concourse_web_lib_path }}/keys/{{ key.filename }}"
+    owner: "{{ concourse_web_user }}"
+    group: "{{ concourse_web_group }}"
+    mode: u=rwx,g=rx,o=
+  no_log: true
+  loop:
+    - filename: tsa_host_key
+      contents: "{{ concourse_web_tsa_host_key }}"
+    - filename: tsa_authorized_keys
+      contents: "{{ concourse_web_tsa_authorized_keys }}"
+    - filename: session_signing_key
+      contents: "{{ concourse_web_session_signing_key }}"
+  loop_control:
+    label: "{{ key.filename }}"
+    loop_var: key
+  notify:
+    - Reload {{ concourse_web_service_name }}.service
+  tags:
+    - concourse
+    - configuration
+
+- name: Create or update the Concourse configuration file
+  ansible.builtin.template:
+    src: defaults.jinja
+    dest: /etc/default/{{ concourse_web_service_name }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=
+  # This file contains secrets, including encryption keys
+  no_log: false
+  notify:
+    - Reload {{ concourse_web_service_name }}.service
+  tags:
+    - concourse
+    - configuration
+
+- name: Create the Concourse user in PostgreSQL
+  community.postgresql.postgresql_user:
+    login_unix_socket: "{{ postgresql_socket_path }}"
+    name: "{{ concourse_web_postgresql_username }}"
+    password: "{{ concourse_web_postgresql_password }}"
+    role_attr_flags: LOGIN
+    state: present
+  environment:
+    PGOPTIONS: "-c password_encryption=scram-sha-256"
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  when: >-
+    not ansible_check_mode and
+    concourse_web_postgresql_manager is defined and
+    concourse_web_postgresql_manager
+  tags:
+    - concourse
+    - configuration
+    - database
+
+- name: Create the Concourse database in PostgreSQL
+  community.postgresql.postgresql_db:
+    login_unix_socket: "{{ postgresql_socket_path }}"
+    name: "{{ concourse_web_postgresql_database }}"
+    owner: "{{ concourse_web_postgresql_username }}"
+    state: present
+  become: true
+  become_user: "{{ postgresql_service_user }}"
+  when: >-
+    not ansible_check_mode and
+    concourse_web_postgresql_manager is defined and
+    concourse_web_postgresql_manager
+  tags:
+    - concourse
+    - configuration
+    - database
+
+- name: Create directory for Lego certificates
+  ansible.builtin.file:
+    path: "{{ lego_lib_path }}/{{ concourse_web_service_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  tags:
+    - bind
+    - lego
+    - configuration
+
+- name: Create or update the Lego configuration file
+  ansible.builtin.template:
+    src: lego.conf.jinja
+    dest: "{{ lego_etc_path }}/{{ concourse_web_service_name }}.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  notify:
+    - Trigger Lego for Concourse Web certificate renewal
+  tags:
+    - bind
+    - lego
+    - configuration
+
+- name: Create or update the Lego post-run hook
+  ansible.builtin.template:
+    src: lego.sh.jinja
+    dest: "{{ lego_usr_path }}/{{ concourse_web_service_name }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=
+  notify:
+    - Trigger Lego for Concourse Web certificate renewal
+  tags:
+    - bind
+    - lego
+    - configuration
