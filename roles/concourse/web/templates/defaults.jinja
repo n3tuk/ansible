@@ -1,0 +1,72 @@
+# {{ ansible_managed }}
+
+PATH={{ concourse_web_usr_path }}/bin
+
+CONCOURSE_EXTERNAL_URL=https://{{ concourse_web_hostname }}
+
+CONCOURSE_CLUSTER_NAME={{ concourse_web_cluster_name }}
+CONCOURSE_LOG_CLUSTER_NAME=true
+
+CONCOURSE_ENABLE_LETS_ENCRYPT=false
+CONCOURSE_TLS_BIND_PORT={{ concourse_web_tls_bind_port }}
+CONCOURSE_TLS_CERT={{ concourse_web_tls_cert }}
+CONCOURSE_TLS_KEY={{ concourse_web_tls_key }}
+
+CONCOURSE_POSTGRES_HOST={{ concourse_web_postgresql_host }}
+CONCOURSE_POSTGRES_PORT={{ concourse_web_postgresql_port }}
+CONCOURSE_POSTGRES_SSLMODE={{ concourse_web_postgresql_sslmode }}
+CONCOURSE_POSTGRES_CA_CERT={{ concourse_web_postgresql_ca_cert }}
+CONCOURSE_POSTGRES_USER={{ concourse_web_postgresql_username }}
+CONCOURSE_POSTGRES_PASSWORD={{ concourse_web_postgresql_password }}
+CONCOURSE_POSTGRES_DATABASE={{ concourse_web_postgresql_database }}
+CONCOURSE_ENCRYPTION_KEY_BASE64={{ concourse_web_encryption_key_base64 }}
+{% if concourse_web_old_encryption_key_base64 is defined and
+      concourse_web_old_encryption_key_base64 is not none and
+      concourse_web_old_encryption_key_base64 | length > 0 %}
+CONCOURSE_OLD_ENCRYPTION_KEY_BASE64={{ concourse_web_old_encryption_key_base64 }}
+{% endif %}
+
+CONCOURSE_API_MAX_CONNS=10
+CONCOURSE_BACKEND_MAX_CONNS=50
+
+{% if concourse_web_tsa_bind_ip is defined and
+      concourse_web_tsa_bind_ip is not none and
+      concourse_web_tsa_bind_ip | length > 0 %}
+CONCOURSE_TSA_BIND_IP={{ concourse_web_tsa_bind_ip }}
+{% endif %}
+CONCOURSE_TSA_BIND_PORT={{ concourse_web_tsa_bind_port }}
+CONCOURSE_TSA_HOST_KEY={{ concourse_web_lib_path }}/keys/tsa_host_key
+CONCOURSE_TSA_AUTHORIZED_KEYS={{ concourse_web_lib_path }}/keys/tsa_authorized_keys
+
+CONCOURSE_SESSION_SIGNING_KEY={{ concourse_web_lib_path }}/keys/session_signing_key
+
+CONCOURSE_OIDC_DISPLAY_NAME={{ concourse_web_oidc_display_name }}
+CONCOURSE_OIDC_ISSUER={{ concourse_web_oidc_issuer }}
+CONCOURSE_OIDC_CA_CERT={{ concourse_web_oidc_ca_cert }}
+CONCOURSE_OIDC_CLIENT_ID={{ concourse_web_oidc_client_id }}
+CONCOURSE_OIDC_CLIENT_SECRET={{ concourse_web_oidc_client_secret }}
+CONCOURSE_OIDC_SCOPE={{ concourse_web_oidc_scope }}
+CONCOURSE_OIDC_USER_NAME_KEY={{ concourse_web_oidc_username_key }}
+CONCOURSE_OIDC_GROUPS_KEY={{ concourse_web_oidc_groups_key }}
+CONCOURSE_MAIN_TEAM_OIDC_USER={{ concourse_web_oidc_main_team_user }}
+CONCOURSE_MAIN_TEAM_OIDC_GROUP={{ concourse_web_oidc_main_team_group }}
+
+CONCOURSE_ENABLE_CACHE_STREAMED_VOLUMES=true
+CONCOURSE_ENABLE_RERUN_WHEN_WORKER_DISAPPEARS=true
+
+CONCOURSE_DEFAULT_BUILD_LOGS_TO_RETAIN=50
+CONCOURSE_MAX_BUILD_LOGS_TO_RETAIN=100
+CONCOURSE_DEFAULT_DAYS_TO_RETAIN_BUILD_LOGS=14
+CONCOURSE_MAX_DAYS_TO_RETAIN_BUILD_LOGS=30
+
+CONCOURSE_VAULT_URL={{ concourse_web_vault_url }}
+CONCOURSE_VAULT_AUTH_BACKEND={{ concourse_web_vault_auth_backend }}
+CONCOURSE_VAULT_AUTH_PARAM="role_id:{{ concourse_web_vault_auth_role_id }},secret_id:{{ concourse_web_vault_auth_secret_id }}"
+CONCOURSE_VAULT_AUTH_BACKEND_MAX_TTL={{ concourse_web_vault_auth_backend_max_ttl }}
+CONCOURSE_VAULT_PATH_PREFIX={{ concourse_web_vault_path_prefix }}
+CONCOURSE_VAULT_ENABLE_KV_MOUNT_CACHE={{ 'true' if concourse_web_vault_enable_kv_mount_cache else 'false' }}
+{% if concourse_web_vault_lookup_templates is defined and
+      concourse_web_vault_lookup_templates is not none and
+      concourse_web_vault_lookup_templates | length > 0 %}
+CONCOURSE_VAULT_LOOKUP_TEMPLATES={{ concourse_web_vault_lookup_templates | join(',') }}
+{% endif %}

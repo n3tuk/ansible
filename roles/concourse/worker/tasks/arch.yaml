@@ -1,0 +1,44 @@
+---
+# arch-specific tasks file for concourse/worker
+
+- name: Create the Concourse cache directory
+  ansible.builtin.file:
+    dest: "{{ concourse_worker_cache_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=
+  tags:
+    - concourse
+    - arch
+
+- name: Download the Concourse archive
+  ansible.builtin.get_url:
+    url: "{{ concourse_worker_download_url }}"
+    # yamllint disable-line rule:line-length
+    dest: "{{ concourse_worker_cache_path }}/concourse-v{{ concourse_worker_version }}.tar.gz"
+    checksum: "{{ concourse_worker_download_checksum }}"
+    mode: u=rw,g=r,o=r
+  when: not ansible_check_mode
+  register: download
+  tags:
+    - concourse
+    - arch
+
+- name: Unpack the Concourse archive
+  ansible.legacy.unarchive:
+    remote_src: true
+    # yamllint disable-line rule:line-length
+    src: "{{ concourse_worker_cache_path }}/concourse-v{{ concourse_worker_version }}.tar.gz"
+    # The archive unpacks into the concourse/ directory, so we need to copy the
+    # contents of that directory into /usr/lib to ensure we have the right
+    # directory structure.
+    dest: /usr/lib
+    owner: root
+    group: root
+  when: download is changed
+  notify:
+    - Restart {{ concourse_worker_service_name }}.service
+  tags:
+    - concourse
+    - arch

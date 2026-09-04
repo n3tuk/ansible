@@ -1,0 +1,28 @@
+---
+# firewall-specific tasks file for concourse/web
+
+- name: Enable firewall access for Worker nodes
+  community.general.ufw:
+    rule: allow
+    from_ip: >-
+      {{ (hostvars[host].ansible_facts.tailscale0.ipv6
+          | selectattr('scope', 'eq', 'global')
+          | list
+          | first).address }}
+    proto: tcp
+    port: "{{ concourse_web_tsa_bind_port }}"
+    comment: >-
+      Allow TSA access for {{ hostvars[host].ansible_facts.fqdn }}
+  loop: >-
+    {{ groups['worker'] | difference([inventory_hostname]) }}
+  loop_control:
+    label: >-
+      allow from
+      {{ (hostvars[host].ansible_facts.tailscale0.ipv6
+          | selectattr('scope', 'eq', 'global')
+          | list
+          | first).address }} to {{ concourse_web_tsa_bind_port }}/tcp
+    loop_var: host
+  tags:
+    - concourse
+    - firewall
