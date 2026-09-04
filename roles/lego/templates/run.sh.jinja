@@ -27,7 +27,13 @@ fi
 
 echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] ${LEGO_RENEW_TYPE} certificate for ${LEGO_CERT_GROUP} (${LEGO_CERT_DOMAINS// /, })"
 
+# We do not use random sleep in this command as the .timer for this service
+# already has a randomized delay configured.  Therefore we already have a
+# mechanism to prevent multiple instances of this service running at the same
+# time and potentially causing rate limiting issues with the ACME server.
+
 /usr/bin/lego run \
+  --no-random-sleep \
   --accept-tos --email "${LEGO_ACME_EMAIL}" \
   --path "/var/lib/lego/${LEGO_CERT_GROUP}" \
   --server "${LEGO_ACME_SERVER}" \

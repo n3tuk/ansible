@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+
+set -euo pipefail
+
+# Ensure required environment variables are set
+: "${LEGO_HOOK_CERT_PATH:?LEGO_HOOK_CERT_PATH must be set}"
+: "${LEGO_HOOK_CERT_KEY_PATH:?LEGO_HOOK_CERT_KEY_PATH must be set}"
+
+# Check if certificate files exist
+if [[ ! -f "${LEGO_HOOK_CERT_PATH}" || ! -f "${LEGO_HOOK_CERT_KEY_PATH}" ]]; then
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [ERROR] Certificate files not found. Cannot continue." >&2
+  exit 1
+fi
+
+for cert in \
+  "${LEGO_HOOK_CERT_PATH}={{ concourse_web_tls_cert }}" \
+  "${LEGO_HOOK_CERT_KEY_PATH}={{ concourse_web_tls_key }}"; do
+  tmp="${cert/*=/}.tmp.${$}"
+
+  echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Copying ${cert/=*/} to ${cert/*=/} (via ${tmp})"
+
+  cp "${cert/=*/}" "${tmp}"
+  chown "{{ concourse_web_user }}:{{ concourse_web_group }}" "${tmp}"
+  chmod 0600 "${tmp}"
+  mv -f "${tmp}" "${cert/*=/}"
+done
+
+echo "$(date +'%Y/%m/%d %H:%M:%S') [INFO] Reloading the Concourse Web service ({{ concourse_web_service_name }}.service)"
+
+systemctl reload "{{ concourse_web_service_name }}.service"

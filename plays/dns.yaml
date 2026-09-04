@@ -32,6 +32,9 @@
     - role: tailscale
       tags:
         - tailscale
+    - role: lego
+      tags:
+        - lego
     - role: bind
       tags:
         - bind

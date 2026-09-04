@@ -9,6 +9,7 @@ all:
     cache:
     netdata:
     secrets:
+    concourse:
     external:
     test:
 
@@ -67,6 +68,20 @@ secrets:
   hosts:
     secrets-[01:03].services.n3t.uk:
 
+concourse:
+  children:
+    web:
+    worker:
+
+web:
+  hosts:
+    madoc.bridgend.n3t.uk:
+
+worker:
+  hosts:
+    eliwold.bridgend.n3t.uk:
+    gawain.bridgend.n3t.uk:
+
 external:
   hosts:
     external-01.london.n3t.uk:
@@ -102,6 +117,7 @@ arch:
     cache:
     netdata:
     secrets:
+    concourse:
     external:
     test:
 
@@ -114,15 +130,16 @@ debian:
 
 virtual:
   children:
-    manager:
     authentik:
     dns:
     ca:
     cache:
     netdata:
     secrets:
+    concourse:
     external:
     test:
+    manager:
 
 physical:
   children:

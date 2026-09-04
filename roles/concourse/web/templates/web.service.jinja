@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Concourse Web Service
+Documentation=https://concourse-ci.org/docs/
+After=network.target network-online.target
+Requires=network-online.target
+StartLimitIntervalSec=900
+StartLimitBurst=10
+
+[Service]
+Type=simple
+User={{ concourse_web_user }}
+Group={{ concourse_web_group }}
+EnvironmentFile=/etc/default/{{ concourse_web_service_name }}
+ExecStart={{ concourse_web_usr_path }}/bin/concourse web
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=60
+
+[Install]
+WantedBy=default.target

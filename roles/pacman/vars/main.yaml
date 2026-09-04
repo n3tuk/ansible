@@ -3,7 +3,7 @@
 
 pacman_keyrings:
   - archlinux-keyring
-  - alhp-keyring
+  # - alhp-keyring
 
-pacman_hooks:
-  - pacman-cleanup-hook
+pacman_hooks: []
+  # - pacman-cleanup-hook
