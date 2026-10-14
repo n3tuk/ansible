@@ -113,8 +113,12 @@ ufw_default_rules:
 
 lego_acme_email: admin@n3t.uk
 lego_acme_server: https://ca.n3t.uk/acme/n3tuk/directory
-lego_acme_servers_group: ca
-lego_acme_mode: standalone
+
+# must configure Lego to use Caddy for ACME certificate management, and set
+# Caddy to disable automatic HTTPS redirects as we must serve these files via
+# HTTP only
+lego_acme_mode: caddy
+caddy_auto_https: disable_redirects
 
 tailscale_exit_node: true
 tailscale_peer_relay: true
