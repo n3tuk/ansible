@@ -1,0 +1,60 @@
+---
+- name: Configure Concourse Web Nodes
+  hosts: web
+  become: true
+  become_user: root
+
+  pre_tasks:
+    - name: Gather facts from all CA hosts
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
+      with_items: "{{ groups['ca'] }}"
+    - name: Gather facts from all Worker nodes
+      ansible.builtin.setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: >-
+        hostvars[item].ansible.default_ipv4 is not defined and
+        hostvars[item].ansible.default_ipv6 is not defined
+      with_items: "{{ groups['worker'] }}"
+
+  roles:
+    - role: ca
+      tags:
+        - ca
+    - role: tailscale
+      tags:
+        - tailscale
+    - role: cloudflared
+      tags:
+        - cloudflare
+        - cloudflared
+    - role: lego
+      tags:
+        - lego
+    - role: postgresql
+      tags:
+        - postgresql
+    - role: caddy
+      tags:
+        - caddy
+    - role: concourse/web
+      tags:
+        - concourse-web
+
+- name: Configure Concourse Worker Nodes
+  hosts: worker
+  become: true
+  become_user: root
+
+  roles:
+    - role: tailscale
+      tags:
+        - tailscale
+    - role: concourse/worker
+      tags:
+        - concourse-worker

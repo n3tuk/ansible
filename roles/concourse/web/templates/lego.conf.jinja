@@ -1,0 +1,4 @@
+# {{ ansible_managed }}
+
+LEGO_CERT_DOMAINS={{ concourse_web_hostname | split(':') | first }}
+LEGO_RENEW_HOOK={{ lego_usr_path }}/{{ concourse_web_service_name }}

@@ -1,0 +1,55 @@
+---
+# defaults file for concourse/web
+
+concourse_web_version: 8.3.0
+
+concourse_web_cluster_name: Concourse
+concourse_web_hostname: concourse.example.com
+
+concourse_web_tls_bind_port: 8443
+concourse_web_tls_cert: "{{ concourse_web_lib_path }}/certs/server.crt"
+concourse_web_tls_key: "{{ concourse_web_lib_path }}/certs/server.key"
+concourse_web_tls_ca_cert: /etc/ssl/certs.pem
+
+concourse_web_caddy_tls_acme_server: https://acme-v02.api.letsencrypt.org/directory
+concourse_web_caddy_tls_acme_email: concourse@{{ concourse_web_hostname }}
+
+concourse_web_caddy_tls_dns_rfc2136_server: dns.example.com
+concourse_web_caddy_tls_dns_rfc2136_key_name: example-key
+concourse_web_caddy_tls_dns_rfc2136_key_algorithm: hmac-sha256
+concourse_web_caddy_tls_dns_rfc2136_key_secret: this-should-be-secret
+
+concourse_web_postgresql_host: localhost
+concourse_web_postgresql_port: 5432
+concourse_web_postgresql_sslmode: verify-full
+concourse_web_postgresql_ca_cert: /etc/ssl/certs.pem
+concourse_web_postgresql_username: concourse
+concourse_web_postgresql_password:
+concourse_web_postgresql_database: atc
+
+concourse_web_encryption_key_base64:
+concourse_web_old_encryption_key_base64:
+
+concourse_web_tsa_bind_ip:
+concourse_web_tsa_bind_port: 2222
+
+concourse_web_oidc_display_name: ""
+concourse_web_oidc_issuer: https://oidc.example.com
+concourse_web_oidc_ca_cert: /etc/ssl/certs.pem
+concourse_web_oidc_client_id: ""
+concourse_web_oidc_client_secret: ""
+concourse_web_oidc_scope: openid profile email
+concourse_web_oidc_username_key: email
+concourse_web_oidc_groups_key: groups
+concourse_web_oidc_main_team_user: ""
+concourse_web_oidc_main_team_group: ""
+
+concourse_web_vault_url: https://vault.example.com:8200
+concourse_web_vault_auth_backend: approle
+concourse_web_vault_auth_role_id:
+concourse_web_vault_auth_secret_id:
+concourse_web_vault_auth_backend_max_ttl: 1h
+concourse_web_vault_path_prefix: concourse
+concourse_web_vault_enable_kv_mount_cache: true
+# yamllint disable rule:line-length
+concourse_web_vault_lookup_templates: []

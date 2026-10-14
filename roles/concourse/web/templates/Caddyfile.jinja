@@ -1,0 +1,53 @@
+# {{ ansible_managed }}
+
+{{ concourse_web_hostname }} {
+  encode gzip
+
+  tls {
+    issuer acme {
+      dir {{ concourse_web_caddy_tls_acme_server }}
+      disable_tlsalpn_challenge
+      trusted_roots "{{ concourse_web_tls_ca_cert }}"
+      email {{ concourse_web_caddy_tls_acme_email }}
+
+      dns rfc2136 {
+        server "{{ concourse_web_caddy_tls_dns_rfc2136_server }}"
+        key_name "{{ concourse_web_caddy_tls_dns_rfc2136_key_name }}"
+        key_alg "{{ concourse_web_caddy_tls_dns_rfc2136_key_algorithm }}"
+        key "{{ concourse_web_caddy_tls_dns_rfc2136_key_secret }}"
+      }
+    }
+  }
+
+  log concourse {
+    level info
+    output file {{ caddy_log_path }}/{{ concourse_web_hostname }}.log {
+       mode 0644
+       roll_size 10MiB
+       roll_keep_for 72h
+     }
+
+    format json {
+       time_format rfc3339_nano
+       duration_format seconds
+    }
+  }
+
+  reverse_proxy [::1]:{{ concourse_web_tls_bind_port  }} {
+    transport http {
+      tls_trust_pool file {{ concourse_web_tls_ca_cert }}
+      tls_server_name {{ concourse_web_hostname }}
+      tls
+    }
+
+    header_down +Strict-Transport-Security "max-age=63072000; always"
+
+    lb_policy least_conn
+
+    health_interval 10s
+    health_uri /api/v1/health
+    health_status 200
+    health_timeout 2s
+    health_fails 2
+  }
+}

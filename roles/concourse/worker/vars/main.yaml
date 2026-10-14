@@ -1,0 +1,14 @@
+---
+# vars file for concourse/worker
+
+# yamllint disable rule:line-length
+concourse_worker_download_prefix: https://github.com/concourse/concourse/releases/download
+concourse_worker_download_url: "{{ concourse_worker_download_prefix }}/v{{ concourse_worker_version }}/concourse-{{ concourse_worker_version }}-linux-amd64.tgz"
+concourse_worker_download_checksum: sha256:320b0cde214893378213d1f2f38eb515c55d0d8128185b076fd7ce555bf09e2c
+# yamllint enable rule:line-length
+
+concourse_worker_usr_path: /usr/lib/concourse
+concourse_worker_lib_path: /var/lib/concourse
+concourse_worker_cache_path: /var/cache/concourse
+concourse_worker_service_path: /etc/systemd/system
+concourse_worker_service_name: concourse-worker

@@ -1,26 +1,6 @@
 ---
 # create physical tasks file for filesystems
 
-- name: Create the physical partitions
-  community.general.parted:
-    device: /dev/{{ item.device }}
-    label: gpt
-    number: "{{ item.number }}"
-    name: "{{ item.name }}"
-    part_start: "{{ item.start }}"
-    part_end: "{{ item.end }}"
-    fs_type: "{{ item.pv_type | default(omit) }}"
-    state: present
-    flags: "{{ item.flags | default(omit) }}"
-  loop: "{{ filesystems_physical_partitions | default([]) }}"
-  loop_control:
-    # yamllint disable-line rule:line-length
-    label: /dev/{{ item.device }}{% if item.device[:4] == 'nvme' %}p{% endif %}{{ item.number }}
-  tags:
-    - filesystems
-    - setup
-    - physical
-
 - name: Create LUKS container on physical partitions
   community.crypto.luks_device:
     # yamllint disable-line rule:line-length
