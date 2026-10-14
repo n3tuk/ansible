@@ -29,6 +29,20 @@
     }
   }
 
+  log openbao {
+    level info
+    output file {{ caddy_log_path }}/{{ (openbao_domain_name) if (openbao_domain_name | length > 0) else 'openbao' }}.log {
+       mode 0644
+       roll_size 10MiB
+       roll_keep_for 72h
+     }
+
+    format json {
+       time_format rfc3339_nano
+       duration_format seconds
+    }
+  }
+
   @verified_client_cert expression `{http.request.tls.client.certificate_der_base64} != ""`
 
   route {

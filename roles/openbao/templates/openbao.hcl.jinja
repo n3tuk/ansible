@@ -47,18 +47,17 @@ listener "tcp" {
   tls_client_ca_file                 = "{{ ca_root_path }}/{{ ca_root_file }}"
 
   x_forwarded_for_authorized_addrs = [
-    "127.0.0.1/32",
-    "::1/128",
 {%  for node in groups[openbao_group_name] | sort %}
     "{{ (hostvars[node].ansible_facts.tailscale0.ipv6 | selectattr('scope', 'eq', 'global') | list | first).address }}/128",
 {%  endfor %}
   ]
-  x_forwarded_for_reject_not_present    = false
-  x_forwarded_for_reject_not_authorized = true
-  x_forwarded_for_client_cert_header     = "Client-Cert"
-  x_forwarded_for_client_cert_decoders   = ["RFC9440"]
+
+  x_forwarded_for_reject_not_present             = false
+  x_forwarded_for_reject_not_authorized          = true
+  x_forwarded_for_client_cert_header             = "Client-Cert"
+  x_forwarded_for_client_cert_decoders           = ["RFC9440"]
   x_forwarded_for_client_cert_keep_not_forwarded = false
-  x_forwarded_for_client_cert_keep_unauthorized   = false
+  x_forwarded_for_client_cert_keep_unauthorized  = false
 
   telemetry {
     disallow_metrics = true
